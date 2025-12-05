@@ -15,3 +15,13 @@ Dec 05, 2025 23:57:30.170 [0xffff952b0b08] INFO - [I] SAT2IP - discover_satip_se
 Dec 05, 2025 23:57:30.587 [0xffff952b0b08] INFO - [I] v4l::DeviceGetList_impl. getting v4l device list
 Dec 05, 2025 23:57:30.592 [0xffff952b0b08] INFO - [I] onetv_factory::DeviceGetListEx >>
 Dec 05, 2025 23:57:30.593 [0xffff952b0b08] WARN - [W] onetv_factory::DeviceGetListEx. libusb_init returned an error -99
+Dec 06, 2025 01:37:04.121 [0xffff9747f890] INFO - Received SIGINT: Interrupt from keyboard.
+Dec 06, 2025 01:37:04.151 [0xffff9747f890] INFO - [I] device_manager_t::term
+Dec 06, 2025 01:37:04.151 [0xffff9747f890] INFO - [I] device_manager_t::term. Stop all devices
+Dec 06, 2025 01:37:04.151 [0xffff9747f890] INFO - [I] device_manager_t::term. Shut down all device auxes
+Dec 06, 2025 01:37:04.151 [0xffff9747f890] INFO - [I] tvbutler_aux_t::term
+Dec 06, 2025 01:37:04.151 [0xffff9747f890] INFO - [I] web_server_t::stop. Web server is stopped
+Dec 06, 2025 01:37:04.151 [0xffff9747f890] INFO - [I] device_manager_t::term
+Dec 06, 2025 01:37:04.151 [0xffff9747f890] INFO - [I] device_manager_t::term. Stop all devices
+Dec 06, 2025 01:37:04.151 [0xffff9747f890] INFO - [I] device_manager_t::term. Shut down all device auxes
+Dec 06, 2025 01:37:04.151 [0xffff9747f890] INFO - [I] broker_t::shutdown. Shutdown is completed.

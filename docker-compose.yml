@@ -1,7 +1,7 @@
 services:
   portainer:
     container_name: container-dashboard
-    image: portainer/portainer-ee:lts
+    image: portainer/portainer-ee:2.33.5
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -10,25 +10,25 @@ services:
       - 9443:9443
       - 8000:8000
 
-  openvpn-as:
-    image: openvpn/openvpn-as
-    container_name: vpn-access-server
-    restart: unless-stopped
-    devices:
-      - /dev/net/tun:/dev/net/tun
-    cap_add:
-      - NET_ADMIN
-      - MKNOD
-    ports:
-      - 943:943
-      - 443:443
-      - 1194:1194/udp
-    volumes:
-      - ./openvpn:/openvpn
+  # openvpn-as:
+  #   image: openvpn/openvpn-as
+  #   container_name: vpn-access-server
+  #   restart: unless-stopped
+  #   devices:
+  #     - /dev/net/tun:/dev/net/tun
+  #   cap_add:
+  #     - NET_ADMIN
+  #     - MKNOD
+  #   ports:
+  #     - 943:943
+  #     - 443:443
+  #     - 1194:1194/udp
+  #   volumes:
+  #     - ./openvpn:/openvpn
 
   plex:
     container_name: media-server
-    image: plexinc/pms-docker
+    image: plexinc/pms-docker:1.42.2.10156-f737b826c
     restart: unless-stopped
     network_mode: host
     environment:
@@ -42,8 +42,8 @@ services:
       - ./media:/data
 
   transmission:
-    container_name: transmission
-    image: lscr.io/linuxserver/transmission:latest
+    container_name: torrent-client
+    image: lscr.io/linuxserver/transmission:4.0.6
     restart: unless-stopped
     ports:
       - 9091:9091
