@@ -65,6 +65,11 @@ services:
 volumes:
   portainer_data:
     name: portainer_data
+    external: true
+
+networks:
+  default:
+    name: portainer_network
 
 secrets:
   transmission_user_password:
