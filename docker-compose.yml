@@ -39,7 +39,7 @@ services:
     volumes:
       - ./plex-media-server/config:/config
       - ./transcode:/transcode
-      - ./media:/data
+      - /media/drive:/data
 
   transmission:
     container_name: torrent-client
@@ -53,12 +53,9 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Vilnius
-      - USER=transmission-manager
       - PASS=/run/secrets/transmission_user_password
     volumes:
       - ./transmission/config:/config
-      - ./downloads:/downloads
-      - ./torrents:/watch
     secrets:
       - transmission_user_password
 

@@ -17,13 +17,13 @@
     "cache-size-mb": 4,
     "default-trackers": "",
     "dht-enabled": true,
-    "download-dir": "/downloads/complete",
+    "download-dir": "/media/drive/downloads/completed",
     "download-queue-enabled": true,
     "download-queue-size": 5,
     "encryption": 1,
     "idle-seeding-limit": 30,
     "idle-seeding-limit-enabled": false,
-    "incomplete-dir": "/downloads/incomplete",
+    "incomplete-dir": "/media/drive/downloads/incomplete",
     "incomplete-dir-enabled": true,
     "lpd-enabled": false,
     "message-level": 2,
@@ -77,6 +77,6 @@
     "umask": "002",
     "upload-slots-per-torrent": 14,
     "utp-enabled": false,
-    "watch-dir": "/watch",
+    "watch-dir": "/media/drive/torrents/watch",
     "watch-dir-enabled": true
 }
