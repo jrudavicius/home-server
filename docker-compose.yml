@@ -1,4 +1,15 @@
 services:
+  portainer:
+    container_name: container-dashboard
+    image: portainer/portainer-ee:lts
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - 9443:9443
+      - 8000:8000
+
   openvpn-as:
     image: openvpn/openvpn-as
     container_name: vpn-access-server
@@ -16,7 +27,7 @@ services:
       - ./openvpn:/openvpn
 
   plex:
-    container_name: plex
+    container_name: media-server
     image: plexinc/pms-docker
     restart: unless-stopped
     network_mode: host
@@ -50,6 +61,10 @@ services:
       - ./torrents:/watch
     secrets:
       - transmission_user_password
+
+volumes:
+  portainer_data:
+    name: portainer_data
 
 secrets:
   transmission_user_password:
