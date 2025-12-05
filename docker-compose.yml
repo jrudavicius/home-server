@@ -1,4 +1,20 @@
 services:
+  openvpn-as:
+    image: openvpn/openvpn-as
+    container_name: vpn-access-server
+    restart: unless-stopped
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - MKNOD
+    ports:
+      - 943:943
+      - 443:443
+      - 1194:1194/udp
+    volumes:
+      - ./openvpn:/openvpn
+
   plex:
     container_name: plex
     image: plexinc/pms-docker

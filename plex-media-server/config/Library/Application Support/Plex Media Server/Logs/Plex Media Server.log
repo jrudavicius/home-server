@@ -5800,3 +5800,965 @@ Dec 05, 2025 23:58:57.375 [281473036165344] DEBUG - Request: [[::1]:63970 (Loopb
 Dec 05, 2025 23:58:57.375 [281473089528032] DEBUG - Completed: [[::1]:63970] 200 GET /identity (2 live) #120 0ms 418 bytes (pipelined: 1)
 Dec 05, 2025 23:59:02.436 [281473036165344] DEBUG - Request: [[::1]:63978 (Loopback)] GET /identity (2 live) #123
 Dec 05, 2025 23:59:02.436 [281473087418592] DEBUG - Completed: [[::1]:63978] 200 GET /identity (2 live) #123 0ms 418 bytes (pipelined: 1)
+Dec 05, 2025 23:59:07.494 [281473036165344] DEBUG - Request: [[::1]:60430 (Loopback)] GET /identity (2 live) #126
+Dec 05, 2025 23:59:07.494 [281473089528032] DEBUG - Completed: [[::1]:60430] 200 GET /identity (2 live) #126 0ms 418 bytes (pipelined: 1)
+Dec 05, 2025 23:59:12.553 [281473036165344] DEBUG - Request: [[::1]:60444 (Loopback)] GET /identity (2 live) #129
+Dec 05, 2025 23:59:12.553 [281473087418592] DEBUG - Completed: [[::1]:60444] 200 GET /identity (2 live) #129 0ms 418 bytes (pipelined: 1)
+Dec 05, 2025 23:59:16.710 [281473059950816] DEBUG - BPQ: [Starting] -> [Processing]
+Dec 05, 2025 23:59:16.715 [281473059950816] DEBUG - BPQ: generating queue items from 0 generator(s)
+Dec 05, 2025 23:59:16.715 [281473059950816] DEBUG - BPQ: generated 0 item(s) for queue
+Dec 05, 2025 23:59:16.715 [281473059950816] DEBUG - BPQ: [Processing] -> [Idle]
+Dec 05, 2025 23:59:17.614 [281473036165344] DEBUG - Request: [[::1]:61832 (Loopback)] GET /identity (2 live) #12c
+Dec 05, 2025 23:59:17.614 [281473089528032] DEBUG - Completed: [[::1]:61832] 200 GET /identity (2 live) #12c 0ms 418 bytes (pipelined: 1)
+Dec 05, 2025 23:59:18.920 [281473036165344] DEBUG - Request: [127.0.0.1:55962 (Loopback)] GET /servers (2 live) #12f GZIP Token ()
+Dec 05, 2025 23:59:18.921 [281473089528032] DEBUG - Completed: [127.0.0.1:55962] 200 GET /servers (2 live) #12f GZIP 0ms 496 bytes
+Dec 05, 2025 23:59:18.926 [281473036165344] DEBUG - Request: [127.0.0.1:55972 (Loopback)] GET / (2 live) #132 GZIP Token ()
+Dec 05, 2025 23:59:18.927 [281473089528032] DEBUG - Completed: [127.0.0.1:55972] 200 GET / (2 live) #132 GZIP 0ms 2573 bytes
+Dec 05, 2025 23:59:18.932 [281473036165344] DEBUG - Request: [127.0.0.1:55980 (Loopback)] GET /library/sections (2 live) #134 GZIP Token ()
+Dec 05, 2025 23:59:18.934 [281473089528032] DEBUG - Completed: [127.0.0.1:55980] 200 GET /library/sections (2 live) #134 GZIP 1ms 403 bytes
+Dec 05, 2025 23:59:18.937 [281473036165344] DEBUG - Request: [127.0.0.1:55986 (Loopback)] GET /channels/all (2 live) #136 GZIP Token ()
+Dec 05, 2025 23:59:18.938 [281473089528032] DEBUG - Completed: [127.0.0.1:55986] 200 GET /channels/all (2 live) #136 GZIP 0ms 387 bytes
+Dec 05, 2025 23:59:18.941 [281473036165344] DEBUG - Request: [127.0.0.1:55996 (Loopback)] GET /library/sections (2 live) #138 GZIP Token ()
+Dec 05, 2025 23:59:18.941 [281473089528032] DEBUG - Completed: [127.0.0.1:55996] 200 GET /library/sections (2 live) #138 GZIP 0ms 403 bytes
+Dec 05, 2025 23:59:18.943 [281473036165344] DEBUG - Request: [127.0.0.1:56010 (Loopback)] GET /channels/all (2 live) #13a GZIP Token ()
+Dec 05, 2025 23:59:18.943 [281473089528032] DEBUG - Completed: [127.0.0.1:56010] 200 GET /channels/all (2 live) #13a GZIP 0ms 387 bytes
+Dec 05, 2025 23:59:22.680 [281473036165344] DEBUG - Request: [[::1]:61834 (Loopback)] GET /identity (2 live) #13c
+Dec 05, 2025 23:59:22.680 [281473089528032] DEBUG - Completed: [[::1]:61834] 200 GET /identity (2 live) #13c 0ms 418 bytes (pipelined: 1)
+Dec 05, 2025 23:59:27.736 [281473036165344] DEBUG - Request: [[::1]:56710 (Loopback)] GET /identity (2 live) #13e
+Dec 05, 2025 23:59:27.736 [281473087418592] DEBUG - Completed: [[::1]:56710] 200 GET /identity (2 live) #13e 0ms 418 bytes (pipelined: 1)
+Dec 05, 2025 23:59:32.793 [281473036165344] DEBUG - Request: [[::1]:56712 (Loopback)] GET /identity (2 live) #141
+Dec 05, 2025 23:59:32.793 [281473089528032] DEBUG - Completed: [[::1]:56712] 200 GET /identity (2 live) #141 0ms 418 bytes (pipelined: 1)
+Dec 05, 2025 23:59:37.845 [281473036165344] DEBUG - Request: [[::1]:61368 (Loopback)] GET /identity (2 live) #144
+Dec 05, 2025 23:59:37.845 [281473087418592] DEBUG - Completed: [[::1]:61368] 200 GET /identity (2 live) #144 0ms 418 bytes (pipelined: 1)
+Dec 05, 2025 23:59:42.904 [281473036165344] DEBUG - Request: [[::1]:61370 (Loopback)] GET /identity (2 live) #147
+Dec 05, 2025 23:59:42.904 [281473089528032] DEBUG - Completed: [[::1]:61370] 200 GET /identity (2 live) #147 0ms 418 bytes (pipelined: 1)
+Dec 05, 2025 23:59:47.962 [281473036165344] DEBUG - Request: [[::1]:56634 (Loopback)] GET /identity (2 live) #14a
+Dec 05, 2025 23:59:47.963 [281473087418592] DEBUG - Completed: [[::1]:56634] 200 GET /identity (2 live) #14a 0ms 418 bytes (pipelined: 1)
+Dec 05, 2025 23:59:53.032 [281473036165344] DEBUG - Request: [[::1]:56646 (Loopback)] GET /identity (2 live) #14d
+Dec 05, 2025 23:59:53.032 [281473089528032] DEBUG - Completed: [[::1]:56646] 200 GET /identity (2 live) #14d 0ms 418 bytes (pipelined: 1)
+Dec 05, 2025 23:59:58.096 [281473036165344] DEBUG - Request: [[::1]:61202 (Loopback)] GET /identity (2 live) #150
+Dec 05, 2025 23:59:58.097 [281473087418592] DEBUG - Completed: [[::1]:61202] 200 GET /identity (2 live) #150 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:00:03.157 [281473036165344] DEBUG - Request: [[::1]:61206 (Loopback)] GET /identity (2 live) #153
+Dec 06, 2025 00:00:03.157 [281473089528032] DEBUG - Completed: [[::1]:61206] 200 GET /identity (2 live) #153 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:00:08.227 [281473036165344] DEBUG - Request: [[::1]:57504 (Loopback)] GET /identity (2 live) #156
+Dec 06, 2025 00:00:08.228 [281473087418592] DEBUG - Completed: [[::1]:57504] 200 GET /identity (2 live) #156 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:00:13.282 [281473036165344] DEBUG - Request: [[::1]:57508 (Loopback)] GET /identity (2 live) #159
+Dec 06, 2025 00:00:13.282 [281473089528032] DEBUG - Completed: [[::1]:57508] 200 GET /identity (2 live) #159 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:00:18.339 [281473036165344] DEBUG - Request: [[::1]:62800 (Loopback)] GET /identity (2 live) #15c
+Dec 06, 2025 00:00:18.339 [281473089528032] DEBUG - Completed: [[::1]:62800] 200 GET /identity (2 live) #15c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:00:23.407 [281473036165344] DEBUG - Request: [[::1]:62812 (Loopback)] GET /identity (2 live) #15f
+Dec 06, 2025 00:00:23.408 [281473089528032] DEBUG - Completed: [[::1]:62812] 200 GET /identity (2 live) #15f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:00:28.457 [281473036165344] DEBUG - Request: [[::1]:58022 (Loopback)] GET /identity (2 live) #162
+Dec 06, 2025 00:00:28.457 [281473089528032] DEBUG - Completed: [[::1]:58022] 200 GET /identity (2 live) #162 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:00:33.518 [281473036165344] DEBUG - Request: [[::1]:58026 (Loopback)] GET /identity (2 live) #165
+Dec 06, 2025 00:00:33.518 [281473087418592] DEBUG - Completed: [[::1]:58026] 200 GET /identity (2 live) #165 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:00:38.570 [281473036165344] DEBUG - Request: [[::1]:64956 (Loopback)] GET /identity (2 live) #168
+Dec 06, 2025 00:00:38.570 [281473089528032] DEBUG - Completed: [[::1]:64956] 200 GET /identity (2 live) #168 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:00:43.636 [281473036165344] DEBUG - Request: [[::1]:64968 (Loopback)] GET /identity (2 live) #16b
+Dec 06, 2025 00:00:43.636 [281473087418592] DEBUG - Completed: [[::1]:64968] 200 GET /identity (2 live) #16b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:00:48.703 [281473036165344] DEBUG - Request: [[::1]:57204 (Loopback)] GET /identity (2 live) #16e
+Dec 06, 2025 00:00:48.703 [281473089528032] DEBUG - Completed: [[::1]:57204] 200 GET /identity (2 live) #16e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:00:53.765 [281473036165344] DEBUG - Request: [[::1]:57210 (Loopback)] GET /identity (2 live) #171
+Dec 06, 2025 00:00:53.765 [281473089528032] DEBUG - Completed: [[::1]:57210] 200 GET /identity (2 live) #171 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:00:58.816 [281473036165344] DEBUG - Request: [[::1]:60142 (Loopback)] GET /identity (2 live) #174
+Dec 06, 2025 00:00:58.816 [281473087418592] DEBUG - Completed: [[::1]:60142] 200 GET /identity (2 live) #174 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:01:03.879 [281473036165344] DEBUG - Request: [[::1]:60152 (Loopback)] GET /identity (2 live) #177
+Dec 06, 2025 00:01:03.879 [281473087418592] DEBUG - Completed: [[::1]:60152] 200 GET /identity (2 live) #177 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:01:08.928 [281473036165344] DEBUG - Request: [[::1]:55148 (Loopback)] GET /identity (2 live) #17a
+Dec 06, 2025 00:01:08.928 [281473089528032] DEBUG - Completed: [[::1]:55148] 200 GET /identity (2 live) #17a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:01:13.977 [281473036165344] DEBUG - Request: [[::1]:55154 (Loopback)] GET /identity (2 live) #17d
+Dec 06, 2025 00:01:13.978 [281473089528032] DEBUG - Completed: [[::1]:55154] 200 GET /identity (2 live) #17d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:01:19.038 [281473036165344] DEBUG - Request: [[::1]:60250 (Loopback)] GET /identity (2 live) #180
+Dec 06, 2025 00:01:19.038 [281473087418592] DEBUG - Completed: [[::1]:60250] 200 GET /identity (2 live) #180 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:01:24.088 [281473036165344] DEBUG - Request: [[::1]:60254 (Loopback)] GET /identity (2 live) #183
+Dec 06, 2025 00:01:24.088 [281473089528032] DEBUG - Completed: [[::1]:60254] 200 GET /identity (2 live) #183 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:01:29.147 [281473036165344] DEBUG - Request: [[::1]:64216 (Loopback)] GET /identity (2 live) #186
+Dec 06, 2025 00:01:29.148 [281473087418592] DEBUG - Completed: [[::1]:64216] 200 GET /identity (2 live) #186 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:01:34.215 [281473036165344] DEBUG - Request: [[::1]:64218 (Loopback)] GET /identity (2 live) #189
+Dec 06, 2025 00:01:34.215 [281473089528032] DEBUG - Completed: [[::1]:64218] 200 GET /identity (2 live) #189 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:01:39.276 [281473036165344] DEBUG - Request: [[::1]:65070 (Loopback)] GET /identity (2 live) #18c
+Dec 06, 2025 00:01:39.276 [281473087418592] DEBUG - Completed: [[::1]:65070] 200 GET /identity (2 live) #18c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:01:44.342 [281473036165344] DEBUG - Request: [[::1]:65080 (Loopback)] GET /identity (2 live) #18f
+Dec 06, 2025 00:01:44.342 [281473089528032] DEBUG - Completed: [[::1]:65080] 200 GET /identity (2 live) #18f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:01:49.397 [281473036165344] DEBUG - Request: [[::1]:61968 (Loopback)] GET /identity (2 live) #192
+Dec 06, 2025 00:01:49.397 [281473087418592] DEBUG - Completed: [[::1]:61968] 200 GET /identity (2 live) #192 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:01:54.462 [281473036165344] DEBUG - Request: [[::1]:61974 (Loopback)] GET /identity (2 live) #195
+Dec 06, 2025 00:01:54.462 [281473089528032] DEBUG - Completed: [[::1]:61974] 200 GET /identity (2 live) #195 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:01:59.512 [281473036165344] DEBUG - Request: [[::1]:63366 (Loopback)] GET /identity (2 live) #198
+Dec 06, 2025 00:01:59.512 [281473089528032] DEBUG - Completed: [[::1]:63366] 200 GET /identity (2 live) #198 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:02:04.585 [281473036165344] DEBUG - Request: [[::1]:63376 (Loopback)] GET /identity (2 live) #19b
+Dec 06, 2025 00:02:04.585 [281473089528032] DEBUG - Completed: [[::1]:63376] 200 GET /identity (2 live) #19b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:02:09.638 [281473036165344] DEBUG - Request: [[::1]:56622 (Loopback)] GET /identity (2 live) #19e
+Dec 06, 2025 00:02:09.638 [281473087418592] DEBUG - Completed: [[::1]:56622] 200 GET /identity (2 live) #19e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:02:14.691 [281473036165344] DEBUG - Request: [[::1]:56632 (Loopback)] GET /identity (2 live) #1a1
+Dec 06, 2025 00:02:14.691 [281473087418592] DEBUG - Completed: [[::1]:56632] 200 GET /identity (2 live) #1a1 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:02:19.484 [281473047187680] DEBUG - [HCl#71] HTTP requesting GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:02:19.748 [281473036165344] DEBUG - Request: [[::1]:64764 (Loopback)] GET /identity (2 live) #1a4
+Dec 06, 2025 00:02:19.748 [281473089528032] DEBUG - Completed: [[::1]:64764] 200 GET /identity (2 live) #1a4 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:02:19.882 [281473070588128] DEBUG - [HttpClient/HCl#71] HTTP/1.1 (0.4s) 200 response from GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:02:19.887 [281473047187680] DEBUG - [HCl#72] HTTP requesting GET https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:02:20.022 [281473070588128] DEBUG - [HttpClient/HCl#72] HTTP/1.1 (0.1s) 401 response from GET https://plex.tv/api/v2/server/users/features (reused)
+Dec 06, 2025 00:02:20.022 [281473059950816] ERROR - MyPlex: Error 401 requesting JSON from: https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:02:20.022 [281473047187680] WARN - FeatureManager: Couldn't get features. Trying again soon.
+Dec 06, 2025 00:02:24.807 [281473036165344] DEBUG - Request: [[::1]:64776 (Loopback)] GET /identity (2 live) #1a7
+Dec 06, 2025 00:02:24.807 [281473087418592] DEBUG - Completed: [[::1]:64776] 200 GET /identity (2 live) #1a7 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:02:29.873 [281473036165344] DEBUG - Request: [[::1]:58754 (Loopback)] GET /identity (2 live) #1aa
+Dec 06, 2025 00:02:29.873 [281473087418592] DEBUG - Completed: [[::1]:58754] 200 GET /identity (2 live) #1aa 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:02:34.933 [281473036165344] DEBUG - Request: [[::1]:58764 (Loopback)] GET /identity (2 live) #1ad
+Dec 06, 2025 00:02:34.933 [281473089528032] DEBUG - Completed: [[::1]:58764] 200 GET /identity (2 live) #1ad 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:02:39.992 [281473036165344] DEBUG - Request: [[::1]:58950 (Loopback)] GET /identity (2 live) #1b0
+Dec 06, 2025 00:02:39.992 [281473089528032] DEBUG - Completed: [[::1]:58950] 200 GET /identity (2 live) #1b0 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:02:45.055 [281473036165344] DEBUG - Request: [[::1]:58966 (Loopback)] GET /identity (2 live) #1b3
+Dec 06, 2025 00:02:45.055 [281473087418592] DEBUG - Completed: [[::1]:58966] 200 GET /identity (2 live) #1b3 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:02:50.126 [281473036165344] DEBUG - Request: [[::1]:61632 (Loopback)] GET /identity (2 live) #1b6
+Dec 06, 2025 00:02:50.126 [281473087418592] DEBUG - Completed: [[::1]:61632] 200 GET /identity (2 live) #1b6 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:02:55.204 [281473036165344] DEBUG - Request: [[::1]:64048 (Loopback)] GET /identity (2 live) #1b9
+Dec 06, 2025 00:02:55.204 [281473089528032] DEBUG - Completed: [[::1]:64048] 200 GET /identity (2 live) #1b9 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:03:00.275 [281473036165344] DEBUG - Request: [[::1]:64050 (Loopback)] GET /identity (2 live) #1bc
+Dec 06, 2025 00:03:00.275 [281473087418592] DEBUG - Completed: [[::1]:64050] 200 GET /identity (2 live) #1bc 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:03:05.343 [281473036165344] DEBUG - Request: [[::1]:61632 (Loopback)] GET /identity (2 live) #1bf
+Dec 06, 2025 00:03:05.343 [281473087418592] DEBUG - Completed: [[::1]:61632] 200 GET /identity (2 live) #1bf 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:03:10.410 [281473036165344] DEBUG - Request: [[::1]:61646 (Loopback)] GET /identity (2 live) #1c2
+Dec 06, 2025 00:03:10.410 [281473089528032] DEBUG - Completed: [[::1]:61646] 200 GET /identity (2 live) #1c2 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:03:15.475 [281473036165344] DEBUG - Request: [[::1]:63616 (Loopback)] GET /identity (2 live) #1c5
+Dec 06, 2025 00:03:15.475 [281473089528032] DEBUG - Completed: [[::1]:63616] 200 GET /identity (2 live) #1c5 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:03:20.535 [281473036165344] DEBUG - Request: [[::1]:63622 (Loopback)] GET /identity (2 live) #1c8
+Dec 06, 2025 00:03:20.536 [281473087418592] DEBUG - Completed: [[::1]:63622] 200 GET /identity (2 live) #1c8 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:03:25.604 [281473036165344] DEBUG - Request: [[::1]:59290 (Loopback)] GET /identity (2 live) #1cb
+Dec 06, 2025 00:03:25.605 [281473089528032] DEBUG - Completed: [[::1]:59290] 200 GET /identity (2 live) #1cb 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:03:30.668 [281473036165344] DEBUG - Request: [[::1]:59306 (Loopback)] GET /identity (2 live) #1ce
+Dec 06, 2025 00:03:30.668 [281473089528032] DEBUG - Completed: [[::1]:59306] 200 GET /identity (2 live) #1ce 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:03:35.738 [281473036165344] DEBUG - Request: [[::1]:64690 (Loopback)] GET /identity (2 live) #1d1
+Dec 06, 2025 00:03:35.738 [281473089528032] DEBUG - Completed: [[::1]:64690] 200 GET /identity (2 live) #1d1 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:03:40.802 [281473036165344] DEBUG - Request: [[::1]:64704 (Loopback)] GET /identity (2 live) #1d4
+Dec 06, 2025 00:03:40.802 [281473087418592] DEBUG - Completed: [[::1]:64704] 200 GET /identity (2 live) #1d4 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:03:45.868 [281473036165344] DEBUG - Request: [[::1]:64148 (Loopback)] GET /identity (2 live) #1d7
+Dec 06, 2025 00:03:45.868 [281473089528032] DEBUG - Completed: [[::1]:64148] 200 GET /identity (2 live) #1d7 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:03:50.923 [281473036165344] DEBUG - Request: [[::1]:64152 (Loopback)] GET /identity (2 live) #1da
+Dec 06, 2025 00:03:50.923 [281473087418592] DEBUG - Completed: [[::1]:64152] 200 GET /identity (2 live) #1da 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:03:55.990 [281473036165344] DEBUG - Request: [[::1]:56938 (Loopback)] GET /identity (2 live) #1dd
+Dec 06, 2025 00:03:55.990 [281473089528032] DEBUG - Completed: [[::1]:56938] 200 GET /identity (2 live) #1dd 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:04:01.058 [281473036165344] DEBUG - Request: [[::1]:56940 (Loopback)] GET /identity (2 live) #1e0
+Dec 06, 2025 00:04:01.058 [281473087418592] DEBUG - Completed: [[::1]:56940] 200 GET /identity (2 live) #1e0 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:04:06.124 [281473036165344] DEBUG - Request: [[::1]:60354 (Loopback)] GET /identity (2 live) #1e3
+Dec 06, 2025 00:04:06.124 [281473087418592] DEBUG - Completed: [[::1]:60354] 200 GET /identity (2 live) #1e3 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:04:11.191 [281473036165344] DEBUG - Request: [[::1]:60358 (Loopback)] GET /identity (2 live) #1e6
+Dec 06, 2025 00:04:11.191 [281473089528032] DEBUG - Completed: [[::1]:60358] 200 GET /identity (2 live) #1e6 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:04:16.269 [281473036165344] DEBUG - Request: [[::1]:63788 (Loopback)] GET /identity (2 live) #1e9
+Dec 06, 2025 00:04:16.269 [281473089528032] DEBUG - Completed: [[::1]:63788] 200 GET /identity (2 live) #1e9 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:04:21.321 [281473036165344] DEBUG - Request: [[::1]:63790 (Loopback)] GET /identity (2 live) #1ec
+Dec 06, 2025 00:04:21.321 [281473089528032] DEBUG - Completed: [[::1]:63790] 200 GET /identity (2 live) #1ec 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:04:26.380 [281473036165344] DEBUG - Request: [[::1]:62762 (Loopback)] GET /identity (2 live) #1ef
+Dec 06, 2025 00:04:26.381 [281473089528032] DEBUG - Completed: [[::1]:62762] 200 GET /identity (2 live) #1ef 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:04:31.419 [281473036165344] DEBUG - Request: [[::1]:62772 (Loopback)] GET /identity (2 live) #1f2
+Dec 06, 2025 00:04:31.419 [281473089528032] DEBUG - Completed: [[::1]:62772] 200 GET /identity (2 live) #1f2 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:04:36.471 [281473036165344] DEBUG - Request: [[::1]:60876 (Loopback)] GET /identity (2 live) #1f5
+Dec 06, 2025 00:04:36.472 [281473089528032] DEBUG - Completed: [[::1]:60876] 200 GET /identity (2 live) #1f5 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:04:41.530 [281473036165344] DEBUG - Request: [[::1]:60890 (Loopback)] GET /identity (2 live) #1f8
+Dec 06, 2025 00:04:41.530 [281473087418592] DEBUG - Completed: [[::1]:60890] 200 GET /identity (2 live) #1f8 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:04:46.589 [281473036165344] DEBUG - Request: [[::1]:60734 (Loopback)] GET /identity (2 live) #1fb
+Dec 06, 2025 00:04:46.589 [281473089528032] DEBUG - Completed: [[::1]:60734] 200 GET /identity (2 live) #1fb 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:04:51.658 [281473036165344] DEBUG - Request: [[::1]:60736 (Loopback)] GET /identity (2 live) #1fe
+Dec 06, 2025 00:04:51.658 [281473087418592] DEBUG - Completed: [[::1]:60736] 200 GET /identity (2 live) #1fe 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:04:56.714 [281473036165344] DEBUG - Request: [[::1]:59714 (Loopback)] GET /identity (2 live) #201
+Dec 06, 2025 00:04:56.714 [281473087418592] DEBUG - Completed: [[::1]:59714] 200 GET /identity (2 live) #201 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:05:01.765 [281473036165344] DEBUG - Request: [[::1]:59720 (Loopback)] GET /identity (2 live) #204
+Dec 06, 2025 00:05:01.765 [281473089528032] DEBUG - Completed: [[::1]:59720] 200 GET /identity (2 live) #204 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:05:06.831 [281473036165344] DEBUG - Request: [[::1]:55508 (Loopback)] GET /identity (2 live) #207
+Dec 06, 2025 00:05:06.831 [281473089528032] DEBUG - Completed: [[::1]:55508] 200 GET /identity (2 live) #207 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:05:11.900 [281473036165344] DEBUG - Request: [[::1]:55520 (Loopback)] GET /identity (2 live) #20a
+Dec 06, 2025 00:05:11.900 [281473087418592] DEBUG - Completed: [[::1]:55520] 200 GET /identity (2 live) #20a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:05:16.961 [281473036165344] DEBUG - Request: [[::1]:59558 (Loopback)] GET /identity (2 live) #20d
+Dec 06, 2025 00:05:16.961 [281473089528032] DEBUG - Completed: [[::1]:59558] 200 GET /identity (2 live) #20d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:05:22.032 [281473036165344] DEBUG - Request: [[::1]:59566 (Loopback)] GET /identity (2 live) #210
+Dec 06, 2025 00:05:22.032 [281473087418592] DEBUG - Completed: [[::1]:59566] 200 GET /identity (2 live) #210 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:05:27.098 [281473036165344] DEBUG - Request: [[::1]:55402 (Loopback)] GET /identity (2 live) #213
+Dec 06, 2025 00:05:27.099 [281473089528032] DEBUG - Completed: [[::1]:55402] 200 GET /identity (2 live) #213 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:05:32.150 [281473036165344] DEBUG - Request: [[::1]:55410 (Loopback)] GET /identity (2 live) #216
+Dec 06, 2025 00:05:32.150 [281473089528032] DEBUG - Completed: [[::1]:55410] 200 GET /identity (2 live) #216 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:05:37.211 [281473036165344] DEBUG - Request: [[::1]:55932 (Loopback)] GET /identity (2 live) #219
+Dec 06, 2025 00:05:37.211 [281473089528032] DEBUG - Completed: [[::1]:55932] 200 GET /identity (2 live) #219 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:05:42.273 [281473036165344] DEBUG - Request: [[::1]:55940 (Loopback)] GET /identity (2 live) #21c
+Dec 06, 2025 00:05:42.273 [281473089528032] DEBUG - Completed: [[::1]:55940] 200 GET /identity (2 live) #21c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:05:47.342 [281473036165344] DEBUG - Request: [[::1]:57502 (Loopback)] GET /identity (2 live) #21f
+Dec 06, 2025 00:05:47.342 [281473089528032] DEBUG - Completed: [[::1]:57502] 200 GET /identity (2 live) #21f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:05:52.404 [281473036165344] DEBUG - Request: [[::1]:57504 (Loopback)] GET /identity (2 live) #222
+Dec 06, 2025 00:05:52.405 [281473089528032] DEBUG - Completed: [[::1]:57504] 200 GET /identity (2 live) #222 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:05:57.463 [281473036165344] DEBUG - Request: [[::1]:62354 (Loopback)] GET /identity (2 live) #225
+Dec 06, 2025 00:05:57.463 [281473089528032] DEBUG - Completed: [[::1]:62354] 200 GET /identity (2 live) #225 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:06:02.526 [281473036165344] DEBUG - Request: [[::1]:62370 (Loopback)] GET /identity (2 live) #228
+Dec 06, 2025 00:06:02.526 [281473087418592] DEBUG - Completed: [[::1]:62370] 200 GET /identity (2 live) #228 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:06:07.601 [281473036165344] DEBUG - Request: [[::1]:59354 (Loopback)] GET /identity (2 live) #22b
+Dec 06, 2025 00:06:07.601 [281473089528032] DEBUG - Completed: [[::1]:59354] 200 GET /identity (2 live) #22b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:06:12.667 [281473036165344] DEBUG - Request: [[::1]:59364 (Loopback)] GET /identity (2 live) #22e
+Dec 06, 2025 00:06:12.667 [281473087418592] DEBUG - Completed: [[::1]:59364] 200 GET /identity (2 live) #22e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:06:17.725 [281473036165344] DEBUG - Request: [[::1]:63492 (Loopback)] GET /identity (2 live) #231
+Dec 06, 2025 00:06:17.725 [281473089528032] DEBUG - Completed: [[::1]:63492] 200 GET /identity (2 live) #231 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:06:22.795 [281473036165344] DEBUG - Request: [[::1]:63504 (Loopback)] GET /identity (2 live) #234
+Dec 06, 2025 00:06:22.795 [281473087418592] DEBUG - Completed: [[::1]:63504] 200 GET /identity (2 live) #234 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:06:27.853 [281473036165344] DEBUG - Request: [[::1]:61442 (Loopback)] GET /identity (2 live) #237
+Dec 06, 2025 00:06:27.853 [281473089528032] DEBUG - Completed: [[::1]:61442] 200 GET /identity (2 live) #237 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:06:32.902 [281473036165344] DEBUG - Request: [[::1]:61450 (Loopback)] GET /identity (2 live) #23a
+Dec 06, 2025 00:06:32.902 [281473089528032] DEBUG - Completed: [[::1]:61450] 200 GET /identity (2 live) #23a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:06:37.958 [281473036165344] DEBUG - Request: [[::1]:55334 (Loopback)] GET /identity (2 live) #23d
+Dec 06, 2025 00:06:37.959 [281473087418592] DEBUG - Completed: [[::1]:55334] 200 GET /identity (2 live) #23d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:06:43.019 [281473036165344] DEBUG - Request: [[::1]:55336 (Loopback)] GET /identity (2 live) #240
+Dec 06, 2025 00:06:43.019 [281473087418592] DEBUG - Completed: [[::1]:55336] 200 GET /identity (2 live) #240 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:06:48.079 [281473036165344] DEBUG - Request: [[::1]:56402 (Loopback)] GET /identity (2 live) #243
+Dec 06, 2025 00:06:48.079 [281473089528032] DEBUG - Completed: [[::1]:56402] 200 GET /identity (2 live) #243 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:06:53.141 [281473036165344] DEBUG - Request: [[::1]:56404 (Loopback)] GET /identity (2 live) #246
+Dec 06, 2025 00:06:53.141 [281473089528032] DEBUG - Completed: [[::1]:56404] 200 GET /identity (2 live) #246 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:06:58.214 [281473036165344] DEBUG - Request: [[::1]:57400 (Loopback)] GET /identity (2 live) #249
+Dec 06, 2025 00:06:58.214 [281473087418592] DEBUG - Completed: [[::1]:57400] 200 GET /identity (2 live) #249 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:07:03.268 [281473036165344] DEBUG - Request: [[::1]:57406 (Loopback)] GET /identity (2 live) #24c
+Dec 06, 2025 00:07:03.268 [281473089528032] DEBUG - Completed: [[::1]:57406] 200 GET /identity (2 live) #24c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:07:08.329 [281473036165344] DEBUG - Request: [[::1]:55178 (Loopback)] GET /identity (2 live) #24f
+Dec 06, 2025 00:07:08.329 [281473087418592] DEBUG - Completed: [[::1]:55178] 200 GET /identity (2 live) #24f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:07:13.413 [281473036165344] DEBUG - Request: [[::1]:55182 (Loopback)] GET /identity (2 live) #252
+Dec 06, 2025 00:07:13.414 [281473089528032] DEBUG - Completed: [[::1]:55182] 200 GET /identity (2 live) #252 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:07:18.477 [281473036165344] DEBUG - Request: [[::1]:63868 (Loopback)] GET /identity (2 live) #255
+Dec 06, 2025 00:07:18.477 [281473089528032] DEBUG - Completed: [[::1]:63868] 200 GET /identity (2 live) #255 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:07:20.025 [281473051414752] DEBUG - [HCl#73] HTTP requesting GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:07:20.433 [281473070588128] DEBUG - [HttpClient/HCl#73] HTTP/1.1 (0.4s) 200 response from GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:07:20.440 [281473051414752] DEBUG - [HCl#74] HTTP requesting GET https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:07:20.562 [281473070588128] DEBUG - [HttpClient/HCl#74] HTTP/1.1 (0.1s) 401 response from GET https://plex.tv/api/v2/server/users/features (reused)
+Dec 06, 2025 00:07:20.562 [281473059950816] ERROR - MyPlex: Error 401 requesting JSON from: https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:07:20.563 [281473051414752] WARN - FeatureManager: Couldn't get features. Trying again soon.
+Dec 06, 2025 00:07:23.555 [281473036165344] DEBUG - Request: [[::1]:63878 (Loopback)] GET /identity (2 live) #258
+Dec 06, 2025 00:07:23.555 [281473087418592] DEBUG - Completed: [[::1]:63878] 200 GET /identity (2 live) #258 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:07:28.618 [281473036165344] DEBUG - Request: [[::1]:58726 (Loopback)] GET /identity (2 live) #25b
+Dec 06, 2025 00:07:28.618 [281473089528032] DEBUG - Completed: [[::1]:58726] 200 GET /identity (2 live) #25b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:07:33.684 [281473036165344] DEBUG - Request: [[::1]:58734 (Loopback)] GET /identity (2 live) #25e
+Dec 06, 2025 00:07:33.684 [281473089528032] DEBUG - Completed: [[::1]:58734] 200 GET /identity (2 live) #25e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:07:38.737 [281473036165344] DEBUG - Request: [[::1]:57374 (Loopback)] GET /identity (2 live) #261
+Dec 06, 2025 00:07:38.738 [281473087418592] DEBUG - Completed: [[::1]:57374] 200 GET /identity (2 live) #261 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:07:43.812 [281473036165344] DEBUG - Request: [[::1]:57382 (Loopback)] GET /identity (2 live) #264
+Dec 06, 2025 00:07:43.812 [281473087418592] DEBUG - Completed: [[::1]:57382] 200 GET /identity (2 live) #264 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:07:48.880 [281473036165344] DEBUG - Request: [[::1]:57374 (Loopback)] GET /identity (2 live) #267
+Dec 06, 2025 00:07:48.880 [281473089528032] DEBUG - Completed: [[::1]:57374] 200 GET /identity (2 live) #267 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:07:53.948 [281473036165344] DEBUG - Request: [[::1]:57382 (Loopback)] GET /identity (2 live) #26a
+Dec 06, 2025 00:07:53.948 [281473087418592] DEBUG - Completed: [[::1]:57382] 200 GET /identity (2 live) #26a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:07:59.009 [281473036165344] DEBUG - Request: [[::1]:55444 (Loopback)] GET /identity (2 live) #26d
+Dec 06, 2025 00:07:59.009 [281473089528032] DEBUG - Completed: [[::1]:55444] 200 GET /identity (2 live) #26d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:08:04.072 [281473036165344] DEBUG - Request: [[::1]:55458 (Loopback)] GET /identity (2 live) #270
+Dec 06, 2025 00:08:04.072 [281473087418592] DEBUG - Completed: [[::1]:55458] 200 GET /identity (2 live) #270 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:08:09.141 [281473036165344] DEBUG - Request: [[::1]:56052 (Loopback)] GET /identity (2 live) #273
+Dec 06, 2025 00:08:09.141 [281473087418592] DEBUG - Completed: [[::1]:56052] 200 GET /identity (2 live) #273 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:08:14.200 [281473036165344] DEBUG - Request: [[::1]:56064 (Loopback)] GET /identity (2 live) #276
+Dec 06, 2025 00:08:14.200 [281473087418592] DEBUG - Completed: [[::1]:56064] 200 GET /identity (2 live) #276 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:08:19.264 [281473036165344] DEBUG - Request: [[::1]:63728 (Loopback)] GET /identity (2 live) #279
+Dec 06, 2025 00:08:19.265 [281473089528032] DEBUG - Completed: [[::1]:63728] 200 GET /identity (2 live) #279 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:08:24.332 [281473036165344] DEBUG - Request: [[::1]:63734 (Loopback)] GET /identity (2 live) #27c
+Dec 06, 2025 00:08:24.332 [281473087418592] DEBUG - Completed: [[::1]:63734] 200 GET /identity (2 live) #27c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:08:29.401 [281473036165344] DEBUG - Request: [[::1]:58286 (Loopback)] GET /identity (2 live) #27f
+Dec 06, 2025 00:08:29.401 [281473087418592] DEBUG - Completed: [[::1]:58286] 200 GET /identity (2 live) #27f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:08:34.451 [281473036165344] DEBUG - Request: [[::1]:58292 (Loopback)] GET /identity (2 live) #282
+Dec 06, 2025 00:08:34.451 [281473089528032] DEBUG - Completed: [[::1]:58292] 200 GET /identity (2 live) #282 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:08:39.498 [281473036165344] DEBUG - Request: [[::1]:55502 (Loopback)] GET /identity (2 live) #285
+Dec 06, 2025 00:08:39.498 [281473087418592] DEBUG - Completed: [[::1]:55502] 200 GET /identity (2 live) #285 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:08:44.559 [281473036165344] DEBUG - Request: [[::1]:55512 (Loopback)] GET /identity (2 live) #288
+Dec 06, 2025 00:08:44.559 [281473087418592] DEBUG - Completed: [[::1]:55512] 200 GET /identity (2 live) #288 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:08:49.616 [281473036165344] DEBUG - Request: [[::1]:65326 (Loopback)] GET /identity (2 live) #28b
+Dec 06, 2025 00:08:49.616 [281473089528032] DEBUG - Completed: [[::1]:65326] 200 GET /identity (2 live) #28b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:08:54.667 [281473036165344] DEBUG - Request: [[::1]:65338 (Loopback)] GET /identity (2 live) #28e
+Dec 06, 2025 00:08:54.667 [281473087418592] DEBUG - Completed: [[::1]:65338] 200 GET /identity (2 live) #28e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:08:59.729 [281473036165344] DEBUG - Request: [[::1]:63974 (Loopback)] GET /identity (2 live) #291
+Dec 06, 2025 00:08:59.729 [281473089528032] DEBUG - Completed: [[::1]:63974] 200 GET /identity (2 live) #291 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:09:04.797 [281473036165344] DEBUG - Request: [[::1]:63978 (Loopback)] GET /identity (2 live) #294
+Dec 06, 2025 00:09:04.797 [281473087418592] DEBUG - Completed: [[::1]:63978] 200 GET /identity (2 live) #294 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:09:09.869 [281473036165344] DEBUG - Request: [[::1]:64458 (Loopback)] GET /identity (2 live) #297
+Dec 06, 2025 00:09:09.869 [281473087418592] DEBUG - Completed: [[::1]:64458] 200 GET /identity (2 live) #297 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:09:14.946 [281473036165344] DEBUG - Request: [[::1]:64470 (Loopback)] GET /identity (2 live) #29a
+Dec 06, 2025 00:09:14.947 [281473089528032] DEBUG - Completed: [[::1]:64470] 200 GET /identity (2 live) #29a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:09:20.007 [281473036165344] DEBUG - Request: [[::1]:62094 (Loopback)] GET /identity (2 live) #29d
+Dec 06, 2025 00:09:20.007 [281473089528032] DEBUG - Completed: [[::1]:62094] 200 GET /identity (2 live) #29d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:09:25.054 [281473036165344] DEBUG - Request: [[::1]:62098 (Loopback)] GET /identity (2 live) #2a0
+Dec 06, 2025 00:09:25.055 [281473087418592] DEBUG - Completed: [[::1]:62098] 200 GET /identity (2 live) #2a0 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:09:30.122 [281473036165344] DEBUG - Request: [[::1]:55068 (Loopback)] GET /identity (2 live) #2a3
+Dec 06, 2025 00:09:30.122 [281473089528032] DEBUG - Completed: [[::1]:55068] 200 GET /identity (2 live) #2a3 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:09:32.898 [281473066369248] DEBUG - NetworkInterface: received Netlink message len=88, type=RTM_DELADDR, flags=0x0
+Dec 06, 2025 00:09:32.898 [281473066369248] DEBUG - NetworkInterface: Netlink address message family=2, index=4, flags=0x80
+Dec 06, 2025 00:09:32.898 [281473066369248] DEBUG - Network change.
+Dec 06, 2025 00:09:32.898 [281473066369248] DEBUG - NetworkInterface: Notified of network changed (force=0)
+Dec 06, 2025 00:09:32.899 [281473066369248] DEBUG - Network change notification but nothing changed.
+Dec 06, 2025 00:09:35.181 [281473036165344] DEBUG - Request: [[::1]:63282 (Loopback)] GET /identity (2 live) #2a6
+Dec 06, 2025 00:09:35.181 [281473089528032] DEBUG - Completed: [[::1]:63282] 200 GET /identity (2 live) #2a6 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:09:40.240 [281473036165344] DEBUG - Request: [[::1]:63296 (Loopback)] GET /identity (2 live) #2a9
+Dec 06, 2025 00:09:40.241 [281473087418592] DEBUG - Completed: [[::1]:63296] 200 GET /identity (2 live) #2a9 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:09:45.308 [281473036165344] DEBUG - Request: [[::1]:56782 (Loopback)] GET /identity (2 live) #2ac
+Dec 06, 2025 00:09:45.308 [281473087418592] DEBUG - Completed: [[::1]:56782] 200 GET /identity (2 live) #2ac 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:09:50.365 [281473036165344] DEBUG - Request: [[::1]:56788 (Loopback)] GET /identity (2 live) #2af
+Dec 06, 2025 00:09:50.365 [281473089528032] DEBUG - Completed: [[::1]:56788] 200 GET /identity (2 live) #2af 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:09:55.435 [281473036165344] DEBUG - Request: [[::1]:63256 (Loopback)] GET /identity (2 live) #2b2
+Dec 06, 2025 00:09:55.435 [281473087418592] DEBUG - Completed: [[::1]:63256] 200 GET /identity (2 live) #2b2 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:10:00.497 [281473036165344] DEBUG - Request: [[::1]:63272 (Loopback)] GET /identity (2 live) #2b5
+Dec 06, 2025 00:10:00.498 [281473087418592] DEBUG - Completed: [[::1]:63272] 200 GET /identity (2 live) #2b5 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:10:05.558 [281473036165344] DEBUG - Request: [[::1]:62018 (Loopback)] GET /identity (2 live) #2b8
+Dec 06, 2025 00:10:05.558 [281473089528032] DEBUG - Completed: [[::1]:62018] 200 GET /identity (2 live) #2b8 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:10:10.629 [281473036165344] DEBUG - Request: [[::1]:62028 (Loopback)] GET /identity (2 live) #2bb
+Dec 06, 2025 00:10:10.630 [281473087418592] DEBUG - Completed: [[::1]:62028] 200 GET /identity (2 live) #2bb 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:10:15.697 [281473036165344] DEBUG - Request: [[::1]:63058 (Loopback)] GET /identity (2 live) #2be
+Dec 06, 2025 00:10:15.697 [281473089528032] DEBUG - Completed: [[::1]:63058] 200 GET /identity (2 live) #2be 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:10:20.766 [281473036165344] DEBUG - Request: [[::1]:63066 (Loopback)] GET /identity (2 live) #2c1
+Dec 06, 2025 00:10:20.766 [281473087418592] DEBUG - Completed: [[::1]:63066] 200 GET /identity (2 live) #2c1 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:10:25.837 [281473036165344] DEBUG - Request: [[::1]:63236 (Loopback)] GET /identity (2 live) #2c4
+Dec 06, 2025 00:10:25.837 [281473089528032] DEBUG - Completed: [[::1]:63236] 200 GET /identity (2 live) #2c4 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:10:30.905 [281473036165344] DEBUG - Request: [[::1]:63238 (Loopback)] GET /identity (2 live) #2c7
+Dec 06, 2025 00:10:30.905 [281473087418592] DEBUG - Completed: [[::1]:63238] 200 GET /identity (2 live) #2c7 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:10:35.960 [281473036165344] DEBUG - Request: [[::1]:60858 (Loopback)] GET /identity (2 live) #2ca
+Dec 06, 2025 00:10:35.960 [281473089528032] DEBUG - Completed: [[::1]:60858] 200 GET /identity (2 live) #2ca 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:10:41.023 [281473036165344] DEBUG - Request: [[::1]:60860 (Loopback)] GET /identity (2 live) #2cd
+Dec 06, 2025 00:10:41.023 [281473089528032] DEBUG - Completed: [[::1]:60860] 200 GET /identity (2 live) #2cd 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:10:46.082 [281473036165344] DEBUG - Request: [[::1]:56938 (Loopback)] GET /identity (2 live) #2d0
+Dec 06, 2025 00:10:46.082 [281473089528032] DEBUG - Completed: [[::1]:56938] 200 GET /identity (2 live) #2d0 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:10:51.136 [281473036165344] DEBUG - Request: [[::1]:56942 (Loopback)] GET /identity (2 live) #2d3
+Dec 06, 2025 00:10:51.136 [281473089528032] DEBUG - Completed: [[::1]:56942] 200 GET /identity (2 live) #2d3 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:10:56.202 [281473036165344] DEBUG - Request: [[::1]:59910 (Loopback)] GET /identity (2 live) #2d6
+Dec 06, 2025 00:10:56.202 [281473087418592] DEBUG - Completed: [[::1]:59910] 200 GET /identity (2 live) #2d6 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:11:01.267 [281473036165344] DEBUG - Request: [[::1]:59924 (Loopback)] GET /identity (2 live) #2d9
+Dec 06, 2025 00:11:01.267 [281473089528032] DEBUG - Completed: [[::1]:59924] 200 GET /identity (2 live) #2d9 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:11:06.324 [281473036165344] DEBUG - Request: [[::1]:64910 (Loopback)] GET /identity (2 live) #2dc
+Dec 06, 2025 00:11:06.324 [281473087418592] DEBUG - Completed: [[::1]:64910] 200 GET /identity (2 live) #2dc 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:11:11.384 [281473036165344] DEBUG - Request: [[::1]:64924 (Loopback)] GET /identity (2 live) #2df
+Dec 06, 2025 00:11:11.384 [281473087418592] DEBUG - Completed: [[::1]:64924] 200 GET /identity (2 live) #2df 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:11:16.448 [281473036165344] DEBUG - Request: [[::1]:61540 (Loopback)] GET /identity (2 live) #2e2
+Dec 06, 2025 00:11:16.449 [281473087418592] DEBUG - Completed: [[::1]:61540] 200 GET /identity (2 live) #2e2 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:11:21.527 [281473036165344] DEBUG - Request: [[::1]:61552 (Loopback)] GET /identity (2 live) #2e5
+Dec 06, 2025 00:11:21.527 [281473089528032] DEBUG - Completed: [[::1]:61552] 200 GET /identity (2 live) #2e5 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:11:26.573 [281473036165344] DEBUG - Request: [[::1]:56530 (Loopback)] GET /identity (2 live) #2e8
+Dec 06, 2025 00:11:26.574 [281473087418592] DEBUG - Completed: [[::1]:56530] 200 GET /identity (2 live) #2e8 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:11:31.626 [281473036165344] DEBUG - Request: [[::1]:56540 (Loopback)] GET /identity (2 live) #2eb
+Dec 06, 2025 00:11:31.627 [281473089528032] DEBUG - Completed: [[::1]:56540] 200 GET /identity (2 live) #2eb 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:11:36.677 [281473036165344] DEBUG - Request: [[::1]:55572 (Loopback)] GET /identity (2 live) #2ee
+Dec 06, 2025 00:11:36.677 [281473087418592] DEBUG - Completed: [[::1]:55572] 200 GET /identity (2 live) #2ee 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:11:41.734 [281473036165344] DEBUG - Request: [[::1]:55574 (Loopback)] GET /identity (2 live) #2f1
+Dec 06, 2025 00:11:41.734 [281473087418592] DEBUG - Completed: [[::1]:55574] 200 GET /identity (2 live) #2f1 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:11:46.804 [281473036165344] DEBUG - Request: [[::1]:58068 (Loopback)] GET /identity (2 live) #2f4
+Dec 06, 2025 00:11:46.804 [281473089528032] DEBUG - Completed: [[::1]:58068] 200 GET /identity (2 live) #2f4 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:11:51.863 [281473036165344] DEBUG - Request: [[::1]:58072 (Loopback)] GET /identity (2 live) #2f7
+Dec 06, 2025 00:11:51.864 [281473087418592] DEBUG - Completed: [[::1]:58072] 200 GET /identity (2 live) #2f7 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:11:56.929 [281473036165344] DEBUG - Request: [[::1]:60880 (Loopback)] GET /identity (2 live) #2fa
+Dec 06, 2025 00:11:56.929 [281473089528032] DEBUG - Completed: [[::1]:60880] 200 GET /identity (2 live) #2fa 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:12:01.992 [281473036165344] DEBUG - Request: [[::1]:60890 (Loopback)] GET /identity (2 live) #2fd
+Dec 06, 2025 00:12:01.993 [281473087418592] DEBUG - Completed: [[::1]:60890] 200 GET /identity (2 live) #2fd 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:12:07.052 [281473036165344] DEBUG - Request: [[::1]:58532 (Loopback)] GET /identity (2 live) #300
+Dec 06, 2025 00:12:07.052 [281473089528032] DEBUG - Completed: [[::1]:58532] 200 GET /identity (2 live) #300 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:12:12.108 [281473036165344] DEBUG - Request: [[::1]:58548 (Loopback)] GET /identity (2 live) #303
+Dec 06, 2025 00:12:12.109 [281473087418592] DEBUG - Completed: [[::1]:58548] 200 GET /identity (2 live) #303 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:12:17.180 [281473036165344] DEBUG - Request: [[::1]:55384 (Loopback)] GET /identity (2 live) #306
+Dec 06, 2025 00:12:17.181 [281473089528032] DEBUG - Completed: [[::1]:55384] 200 GET /identity (2 live) #306 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:12:20.564 [281473047187680] DEBUG - [HCl#75] HTTP requesting GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:12:21.006 [281473070588128] DEBUG - [HttpClient/HCl#75] HTTP/1.1 (0.4s) 200 response from GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:12:21.012 [281473047187680] DEBUG - [HCl#76] HTTP requesting GET https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:12:21.151 [281473070588128] DEBUG - [HttpClient/HCl#76] HTTP/1.1 (0.1s) 401 response from GET https://plex.tv/api/v2/server/users/features (reused)
+Dec 06, 2025 00:12:21.151 [281473059950816] ERROR - MyPlex: Error 401 requesting JSON from: https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:12:21.151 [281473047187680] WARN - FeatureManager: Couldn't get features. Trying again soon.
+Dec 06, 2025 00:12:22.239 [281473036165344] DEBUG - Request: [[::1]:55394 (Loopback)] GET /identity (2 live) #309
+Dec 06, 2025 00:12:22.239 [281473087418592] DEBUG - Completed: [[::1]:55394] 200 GET /identity (2 live) #309 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:12:27.301 [281473036165344] DEBUG - Request: [[::1]:62810 (Loopback)] GET /identity (2 live) #30c
+Dec 06, 2025 00:12:27.301 [281473089528032] DEBUG - Completed: [[::1]:62810] 200 GET /identity (2 live) #30c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:12:32.364 [281473036165344] DEBUG - Request: [[::1]:62826 (Loopback)] GET /identity (2 live) #30f
+Dec 06, 2025 00:12:32.364 [281473087418592] DEBUG - Completed: [[::1]:62826] 200 GET /identity (2 live) #30f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:12:37.431 [281473036165344] DEBUG - Request: [[::1]:64114 (Loopback)] GET /identity (2 live) #312
+Dec 06, 2025 00:12:37.431 [281473089528032] DEBUG - Completed: [[::1]:64114] 200 GET /identity (2 live) #312 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:12:42.494 [281473036165344] DEBUG - Request: [[::1]:64120 (Loopback)] GET /identity (2 live) #315
+Dec 06, 2025 00:12:42.494 [281473087418592] DEBUG - Completed: [[::1]:64120] 200 GET /identity (2 live) #315 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:12:47.554 [281473036165344] DEBUG - Request: [[::1]:63052 (Loopback)] GET /identity (2 live) #318
+Dec 06, 2025 00:12:47.554 [281473087418592] DEBUG - Completed: [[::1]:63052] 200 GET /identity (2 live) #318 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:12:52.601 [281473036165344] DEBUG - Request: [[::1]:63058 (Loopback)] GET /identity (2 live) #31b
+Dec 06, 2025 00:12:52.601 [281473087418592] DEBUG - Completed: [[::1]:63058] 200 GET /identity (2 live) #31b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:12:57.671 [281473036165344] DEBUG - Request: [[::1]:57986 (Loopback)] GET /identity (2 live) #31e
+Dec 06, 2025 00:12:57.671 [281473087418592] DEBUG - Completed: [[::1]:57986] 200 GET /identity (2 live) #31e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:13:02.731 [281473036165344] DEBUG - Request: [[::1]:57990 (Loopback)] GET /identity (2 live) #321
+Dec 06, 2025 00:13:02.731 [281473089528032] DEBUG - Completed: [[::1]:57990] 200 GET /identity (2 live) #321 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:13:07.801 [281473036165344] DEBUG - Request: [[::1]:56922 (Loopback)] GET /identity (2 live) #324
+Dec 06, 2025 00:13:07.801 [281473087418592] DEBUG - Completed: [[::1]:56922] 200 GET /identity (2 live) #324 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:13:12.862 [281473036165344] DEBUG - Request: [[::1]:56936 (Loopback)] GET /identity (2 live) #327
+Dec 06, 2025 00:13:12.862 [281473089528032] DEBUG - Completed: [[::1]:56936] 200 GET /identity (2 live) #327 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:13:17.932 [281473036165344] DEBUG - Request: [[::1]:63314 (Loopback)] GET /identity (2 live) #32a
+Dec 06, 2025 00:13:17.932 [281473087418592] DEBUG - Completed: [[::1]:63314] 200 GET /identity (2 live) #32a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:13:22.998 [281473036165344] DEBUG - Request: [[::1]:63320 (Loopback)] GET /identity (2 live) #32d
+Dec 06, 2025 00:13:22.998 [281473087418592] DEBUG - Completed: [[::1]:63320] 200 GET /identity (2 live) #32d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:13:28.060 [281473036165344] DEBUG - Request: [[::1]:57612 (Loopback)] GET /identity (2 live) #330
+Dec 06, 2025 00:13:28.060 [281473087418592] DEBUG - Completed: [[::1]:57612] 200 GET /identity (2 live) #330 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:13:33.131 [281473036165344] DEBUG - Request: [[::1]:57628 (Loopback)] GET /identity (2 live) #333
+Dec 06, 2025 00:13:33.131 [281473089528032] DEBUG - Completed: [[::1]:57628] 200 GET /identity (2 live) #333 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:13:38.196 [281473036165344] DEBUG - Request: [[::1]:59982 (Loopback)] GET /identity (2 live) #336
+Dec 06, 2025 00:13:38.196 [281473087418592] DEBUG - Completed: [[::1]:59982] 200 GET /identity (2 live) #336 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:13:43.246 [281473036165344] DEBUG - Request: [[::1]:59998 (Loopback)] GET /identity (2 live) #339
+Dec 06, 2025 00:13:43.246 [281473087418592] DEBUG - Completed: [[::1]:59998] 200 GET /identity (2 live) #339 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:13:48.311 [281473036165344] DEBUG - Request: [[::1]:64364 (Loopback)] GET /identity (2 live) #33c
+Dec 06, 2025 00:13:48.311 [281473089528032] DEBUG - Completed: [[::1]:64364] 200 GET /identity (2 live) #33c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:13:53.381 [281473036165344] DEBUG - Request: [[::1]:64374 (Loopback)] GET /identity (2 live) #33f
+Dec 06, 2025 00:13:53.381 [281473087418592] DEBUG - Completed: [[::1]:64374] 200 GET /identity (2 live) #33f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:13:58.449 [281473036165344] DEBUG - Request: [[::1]:63150 (Loopback)] GET /identity (2 live) #342
+Dec 06, 2025 00:13:58.449 [281473089528032] DEBUG - Completed: [[::1]:63150] 200 GET /identity (2 live) #342 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:14:03.526 [281473036165344] DEBUG - Request: [[::1]:63166 (Loopback)] GET /identity (2 live) #345
+Dec 06, 2025 00:14:03.526 [281473087418592] DEBUG - Completed: [[::1]:63166] 200 GET /identity (2 live) #345 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:14:08.588 [281473036165344] DEBUG - Request: [[::1]:57650 (Loopback)] GET /identity (2 live) #348
+Dec 06, 2025 00:14:08.588 [281473089528032] DEBUG - Completed: [[::1]:57650] 200 GET /identity (2 live) #348 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:14:13.649 [281473036165344] DEBUG - Request: [[::1]:57652 (Loopback)] GET /identity (2 live) #34b
+Dec 06, 2025 00:14:13.649 [281473089528032] DEBUG - Completed: [[::1]:57652] 200 GET /identity (2 live) #34b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:14:18.695 [281473036165344] DEBUG - Request: [[::1]:61478 (Loopback)] GET /identity (2 live) #34e
+Dec 06, 2025 00:14:18.695 [281473087418592] DEBUG - Completed: [[::1]:61478] 200 GET /identity (2 live) #34e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:14:23.762 [281473036165344] DEBUG - Request: [[::1]:61494 (Loopback)] GET /identity (2 live) #351
+Dec 06, 2025 00:14:23.762 [281473089528032] DEBUG - Completed: [[::1]:61494] 200 GET /identity (2 live) #351 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:14:28.805 [281473036165344] DEBUG - Request: [[::1]:62034 (Loopback)] GET /identity (2 live) #354
+Dec 06, 2025 00:14:28.805 [281473089528032] DEBUG - Completed: [[::1]:62034] 200 GET /identity (2 live) #354 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:14:33.880 [281473036165344] DEBUG - Request: [[::1]:62038 (Loopback)] GET /identity (2 live) #357
+Dec 06, 2025 00:14:33.881 [281473087418592] DEBUG - Completed: [[::1]:62038] 200 GET /identity (2 live) #357 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:14:38.944 [281473036165344] DEBUG - Request: [[::1]:64920 (Loopback)] GET /identity (2 live) #35a
+Dec 06, 2025 00:14:38.944 [281473087418592] DEBUG - Completed: [[::1]:64920] 200 GET /identity (2 live) #35a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:14:43.990 [281473036165344] DEBUG - Request: [[::1]:64936 (Loopback)] GET /identity (2 live) #35d
+Dec 06, 2025 00:14:43.990 [281473089528032] DEBUG - Completed: [[::1]:64936] 200 GET /identity (2 live) #35d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:14:49.037 [281473036165344] DEBUG - Request: [[::1]:64188 (Loopback)] GET /identity (2 live) #360
+Dec 06, 2025 00:14:49.037 [281473089528032] DEBUG - Completed: [[::1]:64188] 200 GET /identity (2 live) #360 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:14:54.085 [281473036165344] DEBUG - Request: [[::1]:64200 (Loopback)] GET /identity (2 live) #363
+Dec 06, 2025 00:14:54.085 [281473089528032] DEBUG - Completed: [[::1]:64200] 200 GET /identity (2 live) #363 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:14:59.143 [281473036165344] DEBUG - Request: [[::1]:61938 (Loopback)] GET /identity (2 live) #366
+Dec 06, 2025 00:14:59.143 [281473087418592] DEBUG - Completed: [[::1]:61938] 200 GET /identity (2 live) #366 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:15:04.202 [281473036165344] DEBUG - Request: [[::1]:61954 (Loopback)] GET /identity (2 live) #369
+Dec 06, 2025 00:15:04.202 [281473089528032] DEBUG - Completed: [[::1]:61954] 200 GET /identity (2 live) #369 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:15:09.277 [281473036165344] DEBUG - Request: [[::1]:64434 (Loopback)] GET /identity (2 live) #36c
+Dec 06, 2025 00:15:09.277 [281473089528032] DEBUG - Completed: [[::1]:64434] 200 GET /identity (2 live) #36c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:15:14.336 [281473036165344] DEBUG - Request: [[::1]:64442 (Loopback)] GET /identity (2 live) #36f
+Dec 06, 2025 00:15:14.336 [281473087418592] DEBUG - Completed: [[::1]:64442] 200 GET /identity (2 live) #36f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:15:19.395 [281473036165344] DEBUG - Request: [[::1]:55688 (Loopback)] GET /identity (2 live) #372
+Dec 06, 2025 00:15:19.395 [281473089528032] DEBUG - Completed: [[::1]:55688] 200 GET /identity (2 live) #372 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:15:24.458 [281473036165344] DEBUG - Request: [[::1]:55698 (Loopback)] GET /identity (2 live) #375
+Dec 06, 2025 00:15:24.458 [281473087418592] DEBUG - Completed: [[::1]:55698] 200 GET /identity (2 live) #375 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:15:29.515 [281473036165344] DEBUG - Request: [[::1]:59444 (Loopback)] GET /identity (2 live) #378
+Dec 06, 2025 00:15:29.515 [281473089528032] DEBUG - Completed: [[::1]:59444] 200 GET /identity (2 live) #378 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:15:34.573 [281473036165344] DEBUG - Request: [[::1]:59446 (Loopback)] GET /identity (2 live) #37b
+Dec 06, 2025 00:15:34.573 [281473087418592] DEBUG - Completed: [[::1]:59446] 200 GET /identity (2 live) #37b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:15:39.648 [281473036165344] DEBUG - Request: [[::1]:57246 (Loopback)] GET /identity (2 live) #37e
+Dec 06, 2025 00:15:39.648 [281473089528032] DEBUG - Completed: [[::1]:57246] 200 GET /identity (2 live) #37e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:15:44.713 [281473036165344] DEBUG - Request: [[::1]:57248 (Loopback)] GET /identity (2 live) #381
+Dec 06, 2025 00:15:44.713 [281473087418592] DEBUG - Completed: [[::1]:57248] 200 GET /identity (2 live) #381 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:15:49.762 [281473036165344] DEBUG - Request: [[::1]:55950 (Loopback)] GET /identity (2 live) #384
+Dec 06, 2025 00:15:49.762 [281473089528032] DEBUG - Completed: [[::1]:55950] 200 GET /identity (2 live) #384 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:15:54.816 [281473036165344] DEBUG - Request: [[::1]:55958 (Loopback)] GET /identity (2 live) #387
+Dec 06, 2025 00:15:54.816 [281473089528032] DEBUG - Completed: [[::1]:55958] 200 GET /identity (2 live) #387 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:15:59.871 [281473036165344] DEBUG - Request: [[::1]:55250 (Loopback)] GET /identity (2 live) #38a
+Dec 06, 2025 00:15:59.871 [281473087418592] DEBUG - Completed: [[::1]:55250] 200 GET /identity (2 live) #38a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:16:04.928 [281473036165344] DEBUG - Request: [[::1]:55262 (Loopback)] GET /identity (2 live) #38d
+Dec 06, 2025 00:16:04.928 [281473089528032] DEBUG - Completed: [[::1]:55262] 200 GET /identity (2 live) #38d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:16:09.994 [281473036165344] DEBUG - Request: [[::1]:65252 (Loopback)] GET /identity (2 live) #390
+Dec 06, 2025 00:16:09.994 [281473089528032] DEBUG - Completed: [[::1]:65252] 200 GET /identity (2 live) #390 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:16:15.055 [281473036165344] DEBUG - Request: [[::1]:65256 (Loopback)] GET /identity (2 live) #393
+Dec 06, 2025 00:16:15.055 [281473087418592] DEBUG - Completed: [[::1]:65256] 200 GET /identity (2 live) #393 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:16:20.121 [281473036165344] DEBUG - Request: [[::1]:57660 (Loopback)] GET /identity (2 live) #396
+Dec 06, 2025 00:16:20.121 [281473089528032] DEBUG - Completed: [[::1]:57660] 200 GET /identity (2 live) #396 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:16:25.178 [281473036165344] DEBUG - Request: [[::1]:57688 (Loopback)] GET /identity (2 live) #399
+Dec 06, 2025 00:16:25.178 [281473087418592] DEBUG - Completed: [[::1]:57688] 200 GET /identity (2 live) #399 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:16:30.254 [281473036165344] DEBUG - Request: [[::1]:57702 (Loopback)] GET /identity (2 live) #39c
+Dec 06, 2025 00:16:30.254 [281473089528032] DEBUG - Completed: [[::1]:57702] 200 GET /identity (2 live) #39c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:16:35.331 [281473036165344] DEBUG - Request: [[::1]:59346 (Loopback)] GET /identity (2 live) #39f
+Dec 06, 2025 00:16:35.331 [281473087418592] DEBUG - Completed: [[::1]:59346] 200 GET /identity (2 live) #39f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:16:40.397 [281473036165344] DEBUG - Request: [[::1]:59362 (Loopback)] GET /identity (2 live) #3a2
+Dec 06, 2025 00:16:40.397 [281473089528032] DEBUG - Completed: [[::1]:59362] 200 GET /identity (2 live) #3a2 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:16:45.464 [281473036165344] DEBUG - Request: [[::1]:57300 (Loopback)] GET /identity (2 live) #3a5
+Dec 06, 2025 00:16:45.464 [281473089528032] DEBUG - Completed: [[::1]:57300] 200 GET /identity (2 live) #3a5 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:16:50.522 [281473036165344] DEBUG - Request: [[::1]:57316 (Loopback)] GET /identity (2 live) #3a8
+Dec 06, 2025 00:16:50.522 [281473089528032] DEBUG - Completed: [[::1]:57316] 200 GET /identity (2 live) #3a8 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:16:55.588 [281473036165344] DEBUG - Request: [[::1]:62468 (Loopback)] GET /identity (2 live) #3ab
+Dec 06, 2025 00:16:55.588 [281473087418592] DEBUG - Completed: [[::1]:62468] 200 GET /identity (2 live) #3ab 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:17:00.649 [281473036165344] DEBUG - Request: [[::1]:62480 (Loopback)] GET /identity (2 live) #3ae
+Dec 06, 2025 00:17:00.650 [281473089528032] DEBUG - Completed: [[::1]:62480] 200 GET /identity (2 live) #3ae 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:17:05.709 [281473036165344] DEBUG - Request: [[::1]:60492 (Loopback)] GET /identity (2 live) #3b1
+Dec 06, 2025 00:17:05.709 [281473089528032] DEBUG - Completed: [[::1]:60492] 200 GET /identity (2 live) #3b1 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:17:10.766 [281473036165344] DEBUG - Request: [[::1]:60506 (Loopback)] GET /identity (2 live) #3b4
+Dec 06, 2025 00:17:10.766 [281473087418592] DEBUG - Completed: [[::1]:60506] 200 GET /identity (2 live) #3b4 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:17:15.825 [281473036165344] DEBUG - Request: [[::1]:58614 (Loopback)] GET /identity (2 live) #3b7
+Dec 06, 2025 00:17:15.825 [281473089528032] DEBUG - Completed: [[::1]:58614] 200 GET /identity (2 live) #3b7 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:17:20.886 [281473036165344] DEBUG - Request: [[::1]:58624 (Loopback)] GET /identity (2 live) #3ba
+Dec 06, 2025 00:17:20.887 [281473087418592] DEBUG - Completed: [[::1]:58624] 200 GET /identity (2 live) #3ba 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:17:21.162 [281473047187680] DEBUG - [HCl#77] HTTP requesting GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:17:21.615 [281473070588128] DEBUG - [HttpClient/HCl#77] HTTP/1.1 (0.5s) 200 response from GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:17:21.622 [281473047187680] DEBUG - [HCl#78] HTTP requesting GET https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:17:21.757 [281473070588128] DEBUG - [HttpClient/HCl#78] HTTP/1.1 (0.1s) 401 response from GET https://plex.tv/api/v2/server/users/features (reused)
+Dec 06, 2025 00:17:21.757 [281473059950816] ERROR - MyPlex: Error 401 requesting JSON from: https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:17:21.758 [281473047187680] WARN - FeatureManager: Couldn't get features. Trying again soon.
+Dec 06, 2025 00:17:25.938 [281473036165344] DEBUG - Request: [[::1]:59144 (Loopback)] GET /identity (2 live) #3bd
+Dec 06, 2025 00:17:25.938 [281473089528032] DEBUG - Completed: [[::1]:59144] 200 GET /identity (2 live) #3bd 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:17:30.989 [281473036165344] DEBUG - Request: [[::1]:59146 (Loopback)] GET /identity (2 live) #3c0
+Dec 06, 2025 00:17:30.989 [281473087418592] DEBUG - Completed: [[::1]:59146] 200 GET /identity (2 live) #3c0 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:17:36.036 [281473036165344] DEBUG - Request: [[::1]:61822 (Loopback)] GET /identity (2 live) #3c3
+Dec 06, 2025 00:17:36.037 [281473087418592] DEBUG - Completed: [[::1]:61822] 200 GET /identity (2 live) #3c3 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:17:41.078 [281473036165344] DEBUG - Request: [[::1]:61836 (Loopback)] GET /identity (2 live) #3c6
+Dec 06, 2025 00:17:41.078 [281473089528032] DEBUG - Completed: [[::1]:61836] 200 GET /identity (2 live) #3c6 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:17:46.131 [281473036165344] DEBUG - Request: [[::1]:63652 (Loopback)] GET /identity (2 live) #3c9
+Dec 06, 2025 00:17:46.131 [281473087418592] DEBUG - Completed: [[::1]:63652] 200 GET /identity (2 live) #3c9 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:17:51.190 [281473036165344] DEBUG - Request: [[::1]:63664 (Loopback)] GET /identity (2 live) #3cc
+Dec 06, 2025 00:17:51.190 [281473089528032] DEBUG - Completed: [[::1]:63664] 200 GET /identity (2 live) #3cc 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:17:56.250 [281473036165344] DEBUG - Request: [[::1]:65510 (Loopback)] GET /identity (2 live) #3cf
+Dec 06, 2025 00:17:56.251 [281473087418592] DEBUG - Completed: [[::1]:65510] 200 GET /identity (2 live) #3cf 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:18:01.309 [281473036165344] DEBUG - Request: [[::1]:65512 (Loopback)] GET /identity (2 live) #3d2
+Dec 06, 2025 00:18:01.309 [281473087418592] DEBUG - Completed: [[::1]:65512] 200 GET /identity (2 live) #3d2 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:18:06.371 [281473036165344] DEBUG - Request: [[::1]:62996 (Loopback)] GET /identity (2 live) #3d5
+Dec 06, 2025 00:18:06.371 [281473089528032] DEBUG - Completed: [[::1]:62996] 200 GET /identity (2 live) #3d5 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:18:11.434 [281473036165344] DEBUG - Request: [[::1]:63002 (Loopback)] GET /identity (2 live) #3d8
+Dec 06, 2025 00:18:11.434 [281473087418592] DEBUG - Completed: [[::1]:63002] 200 GET /identity (2 live) #3d8 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:18:16.498 [281473036165344] DEBUG - Request: [[::1]:60018 (Loopback)] GET /identity (2 live) #3db
+Dec 06, 2025 00:18:16.498 [281473089528032] DEBUG - Completed: [[::1]:60018] 200 GET /identity (2 live) #3db 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:18:21.567 [281473036165344] DEBUG - Request: [[::1]:60026 (Loopback)] GET /identity (2 live) #3de
+Dec 06, 2025 00:18:21.567 [281473089528032] DEBUG - Completed: [[::1]:60026] 200 GET /identity (2 live) #3de 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:18:26.645 [281473036165344] DEBUG - Request: [[::1]:61076 (Loopback)] GET /identity (2 live) #3e1
+Dec 06, 2025 00:18:26.645 [281473087418592] DEBUG - Completed: [[::1]:61076] 200 GET /identity (2 live) #3e1 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:18:31.721 [281473036165344] DEBUG - Request: [[::1]:61088 (Loopback)] GET /identity (2 live) #3e4
+Dec 06, 2025 00:18:31.721 [281473089528032] DEBUG - Completed: [[::1]:61088] 200 GET /identity (2 live) #3e4 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:18:36.779 [281473036165344] DEBUG - Request: [[::1]:57752 (Loopback)] GET /identity (2 live) #3e7
+Dec 06, 2025 00:18:36.779 [281473087418592] DEBUG - Completed: [[::1]:57752] 200 GET /identity (2 live) #3e7 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:18:41.840 [281473036165344] DEBUG - Request: [[::1]:57762 (Loopback)] GET /identity (2 live) #3ea
+Dec 06, 2025 00:18:41.841 [281473087418592] DEBUG - Completed: [[::1]:57762] 200 GET /identity (2 live) #3ea 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:18:46.900 [281473036165344] DEBUG - Request: [[::1]:56330 (Loopback)] GET /identity (2 live) #3ed
+Dec 06, 2025 00:18:46.900 [281473087418592] DEBUG - Completed: [[::1]:56330] 200 GET /identity (2 live) #3ed 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:18:51.954 [281473036165344] DEBUG - Request: [[::1]:56344 (Loopback)] GET /identity (2 live) #3f0
+Dec 06, 2025 00:18:51.954 [281473089528032] DEBUG - Completed: [[::1]:56344] 200 GET /identity (2 live) #3f0 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:18:57.021 [281473036165344] DEBUG - Request: [[::1]:62002 (Loopback)] GET /identity (2 live) #3f3
+Dec 06, 2025 00:18:57.022 [281473089528032] DEBUG - Completed: [[::1]:62002] 200 GET /identity (2 live) #3f3 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:19:02.086 [281473036165344] DEBUG - Request: [[::1]:62016 (Loopback)] GET /identity (2 live) #3f6
+Dec 06, 2025 00:19:02.086 [281473087418592] DEBUG - Completed: [[::1]:62016] 200 GET /identity (2 live) #3f6 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:19:07.156 [281473036165344] DEBUG - Request: [[::1]:58208 (Loopback)] GET /identity (2 live) #3f9
+Dec 06, 2025 00:19:07.156 [281473089528032] DEBUG - Completed: [[::1]:58208] 200 GET /identity (2 live) #3f9 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:19:12.218 [281473036165344] DEBUG - Request: [[::1]:58212 (Loopback)] GET /identity (2 live) #3fc
+Dec 06, 2025 00:19:12.218 [281473089528032] DEBUG - Completed: [[::1]:58212] 200 GET /identity (2 live) #3fc 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:19:17.280 [281473036165344] DEBUG - Request: [[::1]:65498 (Loopback)] GET /identity (2 live) #3ff
+Dec 06, 2025 00:19:17.280 [281473089528032] DEBUG - Completed: [[::1]:65498] 200 GET /identity (2 live) #3ff 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:19:22.348 [281473036165344] DEBUG - Request: [[::1]:65506 (Loopback)] GET /identity (2 live) #402
+Dec 06, 2025 00:19:22.349 [281473087418592] DEBUG - Completed: [[::1]:65506] 200 GET /identity (2 live) #402 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:19:27.429 [281473036165344] DEBUG - Request: [[::1]:64212 (Loopback)] GET /identity (2 live) #405
+Dec 06, 2025 00:19:27.429 [281473089528032] DEBUG - Completed: [[::1]:64212] 200 GET /identity (2 live) #405 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:19:32.494 [281473036165344] DEBUG - Request: [[::1]:64218 (Loopback)] GET /identity (2 live) #408
+Dec 06, 2025 00:19:32.494 [281473087418592] DEBUG - Completed: [[::1]:64218] 200 GET /identity (2 live) #408 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:19:37.550 [281473036165344] DEBUG - Request: [[::1]:55182 (Loopback)] GET /identity (2 live) #40b
+Dec 06, 2025 00:19:37.550 [281473089528032] DEBUG - Completed: [[::1]:55182] 200 GET /identity (2 live) #40b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:19:42.618 [281473036165344] DEBUG - Request: [[::1]:55188 (Loopback)] GET /identity (2 live) #40e
+Dec 06, 2025 00:19:42.618 [281473087418592] DEBUG - Completed: [[::1]:55188] 200 GET /identity (2 live) #40e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:19:47.679 [281473036165344] DEBUG - Request: [[::1]:59232 (Loopback)] GET /identity (2 live) #411
+Dec 06, 2025 00:19:47.679 [281473089528032] DEBUG - Completed: [[::1]:59232] 200 GET /identity (2 live) #411 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:19:52.741 [281473036165344] DEBUG - Request: [[::1]:59234 (Loopback)] GET /identity (2 live) #414
+Dec 06, 2025 00:19:52.741 [281473087418592] DEBUG - Completed: [[::1]:59234] 200 GET /identity (2 live) #414 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:19:57.808 [281473036165344] DEBUG - Request: [[::1]:60876 (Loopback)] GET /identity (2 live) #417
+Dec 06, 2025 00:19:57.808 [281473089528032] DEBUG - Completed: [[::1]:60876] 200 GET /identity (2 live) #417 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:20:02.871 [281473036165344] DEBUG - Request: [[::1]:60878 (Loopback)] GET /identity (2 live) #41a
+Dec 06, 2025 00:20:02.871 [281473087418592] DEBUG - Completed: [[::1]:60878] 200 GET /identity (2 live) #41a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:20:07.937 [281473036165344] DEBUG - Request: [[::1]:64636 (Loopback)] GET /identity (2 live) #41d
+Dec 06, 2025 00:20:07.937 [281473089528032] DEBUG - Completed: [[::1]:64636] 200 GET /identity (2 live) #41d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:20:12.999 [281473036165344] DEBUG - Request: [[::1]:64642 (Loopback)] GET /identity (2 live) #420
+Dec 06, 2025 00:20:12.999 [281473087418592] DEBUG - Completed: [[::1]:64642] 200 GET /identity (2 live) #420 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:20:18.075 [281473036165344] DEBUG - Request: [[::1]:63096 (Loopback)] GET /identity (2 live) #423
+Dec 06, 2025 00:20:18.075 [281473087418592] DEBUG - Completed: [[::1]:63096] 200 GET /identity (2 live) #423 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:20:23.142 [281473036165344] DEBUG - Request: [[::1]:63112 (Loopback)] GET /identity (2 live) #426
+Dec 06, 2025 00:20:23.142 [281473089528032] DEBUG - Completed: [[::1]:63112] 200 GET /identity (2 live) #426 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:20:28.194 [281473036165344] DEBUG - Request: [[::1]:55124 (Loopback)] GET /identity (2 live) #429
+Dec 06, 2025 00:20:28.194 [281473087418592] DEBUG - Completed: [[::1]:55124] 200 GET /identity (2 live) #429 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:20:33.245 [281473036165344] DEBUG - Request: [[::1]:55138 (Loopback)] GET /identity (2 live) #42c
+Dec 06, 2025 00:20:33.245 [281473089528032] DEBUG - Completed: [[::1]:55138] 200 GET /identity (2 live) #42c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:20:38.325 [281473036165344] DEBUG - Request: [[::1]:59650 (Loopback)] GET /identity (2 live) #42f
+Dec 06, 2025 00:20:38.325 [281473089528032] DEBUG - Completed: [[::1]:59650] 200 GET /identity (2 live) #42f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:20:43.390 [281473036165344] DEBUG - Request: [[::1]:59658 (Loopback)] GET /identity (2 live) #432
+Dec 06, 2025 00:20:43.390 [281473087418592] DEBUG - Completed: [[::1]:59658] 200 GET /identity (2 live) #432 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:20:48.449 [281473036165344] DEBUG - Request: [[::1]:58240 (Loopback)] GET /identity (2 live) #435
+Dec 06, 2025 00:20:48.449 [281473089528032] DEBUG - Completed: [[::1]:58240] 200 GET /identity (2 live) #435 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:20:53.503 [281473036165344] DEBUG - Request: [[::1]:58248 (Loopback)] GET /identity (2 live) #438
+Dec 06, 2025 00:20:53.503 [281473089528032] DEBUG - Completed: [[::1]:58248] 200 GET /identity (2 live) #438 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:20:58.567 [281473036165344] DEBUG - Request: [[::1]:63878 (Loopback)] GET /identity (2 live) #43b
+Dec 06, 2025 00:20:58.567 [281473087418592] DEBUG - Completed: [[::1]:63878] 200 GET /identity (2 live) #43b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:21:03.635 [281473036165344] DEBUG - Request: [[::1]:63894 (Loopback)] GET /identity (2 live) #43e
+Dec 06, 2025 00:21:03.636 [281473089528032] DEBUG - Completed: [[::1]:63894] 200 GET /identity (2 live) #43e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:21:08.698 [281473036165344] DEBUG - Request: [[::1]:61118 (Loopback)] GET /identity (2 live) #441
+Dec 06, 2025 00:21:08.698 [281473087418592] DEBUG - Completed: [[::1]:61118] 200 GET /identity (2 live) #441 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:21:13.746 [281473036165344] DEBUG - Request: [[::1]:61124 (Loopback)] GET /identity (2 live) #444
+Dec 06, 2025 00:21:13.746 [281473089528032] DEBUG - Completed: [[::1]:61124] 200 GET /identity (2 live) #444 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:21:18.795 [281473036165344] DEBUG - Request: [[::1]:62636 (Loopback)] GET /identity (2 live) #447
+Dec 06, 2025 00:21:18.796 [281473087418592] DEBUG - Completed: [[::1]:62636] 200 GET /identity (2 live) #447 1ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:21:23.862 [281473036165344] DEBUG - Request: [[::1]:62642 (Loopback)] GET /identity (2 live) #44a
+Dec 06, 2025 00:21:23.863 [281473087418592] DEBUG - Completed: [[::1]:62642] 200 GET /identity (2 live) #44a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:21:28.926 [281473036165344] DEBUG - Request: [[::1]:57154 (Loopback)] GET /identity (2 live) #44d
+Dec 06, 2025 00:21:28.926 [281473089528032] DEBUG - Completed: [[::1]:57154] 200 GET /identity (2 live) #44d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:21:33.974 [281473036165344] DEBUG - Request: [[::1]:57156 (Loopback)] GET /identity (2 live) #450
+Dec 06, 2025 00:21:33.974 [281473087418592] DEBUG - Completed: [[::1]:57156] 200 GET /identity (2 live) #450 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:21:39.030 [281473036165344] DEBUG - Request: [[::1]:58390 (Loopback)] GET /identity (2 live) #453
+Dec 06, 2025 00:21:39.030 [281473087418592] DEBUG - Completed: [[::1]:58390] 200 GET /identity (2 live) #453 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:21:44.084 [281473036165344] DEBUG - Request: [[::1]:58398 (Loopback)] GET /identity (2 live) #456
+Dec 06, 2025 00:21:44.084 [281473087418592] DEBUG - Completed: [[::1]:58398] 200 GET /identity (2 live) #456 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:21:49.150 [281473036165344] DEBUG - Request: [[::1]:61050 (Loopback)] GET /identity (2 live) #459
+Dec 06, 2025 00:21:49.151 [281473089528032] DEBUG - Completed: [[::1]:61050] 200 GET /identity (2 live) #459 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:21:54.222 [281473036165344] DEBUG - Request: [[::1]:61062 (Loopback)] GET /identity (2 live) #45c
+Dec 06, 2025 00:21:54.222 [281473087418592] DEBUG - Completed: [[::1]:61062] 200 GET /identity (2 live) #45c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:21:59.285 [281473036165344] DEBUG - Request: [[::1]:61594 (Loopback)] GET /identity (2 live) #45f
+Dec 06, 2025 00:21:59.286 [281473087418592] DEBUG - Completed: [[::1]:61594] 200 GET /identity (2 live) #45f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:22:04.350 [281473036165344] DEBUG - Request: [[::1]:61606 (Loopback)] GET /identity (2 live) #462
+Dec 06, 2025 00:22:04.350 [281473089528032] DEBUG - Completed: [[::1]:61606] 200 GET /identity (2 live) #462 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:22:09.408 [281473036165344] DEBUG - Request: [[::1]:62242 (Loopback)] GET /identity (2 live) #465
+Dec 06, 2025 00:22:09.408 [281473087418592] DEBUG - Completed: [[::1]:62242] 200 GET /identity (2 live) #465 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:22:14.479 [281473036165344] DEBUG - Request: [[::1]:62252 (Loopback)] GET /identity (2 live) #468
+Dec 06, 2025 00:22:14.480 [281473089528032] DEBUG - Completed: [[::1]:62252] 200 GET /identity (2 live) #468 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:22:19.543 [281473036165344] DEBUG - Request: [[::1]:61782 (Loopback)] GET /identity (2 live) #46b
+Dec 06, 2025 00:22:19.543 [281473087418592] DEBUG - Completed: [[::1]:61782] 200 GET /identity (2 live) #46b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:22:21.761 [281473051414752] DEBUG - [HCl#79] HTTP requesting GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:22:22.181 [281473070588128] DEBUG - [HttpClient/HCl#79] HTTP/1.1 (0.4s) 200 response from GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:22:22.187 [281473051414752] DEBUG - [HCl#7a] HTTP requesting GET https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:22:22.323 [281473070588128] DEBUG - [HttpClient/HCl#7a] HTTP/1.1 (0.1s) 401 response from GET https://plex.tv/api/v2/server/users/features (reused)
+Dec 06, 2025 00:22:22.323 [281473059950816] ERROR - MyPlex: Error 401 requesting JSON from: https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:22:22.323 [281473051414752] WARN - FeatureManager: Couldn't get features. Trying again soon.
+Dec 06, 2025 00:22:24.600 [281473036165344] DEBUG - Request: [[::1]:61798 (Loopback)] GET /identity (2 live) #46e
+Dec 06, 2025 00:22:24.600 [281473087418592] DEBUG - Completed: [[::1]:61798] 200 GET /identity (2 live) #46e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:22:29.666 [281473036165344] DEBUG - Request: [[::1]:63014 (Loopback)] GET /identity (2 live) #471
+Dec 06, 2025 00:22:29.666 [281473089528032] DEBUG - Completed: [[::1]:63014] 200 GET /identity (2 live) #471 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:22:34.727 [281473036165344] DEBUG - Request: [[::1]:63018 (Loopback)] GET /identity (2 live) #474
+Dec 06, 2025 00:22:34.727 [281473087418592] DEBUG - Completed: [[::1]:63018] 200 GET /identity (2 live) #474 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:22:39.772 [281473036165344] DEBUG - Request: [[::1]:60394 (Loopback)] GET /identity (2 live) #477
+Dec 06, 2025 00:22:39.773 [281473087418592] DEBUG - Completed: [[::1]:60394] 200 GET /identity (2 live) #477 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:22:44.836 [281473036165344] DEBUG - Request: [[::1]:60410 (Loopback)] GET /identity (2 live) #47a
+Dec 06, 2025 00:22:44.837 [281473089528032] DEBUG - Completed: [[::1]:60410] 200 GET /identity (2 live) #47a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:22:49.892 [281473036165344] DEBUG - Request: [[::1]:62474 (Loopback)] GET /identity (2 live) #47d
+Dec 06, 2025 00:22:49.893 [281473087418592] DEBUG - Completed: [[::1]:62474] 200 GET /identity (2 live) #47d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:22:54.961 [281473036165344] DEBUG - Request: [[::1]:62482 (Loopback)] GET /identity (2 live) #480
+Dec 06, 2025 00:22:54.962 [281473089528032] DEBUG - Completed: [[::1]:62482] 200 GET /identity (2 live) #480 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:23:00.025 [281473036165344] DEBUG - Request: [[::1]:57728 (Loopback)] GET /identity (2 live) #483
+Dec 06, 2025 00:23:00.026 [281473087418592] DEBUG - Completed: [[::1]:57728] 200 GET /identity (2 live) #483 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:23:05.084 [281473036165344] DEBUG - Request: [[::1]:57744 (Loopback)] GET /identity (2 live) #486
+Dec 06, 2025 00:23:05.085 [281473089528032] DEBUG - Completed: [[::1]:57744] 200 GET /identity (2 live) #486 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:23:10.145 [281473036165344] DEBUG - Request: [[::1]:64694 (Loopback)] GET /identity (2 live) #489
+Dec 06, 2025 00:23:10.145 [281473087418592] DEBUG - Completed: [[::1]:64694] 200 GET /identity (2 live) #489 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:23:15.206 [281473036165344] DEBUG - Request: [[::1]:59692 (Loopback)] GET /identity (2 live) #48c
+Dec 06, 2025 00:23:15.206 [281473087418592] DEBUG - Completed: [[::1]:59692] 200 GET /identity (2 live) #48c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:23:20.268 [281473036165344] DEBUG - Request: [[::1]:59696 (Loopback)] GET /identity (2 live) #48f
+Dec 06, 2025 00:23:20.268 [281473089528032] DEBUG - Completed: [[::1]:59696] 200 GET /identity (2 live) #48f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:23:25.329 [281473036165344] DEBUG - Request: [[::1]:61148 (Loopback)] GET /identity (2 live) #492
+Dec 06, 2025 00:23:25.330 [281473089528032] DEBUG - Completed: [[::1]:61148] 200 GET /identity (2 live) #492 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:23:30.380 [281473036165344] DEBUG - Request: [[::1]:61154 (Loopback)] GET /identity (2 live) #495
+Dec 06, 2025 00:23:30.380 [281473087418592] DEBUG - Completed: [[::1]:61154] 200 GET /identity (2 live) #495 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:23:35.435 [281473036165344] DEBUG - Request: [[::1]:58766 (Loopback)] GET /identity (2 live) #498
+Dec 06, 2025 00:23:35.436 [281473087418592] DEBUG - Completed: [[::1]:58766] 200 GET /identity (2 live) #498 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:23:40.500 [281473036165344] DEBUG - Request: [[::1]:58782 (Loopback)] GET /identity (2 live) #49b
+Dec 06, 2025 00:23:40.501 [281473087418592] DEBUG - Completed: [[::1]:58782] 200 GET /identity (2 live) #49b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:23:45.555 [281473036165344] DEBUG - Request: [[::1]:58154 (Loopback)] GET /identity (2 live) #49e
+Dec 06, 2025 00:23:45.555 [281473089528032] DEBUG - Completed: [[::1]:58154] 200 GET /identity (2 live) #49e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:23:50.612 [281473036165344] DEBUG - Request: [[::1]:58166 (Loopback)] GET /identity (2 live) #4a1
+Dec 06, 2025 00:23:50.612 [281473087418592] DEBUG - Completed: [[::1]:58166] 200 GET /identity (2 live) #4a1 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:23:55.671 [281473036165344] DEBUG - Request: [[::1]:55120 (Loopback)] GET /identity (2 live) #4a4
+Dec 06, 2025 00:23:55.672 [281473087418592] DEBUG - Completed: [[::1]:55120] 200 GET /identity (2 live) #4a4 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:24:00.725 [281473036165344] DEBUG - Request: [[::1]:55132 (Loopback)] GET /identity (2 live) #4a7
+Dec 06, 2025 00:24:00.725 [281473089528032] DEBUG - Completed: [[::1]:55132] 200 GET /identity (2 live) #4a7 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:24:05.783 [281473036165344] DEBUG - Request: [[::1]:59668 (Loopback)] GET /identity (2 live) #4aa
+Dec 06, 2025 00:24:05.783 [281473087418592] DEBUG - Completed: [[::1]:59668] 200 GET /identity (2 live) #4aa 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:24:10.845 [281473036165344] DEBUG - Request: [[::1]:59678 (Loopback)] GET /identity (2 live) #4ad
+Dec 06, 2025 00:24:10.845 [281473089528032] DEBUG - Completed: [[::1]:59678] 200 GET /identity (2 live) #4ad 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:24:15.911 [281473036165344] DEBUG - Request: [[::1]:64608 (Loopback)] GET /identity (2 live) #4b0
+Dec 06, 2025 00:24:15.911 [281473089528032] DEBUG - Completed: [[::1]:64608] 200 GET /identity (2 live) #4b0 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:24:20.974 [281473036165344] DEBUG - Request: [[::1]:64614 (Loopback)] GET /identity (2 live) #4b3
+Dec 06, 2025 00:24:20.974 [281473087418592] DEBUG - Completed: [[::1]:64614] 200 GET /identity (2 live) #4b3 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:24:26.040 [281473036165344] DEBUG - Request: [[::1]:64632 (Loopback)] GET /identity (2 live) #4b6
+Dec 06, 2025 00:24:26.041 [281473089528032] DEBUG - Completed: [[::1]:64632] 200 GET /identity (2 live) #4b6 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:24:31.104 [281473036165344] DEBUG - Request: [[::1]:64636 (Loopback)] GET /identity (2 live) #4b9
+Dec 06, 2025 00:24:31.104 [281473087418592] DEBUG - Completed: [[::1]:64636] 200 GET /identity (2 live) #4b9 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:24:36.158 [281473036165344] DEBUG - Request: [[::1]:60584 (Loopback)] GET /identity (2 live) #4bc
+Dec 06, 2025 00:24:36.158 [281473089528032] DEBUG - Completed: [[::1]:60584] 200 GET /identity (2 live) #4bc 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:24:41.213 [281473036165344] DEBUG - Request: [[::1]:60596 (Loopback)] GET /identity (2 live) #4bf
+Dec 06, 2025 00:24:41.214 [281473089528032] DEBUG - Completed: [[::1]:60596] 200 GET /identity (2 live) #4bf 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:24:46.284 [281473036165344] DEBUG - Request: [[::1]:62660 (Loopback)] GET /identity (2 live) #4c2
+Dec 06, 2025 00:24:46.284 [281473089528032] DEBUG - Completed: [[::1]:62660] 200 GET /identity (2 live) #4c2 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:24:51.350 [281473036165344] DEBUG - Request: [[::1]:62674 (Loopback)] GET /identity (2 live) #4c5
+Dec 06, 2025 00:24:51.350 [281473087418592] DEBUG - Completed: [[::1]:62674] 200 GET /identity (2 live) #4c5 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:24:56.408 [281473036165344] DEBUG - Request: [[::1]:63522 (Loopback)] GET /identity (2 live) #4c8
+Dec 06, 2025 00:24:56.408 [281473089528032] DEBUG - Completed: [[::1]:63522] 200 GET /identity (2 live) #4c8 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:25:01.467 [281473036165344] DEBUG - Request: [[::1]:63536 (Loopback)] GET /identity (2 live) #4cb
+Dec 06, 2025 00:25:01.467 [281473087418592] DEBUG - Completed: [[::1]:63536] 200 GET /identity (2 live) #4cb 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:25:06.533 [281473036165344] DEBUG - Request: [[::1]:64894 (Loopback)] GET /identity (2 live) #4ce
+Dec 06, 2025 00:25:06.533 [281473089528032] DEBUG - Completed: [[::1]:64894] 200 GET /identity (2 live) #4ce 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:25:11.602 [281473036165344] DEBUG - Request: [[::1]:64900 (Loopback)] GET /identity (2 live) #4d1
+Dec 06, 2025 00:25:11.602 [281473087418592] DEBUG - Completed: [[::1]:64900] 200 GET /identity (2 live) #4d1 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:25:16.663 [281473036165344] DEBUG - Request: [[::1]:55674 (Loopback)] GET /identity (2 live) #4d4
+Dec 06, 2025 00:25:16.664 [281473087418592] DEBUG - Completed: [[::1]:55674] 200 GET /identity (2 live) #4d4 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:25:21.727 [281473036165344] DEBUG - Request: [[::1]:55688 (Loopback)] GET /identity (2 live) #4d7
+Dec 06, 2025 00:25:21.728 [281473089528032] DEBUG - Completed: [[::1]:55688] 200 GET /identity (2 live) #4d7 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:25:26.792 [281473036165344] DEBUG - Request: [[::1]:55932 (Loopback)] GET /identity (2 live) #4da
+Dec 06, 2025 00:25:26.792 [281473089528032] DEBUG - Completed: [[::1]:55932] 200 GET /identity (2 live) #4da 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:25:31.863 [281473036165344] DEBUG - Request: [[::1]:55944 (Loopback)] GET /identity (2 live) #4dd
+Dec 06, 2025 00:25:31.864 [281473089528032] DEBUG - Completed: [[::1]:55944] 200 GET /identity (2 live) #4dd 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:25:36.917 [281473036165344] DEBUG - Request: [[::1]:56792 (Loopback)] GET /identity (2 live) #4e0
+Dec 06, 2025 00:25:36.917 [281473087418592] DEBUG - Completed: [[::1]:56792] 200 GET /identity (2 live) #4e0 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:25:41.978 [281473036165344] DEBUG - Request: [[::1]:56794 (Loopback)] GET /identity (2 live) #4e3
+Dec 06, 2025 00:25:41.978 [281473089528032] DEBUG - Completed: [[::1]:56794] 200 GET /identity (2 live) #4e3 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:25:47.050 [281473036165344] DEBUG - Request: [[::1]:64496 (Loopback)] GET /identity (2 live) #4e6
+Dec 06, 2025 00:25:47.050 [281473089528032] DEBUG - Completed: [[::1]:64496] 200 GET /identity (2 live) #4e6 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:25:52.110 [281473036165344] DEBUG - Request: [[::1]:64502 (Loopback)] GET /identity (2 live) #4e9
+Dec 06, 2025 00:25:52.110 [281473087418592] DEBUG - Completed: [[::1]:64502] 200 GET /identity (2 live) #4e9 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:25:57.184 [281473036165344] DEBUG - Request: [[::1]:64668 (Loopback)] GET /identity (2 live) #4ec
+Dec 06, 2025 00:25:57.184 [281473089528032] DEBUG - Completed: [[::1]:64668] 200 GET /identity (2 live) #4ec 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:26:02.254 [281473036165344] DEBUG - Request: [[::1]:64678 (Loopback)] GET /identity (2 live) #4ef
+Dec 06, 2025 00:26:02.254 [281473087418592] DEBUG - Completed: [[::1]:64678] 200 GET /identity (2 live) #4ef 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:26:07.320 [281473036165344] DEBUG - Request: [[::1]:62892 (Loopback)] GET /identity (2 live) #4f2
+Dec 06, 2025 00:26:07.320 [281473089528032] DEBUG - Completed: [[::1]:62892] 200 GET /identity (2 live) #4f2 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:26:12.384 [281473036165344] DEBUG - Request: [[::1]:62894 (Loopback)] GET /identity (2 live) #4f5
+Dec 06, 2025 00:26:12.384 [281473087418592] DEBUG - Completed: [[::1]:62894] 200 GET /identity (2 live) #4f5 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:26:17.453 [281473036165344] DEBUG - Request: [[::1]:59306 (Loopback)] GET /identity (2 live) #4f8
+Dec 06, 2025 00:26:17.453 [281473087418592] DEBUG - Completed: [[::1]:59306] 200 GET /identity (2 live) #4f8 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:26:22.516 [281473036165344] DEBUG - Request: [[::1]:59312 (Loopback)] GET /identity (2 live) #4fb
+Dec 06, 2025 00:26:22.516 [281473089528032] DEBUG - Completed: [[::1]:59312] 200 GET /identity (2 live) #4fb 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:26:27.587 [281473036165344] DEBUG - Request: [[::1]:64204 (Loopback)] GET /identity (2 live) #4fe
+Dec 06, 2025 00:26:27.587 [281473089528032] DEBUG - Completed: [[::1]:64204] 200 GET /identity (2 live) #4fe 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:26:32.646 [281473036165344] DEBUG - Request: [[::1]:64208 (Loopback)] GET /identity (2 live) #501
+Dec 06, 2025 00:26:32.646 [281473087418592] DEBUG - Completed: [[::1]:64208] 200 GET /identity (2 live) #501 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:26:37.709 [281473036165344] DEBUG - Request: [[::1]:56228 (Loopback)] GET /identity (2 live) #504
+Dec 06, 2025 00:26:37.709 [281473089528032] DEBUG - Completed: [[::1]:56228] 200 GET /identity (2 live) #504 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:26:42.775 [281473036165344] DEBUG - Request: [[::1]:56242 (Loopback)] GET /identity (2 live) #507
+Dec 06, 2025 00:26:42.775 [281473087418592] DEBUG - Completed: [[::1]:56242] 200 GET /identity (2 live) #507 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:26:47.836 [281473036165344] DEBUG - Request: [[::1]:55378 (Loopback)] GET /identity (2 live) #50a
+Dec 06, 2025 00:26:47.836 [281473087418592] DEBUG - Completed: [[::1]:55378] 200 GET /identity (2 live) #50a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:26:52.885 [281473036165344] DEBUG - Request: [[::1]:55392 (Loopback)] GET /identity (2 live) #50d
+Dec 06, 2025 00:26:52.885 [281473089528032] DEBUG - Completed: [[::1]:55392] 200 GET /identity (2 live) #50d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:26:57.939 [281473036165344] DEBUG - Request: [[::1]:62158 (Loopback)] GET /identity (2 live) #510
+Dec 06, 2025 00:26:57.939 [281473089528032] DEBUG - Completed: [[::1]:62158] 200 GET /identity (2 live) #510 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:27:02.998 [281473036165344] DEBUG - Request: [[::1]:62164 (Loopback)] GET /identity (2 live) #513
+Dec 06, 2025 00:27:02.998 [281473089528032] DEBUG - Completed: [[::1]:62164] 200 GET /identity (2 live) #513 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:27:08.060 [281473036165344] DEBUG - Request: [[::1]:56346 (Loopback)] GET /identity (2 live) #516
+Dec 06, 2025 00:27:08.060 [281473089528032] DEBUG - Completed: [[::1]:56346] 200 GET /identity (2 live) #516 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:27:13.115 [281473036165344] DEBUG - Request: [[::1]:56356 (Loopback)] GET /identity (2 live) #519
+Dec 06, 2025 00:27:13.115 [281473087418592] DEBUG - Completed: [[::1]:56356] 200 GET /identity (2 live) #519 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:27:18.183 [281473036165344] DEBUG - Request: [[::1]:59802 (Loopback)] GET /identity (2 live) #51c
+Dec 06, 2025 00:27:18.183 [281473087418592] DEBUG - Completed: [[::1]:59802] 200 GET /identity (2 live) #51c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:27:22.325 [281473051414752] DEBUG - [HCl#7b] HTTP requesting GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:27:22.739 [281473070588128] DEBUG - [HttpClient/HCl#7b] HTTP/1.1 (0.4s) 200 response from GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:27:22.746 [281473051414752] DEBUG - [HCl#7c] HTTP requesting GET https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:27:22.888 [281473070588128] DEBUG - [HttpClient/HCl#7c] HTTP/1.1 (0.1s) 401 response from GET https://plex.tv/api/v2/server/users/features (reused)
+Dec 06, 2025 00:27:22.888 [281473059950816] ERROR - MyPlex: Error 401 requesting JSON from: https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:27:22.889 [281473051414752] WARN - FeatureManager: Couldn't get features. Trying again soon.
+Dec 06, 2025 00:27:23.232 [281473036165344] DEBUG - Request: [[::1]:59812 (Loopback)] GET /identity (2 live) #51f
+Dec 06, 2025 00:27:23.232 [281473087418592] DEBUG - Completed: [[::1]:59812] 200 GET /identity (2 live) #51f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:27:28.309 [281473036165344] DEBUG - Request: [[::1]:55058 (Loopback)] GET /identity (2 live) #522
+Dec 06, 2025 00:27:28.309 [281473087418592] DEBUG - Completed: [[::1]:55058] 200 GET /identity (2 live) #522 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:27:33.367 [281473036165344] DEBUG - Request: [[::1]:55060 (Loopback)] GET /identity (2 live) #525
+Dec 06, 2025 00:27:33.368 [281473089528032] DEBUG - Completed: [[::1]:55060] 200 GET /identity (2 live) #525 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:27:38.497 [281473036165344] DEBUG - Request: [[::1]:59250 (Loopback)] GET /identity (2 live) #528
+Dec 06, 2025 00:27:38.497 [281473089528032] DEBUG - Completed: [[::1]:59250] 200 GET /identity (2 live) #528 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:27:43.564 [281473036165344] DEBUG - Request: [[::1]:59266 (Loopback)] GET /identity (2 live) #52b
+Dec 06, 2025 00:27:43.564 [281473087418592] DEBUG - Completed: [[::1]:59266] 200 GET /identity (2 live) #52b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:27:48.612 [281473036165344] DEBUG - Request: [[::1]:61506 (Loopback)] GET /identity (2 live) #52e
+Dec 06, 2025 00:27:48.612 [281473087418592] DEBUG - Completed: [[::1]:61506] 200 GET /identity (2 live) #52e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:27:52.126 [281473066369248] DEBUG - NetworkInterface: received Netlink message len=1472, type=RTM_NEWLINK, flags=0x0
+Dec 06, 2025 00:27:52.126 [281473066369248] DEBUG - NetworkInterface: Netlink information message family=0, type=1, index=28, flags=0x1002, change=0xffffffff
+Dec 06, 2025 00:27:52.126 [281473066369248] DEBUG - Network change.
+Dec 06, 2025 00:27:52.126 [281473066369248] DEBUG - NetworkInterface: Notified of network changed (force=0)
+Dec 06, 2025 00:27:52.127 [281473066369248] DEBUG - Network change notification but nothing changed.
+Dec 06, 2025 00:27:52.127 [281473066369248] DEBUG - NetworkInterface: received Netlink message len=1828, type=RTM_NEWLINK, flags=0x0
+Dec 06, 2025 00:27:52.127 [281473066369248] DEBUG - NetworkInterface: Netlink information message family=0, type=1, index=28, flags=0x1002, change=0x0
+Dec 06, 2025 00:27:52.127 [281473066369248] DEBUG - Network change.
+Dec 06, 2025 00:27:52.127 [281473066369248] DEBUG - NetworkInterface: Notified of network changed (force=0)
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - Network change notification but nothing changed.
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - NetworkInterface: received Netlink message len=1828, type=RTM_NEWLINK, flags=0x0
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - NetworkInterface: Netlink information message family=0, type=1, index=28, flags=0x1002, change=0x100
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - Network change.
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - NetworkInterface: Notified of network changed (force=0)
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - Network change notification but nothing changed.
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - NetworkInterface: received Netlink message len=440, type=RTM_NEWLINK, flags=0x0
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - NetworkInterface: Netlink information message family=7, type=1, index=28, flags=0x1002, change=0x0
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - Network change.
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - NetworkInterface: Notified of network changed (force=0)
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - Network change notification but nothing changed.
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - NetworkInterface: received Netlink message len=440, type=RTM_NEWLINK, flags=0x0
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - NetworkInterface: Netlink information message family=7, type=1, index=28, flags=0x1002, change=0x0
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - Network change.
+Dec 06, 2025 00:27:52.128 [281473066369248] DEBUG - NetworkInterface: Notified of network changed (force=0)
+Dec 06, 2025 00:27:52.129 [281473066369248] DEBUG - Network change notification but nothing changed.
+Dec 06, 2025 00:27:52.129 [281473066369248] DEBUG - NetworkInterface: received Netlink message len=1828, type=RTM_NEWLINK, flags=0x0
+Dec 06, 2025 00:27:52.129 [281473066369248] DEBUG - NetworkInterface: Netlink information message family=0, type=1, index=28, flags=0x1003, change=0x1
+Dec 06, 2025 00:27:52.129 [281473066369248] DEBUG - Network change.
+Dec 06, 2025 00:27:52.129 [281473066369248] DEBUG - NetworkInterface: Notified of network changed (force=0)
+Dec 06, 2025 00:27:52.129 [281473066369248] DEBUG - Network change notification but nothing changed.
+Dec 06, 2025 00:27:52.129 [281473066369248] DEBUG - NetworkInterface: received Netlink message len=440, type=RTM_NEWLINK, flags=0x0
+Dec 06, 2025 00:27:52.129 [281473066369248] DEBUG - NetworkInterface: Netlink information message family=7, type=1, index=28, flags=0x1003, change=0x0
+Dec 06, 2025 00:27:52.129 [281473066369248] DEBUG - Network change.
+Dec 06, 2025 00:27:52.129 [281473066369248] DEBUG - NetworkInterface: Notified of network changed (force=0)
+Dec 06, 2025 00:27:52.129 [281473066369248] DEBUG - Network change notification but nothing changed.
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - NetworkInterface: received Netlink message len=440, type=RTM_NEWLINK, flags=0x0
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - NetworkInterface: Netlink information message family=7, type=1, index=28, flags=0x11043, change=0x0
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - Network change.
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - NetworkInterface: Notified of network changed (force=0)
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - Network change notification but nothing changed.
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - NetworkInterface: received Netlink message len=440, type=RTM_NEWLINK, flags=0x0
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - NetworkInterface: Netlink information message family=7, type=1, index=28, flags=0x11043, change=0x0
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - Network change.
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - NetworkInterface: Notified of network changed (force=0)
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - Network change notification but nothing changed.
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - NetworkInterface: received Netlink message len=1828, type=RTM_NEWLINK, flags=0x0
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - NetworkInterface: Netlink information message family=0, type=1, index=28, flags=0x11043, change=0x0
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - Network change.
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - NetworkInterface: Notified of network changed (force=0)
+Dec 06, 2025 00:27:52.138 [281473066369248] DEBUG - Network change notification but nothing changed.
+Dec 06, 2025 00:27:53.702 [281473036165344] DEBUG - Request: [[::1]:61518 (Loopback)] GET /identity (2 live) #531
+Dec 06, 2025 00:27:53.704 [281473087418592] DEBUG - Completed: [[::1]:61518] 200 GET /identity (2 live) #531 1ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:27:58.761 [281473036165344] DEBUG - Request: [[::1]:55952 (Loopback)] GET /identity (2 live) #534
+Dec 06, 2025 00:27:58.762 [281473089528032] DEBUG - Completed: [[::1]:55952] 200 GET /identity (2 live) #534 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:28:02.490 [281473072746720] DEBUG - Putting plug-in com.plexapp.agents.thetvdb to sleep.
+Dec 06, 2025 00:28:02.490 [281473072746720] DEBUG - Stopping [com.plexapp.agents.thetvdb].
+Dec 06, 2025 00:28:02.490 [281473072746720] DEBUG - [com.plexapp.agents.thetvdb] Killing.
+Dec 06, 2025 00:28:02.493 [281473097519328] WARN - JobManager: Could not find job for handle 576
+Dec 06, 2025 00:28:03.663 [281473021116640] DEBUG - Putting plug-in com.plexapp.agents.imdb to sleep.
+Dec 06, 2025 00:28:03.663 [281473021116640] DEBUG - Stopping [com.plexapp.agents.imdb].
+Dec 06, 2025 00:28:03.663 [281473021116640] DEBUG - [com.plexapp.agents.imdb] Killing.
+Dec 06, 2025 00:28:03.665 [281473097519328] WARN - JobManager: Could not find job for handle 742
+Dec 06, 2025 00:28:03.808 [281473036165344] DEBUG - Request: [[::1]:55954 (Loopback)] GET /identity (2 live) #537
+Dec 06, 2025 00:28:03.809 [281473089528032] DEBUG - Completed: [[::1]:55954] 200 GET /identity (2 live) #537 1ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:28:07.506 [281473066369248] DEBUG - NetworkInterface: received Netlink message len=440, type=RTM_NEWLINK, flags=0x0
+Dec 06, 2025 00:28:07.506 [281473066369248] DEBUG - NetworkInterface: Netlink information message family=7, type=1, index=28, flags=0x11043, change=0x0
+Dec 06, 2025 00:28:07.506 [281473066369248] DEBUG - Network change.
+Dec 06, 2025 00:28:07.506 [281473066369248] DEBUG - NetworkInterface: Notified of network changed (force=0)
+Dec 06, 2025 00:28:07.507 [281473066369248] DEBUG - Network change notification but nothing changed.
+Dec 06, 2025 00:28:08.864 [281473036165344] DEBUG - Request: [[::1]:61448 (Loopback)] GET /identity (2 live) #53a
+Dec 06, 2025 00:28:08.864 [281473089528032] DEBUG - Completed: [[::1]:61448] 200 GET /identity (2 live) #53a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:28:12.505 [281473072746720] DEBUG - Stopping file watcher for com.plexapp.agents.thetvdb
+Dec 06, 2025 00:28:13.671 [281473021116640] DEBUG - Stopping file watcher for com.plexapp.agents.imdb
+Dec 06, 2025 00:28:13.926 [281473036165344] DEBUG - Request: [[::1]:61450 (Loopback)] GET /identity (2 live) #53d
+Dec 06, 2025 00:28:13.926 [281473089528032] DEBUG - Completed: [[::1]:61450] 200 GET /identity (2 live) #53d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:28:18.975 [281473036165344] DEBUG - Request: [[::1]:62078 (Loopback)] GET /identity (2 live) #540
+Dec 06, 2025 00:28:18.975 [281473087418592] DEBUG - Completed: [[::1]:62078] 200 GET /identity (2 live) #540 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:28:24.035 [281473036165344] DEBUG - Request: [[::1]:62088 (Loopback)] GET /identity (2 live) #543
+Dec 06, 2025 00:28:24.035 [281473087418592] DEBUG - Completed: [[::1]:62088] 200 GET /identity (2 live) #543 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:28:29.088 [281473036165344] DEBUG - Request: [[::1]:61846 (Loopback)] GET /identity (2 live) #546
+Dec 06, 2025 00:28:29.088 [281473089528032] DEBUG - Completed: [[::1]:61846] 200 GET /identity (2 live) #546 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:28:34.163 [281473036165344] DEBUG - Request: [[::1]:61860 (Loopback)] GET /identity (2 live) #549
+Dec 06, 2025 00:28:34.164 [281473087418592] DEBUG - Completed: [[::1]:61860] 200 GET /identity (2 live) #549 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:28:39.234 [281473036165344] DEBUG - Request: [[::1]:63480 (Loopback)] GET /identity (2 live) #54c
+Dec 06, 2025 00:28:39.234 [281473089528032] DEBUG - Completed: [[::1]:63480] 200 GET /identity (2 live) #54c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:28:44.286 [281473036165344] DEBUG - Request: [[::1]:63492 (Loopback)] GET /identity (2 live) #54f
+Dec 06, 2025 00:28:44.286 [281473089528032] DEBUG - Completed: [[::1]:63492] 200 GET /identity (2 live) #54f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:28:49.353 [281473036165344] DEBUG - Request: [[::1]:63594 (Loopback)] GET /identity (2 live) #552
+Dec 06, 2025 00:28:49.353 [281473089528032] DEBUG - Completed: [[::1]:63594] 200 GET /identity (2 live) #552 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:28:54.405 [281473036165344] DEBUG - Request: [[::1]:63602 (Loopback)] GET /identity (2 live) #555
+Dec 06, 2025 00:28:54.405 [281473087418592] DEBUG - Completed: [[::1]:63602] 200 GET /identity (2 live) #555 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:28:59.464 [281473036165344] DEBUG - Request: [[::1]:64418 (Loopback)] GET /identity (2 live) #558
+Dec 06, 2025 00:28:59.464 [281473087418592] DEBUG - Completed: [[::1]:64418] 200 GET /identity (2 live) #558 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:29:04.518 [281473036165344] DEBUG - Request: [[::1]:64426 (Loopback)] GET /identity (2 live) #55b
+Dec 06, 2025 00:29:04.518 [281473089528032] DEBUG - Completed: [[::1]:64426] 200 GET /identity (2 live) #55b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:29:09.577 [281473036165344] DEBUG - Request: [[::1]:63226 (Loopback)] GET /identity (2 live) #55e
+Dec 06, 2025 00:29:09.577 [281473089528032] DEBUG - Completed: [[::1]:63226] 200 GET /identity (2 live) #55e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:29:14.645 [281473036165344] DEBUG - Request: [[::1]:63238 (Loopback)] GET /identity (2 live) #561
+Dec 06, 2025 00:29:14.645 [281473087418592] DEBUG - Completed: [[::1]:63238] 200 GET /identity (2 live) #561 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:29:19.703 [281473036165344] DEBUG - Request: [[::1]:64384 (Loopback)] GET /identity (2 live) #564
+Dec 06, 2025 00:29:19.703 [281473089528032] DEBUG - Completed: [[::1]:64384] 200 GET /identity (2 live) #564 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:29:24.776 [281473036165344] DEBUG - Request: [[::1]:64396 (Loopback)] GET /identity (2 live) #567
+Dec 06, 2025 00:29:24.777 [281473087418592] DEBUG - Completed: [[::1]:64396] 200 GET /identity (2 live) #567 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:29:29.843 [281473036165344] DEBUG - Request: [[::1]:59282 (Loopback)] GET /identity (2 live) #56a
+Dec 06, 2025 00:29:29.843 [281473087418592] DEBUG - Completed: [[::1]:59282] 200 GET /identity (2 live) #56a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:29:34.916 [281473036165344] DEBUG - Request: [[::1]:59298 (Loopback)] GET /identity (2 live) #56d
+Dec 06, 2025 00:29:34.916 [281473087418592] DEBUG - Completed: [[::1]:59298] 200 GET /identity (2 live) #56d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:29:39.986 [281473036165344] DEBUG - Request: [[::1]:58758 (Loopback)] GET /identity (2 live) #570
+Dec 06, 2025 00:29:39.986 [281473089528032] DEBUG - Completed: [[::1]:58758] 200 GET /identity (2 live) #570 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:29:45.056 [281473036165344] DEBUG - Request: [[::1]:58762 (Loopback)] GET /identity (2 live) #573
+Dec 06, 2025 00:29:45.056 [281473087418592] DEBUG - Completed: [[::1]:58762] 200 GET /identity (2 live) #573 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:29:50.120 [281473036165344] DEBUG - Request: [[::1]:60328 (Loopback)] GET /identity (2 live) #576
+Dec 06, 2025 00:29:50.120 [281473087418592] DEBUG - Completed: [[::1]:60328] 200 GET /identity (2 live) #576 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:29:55.184 [281473036165344] DEBUG - Request: [[::1]:63164 (Loopback)] GET /identity (2 live) #579
+Dec 06, 2025 00:29:55.185 [281473089528032] DEBUG - Completed: [[::1]:63164] 200 GET /identity (2 live) #579 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:30:00.248 [281473036165344] DEBUG - Request: [[::1]:63168 (Loopback)] GET /identity (2 live) #57c
+Dec 06, 2025 00:30:00.248 [281473087418592] DEBUG - Completed: [[::1]:63168] 200 GET /identity (2 live) #57c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:30:05.321 [281473036165344] DEBUG - Request: [[::1]:64170 (Loopback)] GET /identity (2 live) #57f
+Dec 06, 2025 00:30:05.321 [281473089528032] DEBUG - Completed: [[::1]:64170] 200 GET /identity (2 live) #57f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:30:10.383 [281473036165344] DEBUG - Request: [[::1]:64184 (Loopback)] GET /identity (2 live) #582
+Dec 06, 2025 00:30:10.383 [281473087418592] DEBUG - Completed: [[::1]:64184] 200 GET /identity (2 live) #582 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:30:15.436 [281473036165344] DEBUG - Request: [[::1]:56382 (Loopback)] GET /identity (2 live) #585
+Dec 06, 2025 00:30:15.436 [281473087418592] DEBUG - Completed: [[::1]:56382] 200 GET /identity (2 live) #585 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:30:20.507 [281473036165344] DEBUG - Request: [[::1]:56396 (Loopback)] GET /identity (2 live) #588
+Dec 06, 2025 00:30:20.507 [281473087418592] DEBUG - Completed: [[::1]:56396] 200 GET /identity (2 live) #588 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:30:25.574 [281473036165344] DEBUG - Request: [[::1]:56494 (Loopback)] GET /identity (2 live) #58b
+Dec 06, 2025 00:30:25.574 [281473089528032] DEBUG - Completed: [[::1]:56494] 200 GET /identity (2 live) #58b 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:30:30.646 [281473036165344] DEBUG - Request: [[::1]:56506 (Loopback)] GET /identity (2 live) #58e
+Dec 06, 2025 00:30:30.646 [281473087418592] DEBUG - Completed: [[::1]:56506] 200 GET /identity (2 live) #58e 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:30:35.719 [281473036165344] DEBUG - Request: [[::1]:57344 (Loopback)] GET /identity (2 live) #591
+Dec 06, 2025 00:30:35.719 [281473089528032] DEBUG - Completed: [[::1]:57344] 200 GET /identity (2 live) #591 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:30:40.790 [281473036165344] DEBUG - Request: [[::1]:57348 (Loopback)] GET /identity (2 live) #594
+Dec 06, 2025 00:30:40.790 [281473089528032] DEBUG - Completed: [[::1]:57348] 200 GET /identity (2 live) #594 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:30:45.836 [281473036165344] DEBUG - Request: [[::1]:63348 (Loopback)] GET /identity (2 live) #597
+Dec 06, 2025 00:30:45.836 [281473087418592] DEBUG - Completed: [[::1]:63348] 200 GET /identity (2 live) #597 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:30:50.917 [281473036165344] DEBUG - Request: [[::1]:63360 (Loopback)] GET /identity (2 live) #59a
+Dec 06, 2025 00:30:50.918 [281473087418592] DEBUG - Completed: [[::1]:63360] 200 GET /identity (2 live) #59a 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:30:55.975 [281473036165344] DEBUG - Request: [[::1]:59688 (Loopback)] GET /identity (2 live) #59d
+Dec 06, 2025 00:30:55.975 [281473089528032] DEBUG - Completed: [[::1]:59688] 200 GET /identity (2 live) #59d 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:31:01.039 [281473036165344] DEBUG - Request: [[::1]:59698 (Loopback)] GET /identity (2 live) #5a0
+Dec 06, 2025 00:31:01.039 [281473087418592] DEBUG - Completed: [[::1]:59698] 200 GET /identity (2 live) #5a0 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:31:06.109 [281473036165344] DEBUG - Request: [[::1]:60386 (Loopback)] GET /identity (2 live) #5a3
+Dec 06, 2025 00:31:06.109 [281473087418592] DEBUG - Completed: [[::1]:60386] 200 GET /identity (2 live) #5a3 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:31:11.174 [281473036165344] DEBUG - Request: [[::1]:60398 (Loopback)] GET /identity (2 live) #5a6
+Dec 06, 2025 00:31:11.174 [281473087418592] DEBUG - Completed: [[::1]:60398] 200 GET /identity (2 live) #5a6 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:31:16.241 [281473036165344] DEBUG - Request: [[::1]:64254 (Loopback)] GET /identity (2 live) #5a9
+Dec 06, 2025 00:31:16.242 [281473089528032] DEBUG - Completed: [[::1]:64254] 200 GET /identity (2 live) #5a9 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:31:21.320 [281473036165344] DEBUG - Request: [[::1]:64268 (Loopback)] GET /identity (2 live) #5ac
+Dec 06, 2025 00:31:21.320 [281473087418592] DEBUG - Completed: [[::1]:64268] 200 GET /identity (2 live) #5ac 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:31:26.395 [281473036165344] DEBUG - Request: [[::1]:62288 (Loopback)] GET /identity (2 live) #5af
+Dec 06, 2025 00:31:26.396 [281473089528032] DEBUG - Completed: [[::1]:62288] 200 GET /identity (2 live) #5af 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:31:31.466 [281473036165344] DEBUG - Request: [[::1]:62300 (Loopback)] GET /identity (2 live) #5b2
+Dec 06, 2025 00:31:31.466 [281473087418592] DEBUG - Completed: [[::1]:62300] 200 GET /identity (2 live) #5b2 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:31:36.527 [281473036165344] DEBUG - Request: [[::1]:59296 (Loopback)] GET /identity (2 live) #5b5
+Dec 06, 2025 00:31:36.528 [281473087418592] DEBUG - Completed: [[::1]:59296] 200 GET /identity (2 live) #5b5 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:31:41.602 [281473036165344] DEBUG - Request: [[::1]:59308 (Loopback)] GET /identity (2 live) #5b8
+Dec 06, 2025 00:31:41.602 [281473089528032] DEBUG - Completed: [[::1]:59308] 200 GET /identity (2 live) #5b8 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:31:46.651 [281473036165344] DEBUG - Request: [[::1]:59184 (Loopback)] GET /identity (2 live) #5bb
+Dec 06, 2025 00:31:46.652 [281473087418592] DEBUG - Completed: [[::1]:59184] 200 GET /identity (2 live) #5bb 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:31:51.720 [281473036165344] DEBUG - Request: [[::1]:59198 (Loopback)] GET /identity (2 live) #5be
+Dec 06, 2025 00:31:51.721 [281473087418592] DEBUG - Completed: [[::1]:59198] 200 GET /identity (2 live) #5be 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:31:56.787 [281473036165344] DEBUG - Request: [[::1]:59148 (Loopback)] GET /identity (2 live) #5c1
+Dec 06, 2025 00:31:56.788 [281473089528032] DEBUG - Completed: [[::1]:59148] 200 GET /identity (2 live) #5c1 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:32:01.859 [281473036165344] DEBUG - Request: [[::1]:59162 (Loopback)] GET /identity (2 live) #5c4
+Dec 06, 2025 00:32:01.860 [281473089528032] DEBUG - Completed: [[::1]:59162] 200 GET /identity (2 live) #5c4 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:32:06.940 [281473036165344] DEBUG - Request: [[::1]:56952 (Loopback)] GET /identity (2 live) #5c7
+Dec 06, 2025 00:32:06.940 [281473089528032] DEBUG - Completed: [[::1]:56952] 200 GET /identity (2 live) #5c7 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:32:11.999 [281473036165344] DEBUG - Request: [[::1]:56958 (Loopback)] GET /identity (2 live) #5ca
+Dec 06, 2025 00:32:11.999 [281473089528032] DEBUG - Completed: [[::1]:56958] 200 GET /identity (2 live) #5ca 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:32:17.055 [281473036165344] DEBUG - Request: [[::1]:60230 (Loopback)] GET /identity (2 live) #5cd
+Dec 06, 2025 00:32:17.055 [281473087418592] DEBUG - Completed: [[::1]:60230] 200 GET /identity (2 live) #5cd 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:32:22.135 [281473036165344] DEBUG - Request: [[::1]:60240 (Loopback)] GET /identity (2 live) #5d0
+Dec 06, 2025 00:32:22.136 [281473087418592] DEBUG - Completed: [[::1]:60240] 200 GET /identity (2 live) #5d0 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:32:22.891 [281473047187680] DEBUG - [HCl#7d] HTTP requesting GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:32:23.295 [281473070588128] DEBUG - [HttpClient/HCl#7d] HTTP/1.1 (0.4s) 200 response from GET https://plex.tv/api/v2/features?X-Plex-Token=
+Dec 06, 2025 00:32:23.301 [281473047187680] DEBUG - [HCl#7e] HTTP requesting GET https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:32:23.428 [281473070588128] DEBUG - [HttpClient/HCl#7e] HTTP/1.1 (0.1s) 401 response from GET https://plex.tv/api/v2/server/users/features (reused)
+Dec 06, 2025 00:32:23.428 [281473059950816] ERROR - MyPlex: Error 401 requesting JSON from: https://plex.tv/api/v2/server/users/features
+Dec 06, 2025 00:32:23.428 [281473047187680] WARN - FeatureManager: Couldn't get features. Trying again soon.
+Dec 06, 2025 00:32:27.194 [281473036165344] DEBUG - Request: [[::1]:60304 (Loopback)] GET /identity (2 live) #5d3
+Dec 06, 2025 00:32:27.194 [281473087418592] DEBUG - Completed: [[::1]:60304] 200 GET /identity (2 live) #5d3 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:32:32.248 [281473036165344] DEBUG - Request: [[::1]:60314 (Loopback)] GET /identity (2 live) #5d6
+Dec 06, 2025 00:32:32.248 [281473089528032] DEBUG - Completed: [[::1]:60314] 200 GET /identity (2 live) #5d6 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:32:37.307 [281473036165344] DEBUG - Request: [[::1]:56074 (Loopback)] GET /identity (2 live) #5d9
+Dec 06, 2025 00:32:37.307 [281473087418592] DEBUG - Completed: [[::1]:56074] 200 GET /identity (2 live) #5d9 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:32:42.352 [281473036165344] DEBUG - Request: [[::1]:56086 (Loopback)] GET /identity (2 live) #5dc
+Dec 06, 2025 00:32:42.352 [281473089528032] DEBUG - Completed: [[::1]:56086] 200 GET /identity (2 live) #5dc 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:32:47.417 [281473036165344] DEBUG - Request: [[::1]:62072 (Loopback)] GET /identity (2 live) #5df
+Dec 06, 2025 00:32:47.417 [281473089528032] DEBUG - Completed: [[::1]:62072] 200 GET /identity (2 live) #5df 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:32:52.479 [281473036165344] DEBUG - Request: [[::1]:62078 (Loopback)] GET /identity (2 live) #5e2
+Dec 06, 2025 00:32:52.479 [281473087418592] DEBUG - Completed: [[::1]:62078] 200 GET /identity (2 live) #5e2 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:32:57.552 [281473036165344] DEBUG - Request: [[::1]:58234 (Loopback)] GET /identity (2 live) #5e5
+Dec 06, 2025 00:32:57.552 [281473089528032] DEBUG - Completed: [[::1]:58234] 200 GET /identity (2 live) #5e5 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:33:02.609 [281473036165344] DEBUG - Request: [[::1]:58242 (Loopback)] GET /identity (2 live) #5e8
+Dec 06, 2025 00:33:02.609 [281473087418592] DEBUG - Completed: [[::1]:58242] 200 GET /identity (2 live) #5e8 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:33:07.671 [281473036165344] DEBUG - Request: [[::1]:64182 (Loopback)] GET /identity (2 live) #5eb
+Dec 06, 2025 00:33:07.671 [281473087418592] DEBUG - Completed: [[::1]:64182] 200 GET /identity (2 live) #5eb 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:33:12.733 [281473036165344] DEBUG - Request: [[::1]:64190 (Loopback)] GET /identity (2 live) #5ee
+Dec 06, 2025 00:33:12.733 [281473089528032] DEBUG - Completed: [[::1]:64190] 200 GET /identity (2 live) #5ee 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:33:17.803 [281473036165344] DEBUG - Request: [[::1]:56652 (Loopback)] GET /identity (2 live) #5f1
+Dec 06, 2025 00:33:17.803 [281473089528032] DEBUG - Completed: [[::1]:56652] 200 GET /identity (2 live) #5f1 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:33:22.868 [281473036165344] DEBUG - Request: [[::1]:56666 (Loopback)] GET /identity (2 live) #5f4
+Dec 06, 2025 00:33:22.868 [281473089528032] DEBUG - Completed: [[::1]:56666] 200 GET /identity (2 live) #5f4 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:33:27.946 [281473036165344] DEBUG - Request: [[::1]:62636 (Loopback)] GET /identity (2 live) #5f7
+Dec 06, 2025 00:33:27.946 [281473087418592] DEBUG - Completed: [[::1]:62636] 200 GET /identity (2 live) #5f7 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:33:33.014 [281473036165344] DEBUG - Request: [[::1]:62640 (Loopback)] GET /identity (2 live) #5fa
+Dec 06, 2025 00:33:33.014 [281473087418592] DEBUG - Completed: [[::1]:62640] 200 GET /identity (2 live) #5fa 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:33:38.079 [281473036165344] DEBUG - Request: [[::1]:59396 (Loopback)] GET /identity (2 live) #5fd
+Dec 06, 2025 00:33:38.080 [281473089528032] DEBUG - Completed: [[::1]:59396] 200 GET /identity (2 live) #5fd 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:33:43.160 [281473036165344] DEBUG - Request: [[::1]:59404 (Loopback)] GET /identity (2 live) #600
+Dec 06, 2025 00:33:43.160 [281473087418592] DEBUG - Completed: [[::1]:59404] 200 GET /identity (2 live) #600 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:33:48.214 [281473036165344] DEBUG - Request: [[::1]:63484 (Loopback)] GET /identity (2 live) #603
+Dec 06, 2025 00:33:48.214 [281473087418592] DEBUG - Completed: [[::1]:63484] 200 GET /identity (2 live) #603 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:33:53.272 [281473036165344] DEBUG - Request: [[::1]:63496 (Loopback)] GET /identity (2 live) #606
+Dec 06, 2025 00:33:53.273 [281473089528032] DEBUG - Completed: [[::1]:63496] 200 GET /identity (2 live) #606 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:33:58.342 [281473036165344] DEBUG - Request: [[::1]:59660 (Loopback)] GET /identity (2 live) #609
+Dec 06, 2025 00:33:58.342 [281473087418592] DEBUG - Completed: [[::1]:59660] 200 GET /identity (2 live) #609 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:34:03.412 [281473036165344] DEBUG - Request: [[::1]:59672 (Loopback)] GET /identity (2 live) #60c
+Dec 06, 2025 00:34:03.413 [281473089528032] DEBUG - Completed: [[::1]:59672] 200 GET /identity (2 live) #60c 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:34:08.488 [281473036165344] DEBUG - Request: [[::1]:62102 (Loopback)] GET /identity (2 live) #60f
+Dec 06, 2025 00:34:08.488 [281473089528032] DEBUG - Completed: [[::1]:62102] 200 GET /identity (2 live) #60f 0ms 418 bytes (pipelined: 1)
+Dec 06, 2025 00:34:13.571 [281473036165344] DEBUG - Request: [[::1]:62118 (Loopback)] GET /identity (2 live) #612
+Dec 06, 2025 00:34:13.571 [281473089528032] DEBUG - Completed: [[::1]:62118] 200 GET /identity (2 live) #612 0ms 418 bytes (pipelined: 1)
