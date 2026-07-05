@@ -1,14 +1,81 @@
 services:
-  portainer:
-    container_name: container-dashboard
-    image: portainer/portainer-ee:2.33.5
-    restart: always
+  komodo-mongo:
+    container_name: komodo-database
+    image: mongo:8.0
+    restart: unless-stopped
+    command: ["--quiet", "--wiredTigerCacheSizeGB", "0.25"]
+    labels:
+      komodo.skip: "true"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${KOMODO_DATABASE_USERNAME:?Set KOMODO_DATABASE_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${KOMODO_DATABASE_PASSWORD:?Set KOMODO_DATABASE_PASSWORD}
+    volumes:
+      - komodo-mongo-data:/data/db
+      - komodo-mongo-config:/data/configdb
+
+  komodo-core:
+    container_name: komodo-core
+    image: ghcr.io/moghtech/komodo-core:${KOMODO_IMAGE_TAG:-2}
+    init: true
+    restart: unless-stopped
+    depends_on:
+      - komodo-mongo
+    ports:
+      - "${KOMODO_PORT:?Set KOMODO_PORT}:9120"
+    environment:
+      TZ: Europe/Vilnius
+      KOMODO_DATABASE_ADDRESS: komodo-mongo:27017
+      KOMODO_DATABASE_USERNAME: ${KOMODO_DATABASE_USERNAME:?Set KOMODO_DATABASE_USERNAME}
+      KOMODO_DATABASE_PASSWORD: ${KOMODO_DATABASE_PASSWORD:?Set KOMODO_DATABASE_PASSWORD}
+      KOMODO_HOST: ${KOMODO_HOST:?Set KOMODO_HOST}
+      KOMODO_TITLE: Komodo
+      KOMODO_PERIPHERY_PUBLIC_KEY: file:/config/keys/periphery.pub
+      KOMODO_LOCAL_AUTH: true
+      KOMODO_INIT_ADMIN_USERNAME: ${KOMODO_INIT_ADMIN_USERNAME:?Set KOMODO_INIT_ADMIN_USERNAME}
+      KOMODO_INIT_ADMIN_PASSWORD: ${KOMODO_INIT_ADMIN_PASSWORD:?Set KOMODO_INIT_ADMIN_PASSWORD}
+      KOMODO_FIRST_SERVER_NAME: ${KOMODO_FIRST_SERVER_NAME:?Set KOMODO_FIRST_SERVER_NAME}
+      KOMODO_DISABLE_CONFIRM_DIALOG: false
+      KOMODO_DISABLE_INIT_RESOURCES: false
+      KOMODO_WEBHOOK_SECRET: ${KOMODO_WEBHOOK_SECRET:?Set KOMODO_WEBHOOK_SECRET}
+      KOMODO_JWT_SECRET: ${KOMODO_JWT_SECRET:?Set KOMODO_JWT_SECRET}
+      KOMODO_JWT_TTL: 1-day
+      KOMODO_MONITORING_INTERVAL: 15-sec
+      KOMODO_RESOURCE_POLL_INTERVAL: 1-hr
+      KOMODO_DISABLE_USER_REGISTRATION: true
+      KOMODO_ENABLE_NEW_USERS: false
+      KOMODO_DISABLE_NON_ADMIN_CREATE: false
+      KOMODO_TRANSPARENT_MODE: false
+      KOMODO_OIDC_ENABLED: false
+      KOMODO_GITHUB_OAUTH_ENABLED: false
+      KOMODO_GOOGLE_OAUTH_ENABLED: false
+      KOMODO_LOGGING_PRETTY: false
+      KOMODO_PRETTY_STARTUP_CONFIG: false
+    volumes:
+      - komodo-keys:/config/keys
+      - "${KOMODO_BACKUPS_PATH:?Set KOMODO_BACKUPS_PATH}:/backups"
+
+  komodo-periphery:
+    container_name: komodo-agent
+    image: ghcr.io/moghtech/komodo-periphery:${KOMODO_IMAGE_TAG:-2}
+    init: true
+    restart: unless-stopped
+    depends_on:
+      - komodo-core
+    environment:
+      TZ: Europe/Vilnius
+      PERIPHERY_CORE_ADDRESS: ws://komodo-core:9120
+      PERIPHERY_CONNECT_AS: ${KOMODO_FIRST_SERVER_NAME:?Set KOMODO_FIRST_SERVER_NAME}
+      PERIPHERY_CORE_PUBLIC_KEYS: file:/config/keys/core.pub
+      PERIPHERY_ROOT_DIRECTORY: ${PERIPHERY_ROOT_DIRECTORY:?Set PERIPHERY_ROOT_DIRECTORY}
+      PERIPHERY_DISABLE_TERMINALS: false
+      PERIPHERY_DISABLE_CONTAINER_TERMINALS: false
+      PERIPHERY_INCLUDE_DISK_MOUNTS: /etc/hostname
+      PERIPHERY_LOGGING_PRETTY: false
+      PERIPHERY_PRETTY_STARTUP_CONFIG: false
     volumes:
       - "${DOCKER_SOCKET_PATH:?Set DOCKER_SOCKET_PATH}:/var/run/docker.sock"
-      - "${PORTAINER_DATA:?Set PORTAINER_DATA}:/data"
-    ports:
-      - 9443:9443
-      - 8000:8000
+      - komodo-keys:/config/keys
+      - "${PERIPHERY_ROOT_DIRECTORY:?Set PERIPHERY_ROOT_DIRECTORY}:${PERIPHERY_ROOT_DIRECTORY:?Set PERIPHERY_ROOT_DIRECTORY}"
 
   # openvpn-as:
   #   image: openvpn/openvpn-as
@@ -65,6 +132,11 @@ services:
 networks:
   default:
     name: portainer_network
+
+volumes:
+  komodo-mongo-data:
+  komodo-mongo-config:
+  komodo-keys:
 
 secrets:
   transmission_user_password:
