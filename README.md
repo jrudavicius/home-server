@@ -126,6 +126,11 @@ Repo named `home-server` for this Git repository. It is separate from the
 Git-backed `media` Stack and is useful when you want the repository to appear
 under Komodo's Repos page.
 
+The Resource Sync in `komodo/syncs.toml` makes Komodo read the `komodo/`
+directory from the `home-server` Repo and reconcile the declared resources.
+Deletion is disabled so resources not yet represented in TOML, such as the
+connected server, are left alone.
+
 Keep `stacks/media/.env` out of Git. After the Stack is synced, open the Stack
 environment in Komodo and paste the values from `stacks/media/.env.example`
 with real local paths/secrets. Komodo will write that environment to `.env`

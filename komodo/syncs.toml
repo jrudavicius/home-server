@@ -1,0 +1,15 @@
+[[resource_sync]]
+name = "home-server-resources"
+description = "Sync Komodo resources from this repository."
+tags = ["raspberry-pi"]
+
+[resource_sync.config]
+linked_repo = "home-server"
+resource_path = ["komodo"]
+managed = false
+delete = false
+include_resources = true
+include_variables = false
+include_user_groups = false
+pending_alert = true
+webhook_enabled = true
