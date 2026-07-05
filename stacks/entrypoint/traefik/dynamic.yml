@@ -1,0 +1,57 @@
+http:
+  routers:
+    traefik:
+      rule: "Host(`traefik.home.arpa`) || PathPrefix(`/api`) || PathPrefix(`/dashboard`)"
+      entryPoints:
+        - web
+      priority: 20
+      service: api@internal
+
+    komodo:
+      rule: "Host(`komodo.home.arpa`)"
+      entryPoints:
+        - web
+      priority: 20
+      service: komodo
+
+    plex:
+      rule: "Host(`plex.home.arpa`)"
+      entryPoints:
+        - web
+      priority: 20
+      service: plex
+
+    transmission:
+      rule: "Host(`transmission.home.arpa`)"
+      entryPoints:
+        - web
+      priority: 20
+      service: transmission
+
+    entrypoint:
+      rule: "PathPrefix(`/`)"
+      entryPoints:
+        - web
+      priority: 1
+      service: entrypoint
+
+  services:
+    komodo:
+      loadBalancer:
+        servers:
+          - url: "http://komodo-core:9120"
+
+    plex:
+      loadBalancer:
+        servers:
+          - url: "http://media-server:32400"
+
+    transmission:
+      loadBalancer:
+        servers:
+          - url: "http://torrent-client:9091"
+
+    entrypoint:
+      loadBalancer:
+        servers:
+          - url: "http://home-server-entrypoint:80"

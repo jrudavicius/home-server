@@ -72,7 +72,6 @@ manual testing of the entrypoint stack:
 TRAEFIK_HTTP_PORT=80
 TRAEFIK_DASHBOARD_HOST=traefik.home.arpa
 TRAEFIK_LOG_LEVEL=INFO
-DOCKER_SOCKET_PATH=/var/run/docker.sock
 
 ENTRYPOINT_TITLE=Home Server
 ENTRYPOINT_SUBTITLE=Raspberry Pi services
