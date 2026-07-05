@@ -1,11 +1,11 @@
 [[stack]]
 name = "media"
 description = "Plex Media Server and Transmission torrent client."
-tags = ["media", "raspberry-pi"]
+tags = ["media", "home"]
 deploy = true
 
 [stack.config]
-server = "raspberry-pi"
+server = "home"
 files_on_host = false
 git_provider = "github.com"
 git_https = true

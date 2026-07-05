@@ -107,7 +107,7 @@ docker compose up -d
 ```
 
 For Komodo, sync the declarative Stack resource from `komodo/stacks.toml`.
-It creates a Git-based Stack named `media` on the `raspberry-pi` server using:
+It creates a Git-based Stack named `media` on the `home` server using:
 
 ```text
 Repo: github.com/jrudavicius/home-server

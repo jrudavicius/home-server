@@ -1,7 +1,7 @@
 [[resource_sync]]
 name = "home-server-resources"
 description = "Sync Komodo resources from this repository."
-tags = ["raspberry-pi"]
+tags = ["home"]
 
 [resource_sync.config]
 linked_repo = "home-server"
