@@ -131,10 +131,20 @@ directory from the `home-server` Repo and reconcile the declared resources.
 Deletion is disabled so resources not yet represented in TOML, such as the
 connected server, are left alone.
 
-Keep `stacks/media/.env` out of Git. After the Stack is synced, open the Stack
-environment in Komodo and paste the values from `stacks/media/.env.example`
-with real local paths/secrets. Komodo will write that environment to `.env`
-when deploying.
+Keep `stacks/media/.env` out of Git. The synced Stack environment references
+Komodo variables for host-specific values:
+
+```text
+PLEX_CLAIM
+PLEX_CONFIG_PATH
+TRANSCODE_PATH
+MEDIA_PATH
+TRANSMISSION_CONFIG_PATH
+TRANSMISSION_USER_PASSWORD_FILE
+```
+
+Create those variables in Komodo with real local paths/secrets before deploying
+on a new host. Komodo writes the resolved environment to `.env` when deploying.
 
 Stop the Komodo bootstrap stack:
 
