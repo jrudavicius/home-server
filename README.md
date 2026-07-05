@@ -30,6 +30,8 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 - Docker Compose plugin.
 - Persistent directories for configuration, media, backups, and transcode data.
 - A `.env` file containing the required environment variables.
+- A Komodo periphery work directory outside this repository, for example
+  `/srv/komodo/periphery`.
 
 ## Configuration
 
@@ -49,9 +51,13 @@ KOMODO_WEBHOOK_SECRET=
 KOMODO_JWT_SECRET=
 KOMODO_BACKUPS_PATH=
 
-PERIPHERY_ROOT_DIRECTORY=
+PERIPHERY_ROOT_DIRECTORY=/srv/komodo/periphery
 DOCKER_SOCKET_PATH=/var/run/docker.sock
 ```
+
+Do not point `PERIPHERY_ROOT_DIRECTORY` at this repository. Komodo uses that
+directory for managed Git checkouts, generated environment files, and stack
+working state.
 
 Create a second `.env` file next to `stacks/media/docker-compose.yml` for the
 media stack:
