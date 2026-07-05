@@ -1,8 +1,49 @@
 [[stack]]
+name = "entrypoint"
+description = "Traefik reverse proxy and local home server landing page."
+tags = ["entrypoint", "home"]
+deploy = true
+
+[stack.config]
+server = "home"
+files_on_host = false
+git_provider = "github.com"
+git_https = true
+repo = "jrudavicius/home-server"
+branch = "main"
+run_directory = "stacks/entrypoint"
+file_paths = ["docker-compose.yml"]
+project_name = "entrypoint"
+auto_pull = true
+webhook_enabled = true
+webhook_force_deploy = true
+environment = """
+TRAEFIK_HTTP_PORT=80
+TRAEFIK_DASHBOARD_HOST=traefik.home.arpa
+TRAEFIK_LOG_LEVEL=INFO
+DOCKER_SOCKET_PATH=/var/run/docker.sock
+
+ENTRYPOINT_TITLE=Home Server
+ENTRYPOINT_SUBTITLE=Raspberry Pi services
+ENTRYPOINT_KOMODO_URL=
+ENTRYPOINT_PLEX_URL=
+ENTRYPOINT_TRAEFIK_URL=
+ENTRYPOINT_TRANSMISSION_URL=
+
+KOMODO_PORT=9120
+KOMODO_TRAEFIK_HOST=komodo.home.arpa
+PLEX_PORT=32400
+PLEX_TRAEFIK_HOST=plex.home.arpa
+TRANSMISSION_WEB_PORT=9091
+TRANSMISSION_TRAEFIK_HOST=transmission.home.arpa
+"""
+
+[[stack]]
 name = "media"
 description = "Plex Media Server and Transmission torrent client."
 tags = ["media-services", "home"]
 deploy = true
+after = ["entrypoint"]
 
 [stack.config]
 server = "home"
@@ -19,6 +60,7 @@ webhook_enabled = true
 webhook_force_deploy = true
 environment = """
 PLEX_PORT=32400
+PLEX_TRAEFIK_HOST=plex.home.arpa
 PLEX_CLAIM=[[PLEX_CLAIM]]
 PLEX_CONFIG_PATH=[[PLEX_CONFIG_PATH]]
 TRANSCODE_PATH=[[TRANSCODE_PATH]]
@@ -26,6 +68,7 @@ MEDIA_PATH=[[MEDIA_PATH]]
 
 TRANSMISSION_WEB_PORT=9091
 TRANSMISSION_PEER_PORT=51413
+TRANSMISSION_TRAEFIK_HOST=transmission.home.arpa
 TRANSMISSION_USERNAME=julius
 TRANSMISSION_CONFIG_PATH=[[TRANSMISSION_CONFIG_PATH]]
 TRANSMISSION_USER_PASSWORD_FILE=[[TRANSMISSION_USER_PASSWORD_FILE]]

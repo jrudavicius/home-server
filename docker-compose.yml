@@ -20,6 +20,12 @@ services:
     restart: unless-stopped
     depends_on:
       - komodo-mongo
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.komodo.rule: "Host(`${KOMODO_TRAEFIK_HOST:-komodo.home.arpa}`)"
+      traefik.http.routers.komodo.entrypoints: web
+      traefik.http.routers.komodo.priority: "20"
+      traefik.http.services.komodo.loadbalancer.server.port: "9120"
     ports:
       - "${KOMODO_PORT:?Set KOMODO_PORT}:9120"
     environment:

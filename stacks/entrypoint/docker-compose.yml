@@ -1,0 +1,58 @@
+services:
+  traefik:
+    container_name: home-server-proxy
+    image: traefik:v3.1
+    restart: unless-stopped
+    command:
+      - --api.dashboard=true
+      - --entrypoints.web.address=:80
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=portainer_network
+      - --log.level=${TRAEFIK_LOG_LEVEL:-INFO}
+    ports:
+      - "${TRAEFIK_HTTP_PORT:-80}:80"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.traefik.rule: "Host(`${TRAEFIK_DASHBOARD_HOST:-traefik.home.arpa}`) || PathPrefix(`/api`) || PathPrefix(`/dashboard`)"
+      traefik.http.routers.traefik.entrypoints: web
+      traefik.http.routers.traefik.priority: "20"
+      traefik.http.routers.traefik.service: api@internal
+    volumes:
+      - "${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock:ro"
+
+  entrypoint:
+    container_name: home-server-entrypoint
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - traefik
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.entrypoint.rule: "PathPrefix(`/`)"
+      traefik.http.routers.entrypoint.entrypoints: web
+      traefik.http.routers.entrypoint.priority: "1"
+      traefik.http.services.entrypoint.loadbalancer.server.port: "80"
+    environment:
+      NGINX_ENVSUBST_OUTPUT_DIR: /usr/share/nginx/html
+      ENTRYPOINT_TITLE: ${ENTRYPOINT_TITLE:-Home Server}
+      ENTRYPOINT_SUBTITLE: ${ENTRYPOINT_SUBTITLE:-Raspberry Pi services}
+      ENTRYPOINT_KOMODO_URL: ${ENTRYPOINT_KOMODO_URL:-}
+      ENTRYPOINT_PLEX_URL: ${ENTRYPOINT_PLEX_URL:-}
+      ENTRYPOINT_TRAEFIK_URL: ${ENTRYPOINT_TRAEFIK_URL:-}
+      ENTRYPOINT_TRANSMISSION_URL: ${ENTRYPOINT_TRANSMISSION_URL:-}
+      KOMODO_PORT: ${KOMODO_PORT:-9120}
+      KOMODO_TRAEFIK_HOST: ${KOMODO_TRAEFIK_HOST:-komodo.home.arpa}
+      PLEX_PORT: ${PLEX_PORT:-32400}
+      PLEX_TRAEFIK_HOST: ${PLEX_TRAEFIK_HOST:-plex.home.arpa}
+      TRAEFIK_HTTP_PORT: ${TRAEFIK_HTTP_PORT:-80}
+      TRAEFIK_DASHBOARD_HOST: ${TRAEFIK_DASHBOARD_HOST:-traefik.home.arpa}
+      TRANSMISSION_WEB_PORT: ${TRANSMISSION_WEB_PORT:-9091}
+      TRANSMISSION_TRAEFIK_HOST: ${TRANSMISSION_TRAEFIK_HOST:-transmission.home.arpa}
+    volumes:
+      - ./entrypoint/index.html.template:/etc/nginx/templates/index.html.template:ro
+
+networks:
+  default:
+    external: true
+    name: portainer_network

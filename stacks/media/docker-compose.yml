@@ -3,6 +3,12 @@ services:
     container_name: media-server
     image: plexinc/pms-docker:1.42.2.10156-f737b826c
     restart: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.plex.rule: "Host(`${PLEX_TRAEFIK_HOST:-plex.home.arpa}`)"
+      traefik.http.routers.plex.entrypoints: web
+      traefik.http.routers.plex.priority: "20"
+      traefik.http.services.plex.loadbalancer.server.port: "32400"
     ports:
       - "${PLEX_PORT:?Set PLEX_PORT}:32400"
     environment:
@@ -19,6 +25,12 @@ services:
     container_name: torrent-client
     image: lscr.io/linuxserver/transmission:4.0.6
     restart: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.transmission.rule: "Host(`${TRANSMISSION_TRAEFIK_HOST:-transmission.home.arpa}`)"
+      traefik.http.routers.transmission.entrypoints: web
+      traefik.http.routers.transmission.priority: "20"
+      traefik.http.services.transmission.loadbalancer.server.port: "9091"
     ports:
       - "${TRANSMISSION_WEB_PORT:-9091}:9091"
       - "${TRANSMISSION_PEER_PORT:-51413}:51413"
@@ -32,9 +44,15 @@ services:
     volumes:
       - "${TRANSMISSION_CONFIG_PATH:?Set TRANSMISSION_CONFIG_PATH}:/config"
       - "${MEDIA_PATH:?Set MEDIA_PATH}:/media"
+      - "${MEDIA_PATH:?Set MEDIA_PATH}/watch:/watch"
     secrets:
       - transmission_user_password
 
 secrets:
   transmission_user_password:
     file: ${TRANSMISSION_USER_PASSWORD_FILE:?Set TRANSMISSION_USER_PASSWORD_FILE}
+
+networks:
+  default:
+    external: true
+    name: portainer_network
