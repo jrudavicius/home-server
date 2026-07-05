@@ -16,6 +16,7 @@ file_paths = ["docker-compose.yml"]
 project_name = "media"
 auto_pull = true
 webhook_enabled = true
+webhook_force_deploy = true
 environment = """
 PLEX_PORT=32400
 PLEX_CLAIM=[[PLEX_CLAIM]]

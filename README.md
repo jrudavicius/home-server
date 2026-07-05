@@ -131,6 +131,19 @@ directory from the `home-server` Repo and reconcile the declared resources.
 Deletion is disabled so resources not yet represented in TOML, such as the
 connected server, are left alone.
 
+To deploy from GitHub pushes, set `KOMODO_WEBHOOK_BASE_URL` to a public HTTPS
+URL that can reach Komodo, then add GitHub push webhooks using these payload
+URLs:
+
+```text
+https://<komodo-public-host>/listener/github/sync/home-server-resources/sync
+https://<komodo-public-host>/listener/github/stack/media/deploy
+```
+
+Use content type `application/json` and set the GitHub webhook secret to the
+same value as `KOMODO_WEBHOOK_SECRET`. The `media` Stack has
+`webhook_force_deploy = true`, so the Stack webhook deploys on every push.
+
 Keep `stacks/media/.env` out of Git. The synced Stack environment references
 Komodo variables for host-specific values:
 
