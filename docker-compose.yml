@@ -27,7 +27,7 @@ services:
       traefik.http.routers.komodo.priority: "20"
       traefik.http.services.komodo.loadbalancer.server.port: "9120"
     ports:
-      - "${KOMODO_PORT:?Set KOMODO_PORT}:9120"
+      - "${HOST_BIND_ADDRESS:-0.0.0.0}:${KOMODO_PORT:?Set KOMODO_PORT}:9120"
     environment:
       TZ: Europe/Vilnius
       KOMODO_DATABASE_ADDRESS: komodo-mongo:27017

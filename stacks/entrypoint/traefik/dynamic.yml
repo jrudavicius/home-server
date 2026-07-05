@@ -8,10 +8,10 @@ http:
       service: api@internal
 
     komodo:
-      rule: "Host(`komodo.home.arpa`)"
+      rule: "Host(`komodo.home.arpa`) || PathPrefix(`/listener`)"
       entryPoints:
         - web
-      priority: 20
+      priority: 30
       service: komodo
 
     plex:
