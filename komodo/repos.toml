@@ -1,0 +1,13 @@
+[[repo]]
+name = "home-server"
+description = "Raspberry Pi server configuration repository."
+tags = ["raspberry-pi"]
+
+[repo.config]
+server = "raspberry-pi"
+git_provider = "github.com"
+git_https = true
+repo = "jrudavicius/home-server"
+branch = "main"
+path = "home-server"
+webhook_enabled = true

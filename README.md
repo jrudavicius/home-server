@@ -121,6 +121,11 @@ token account in Komodo and select that account on the Stack after syncing.
 Do this after committing and pushing this repository, otherwise Komodo will
 clone the old `main` branch and miss the stack files.
 
+The optional Repo resource in `komodo/repos.toml` creates a visible Komodo
+Repo named `home-server` for this Git repository. It is separate from the
+Git-backed `media` Stack and is useful when you want the repository to appear
+under Komodo's Repos page.
+
 Keep `stacks/media/.env` out of Git. After the Stack is synced, open the Stack
 environment in Komodo and paste the values from `stacks/media/.env.example`
 with real local paths/secrets. Komodo will write that environment to `.env`
