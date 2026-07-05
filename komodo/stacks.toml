@@ -5,7 +5,7 @@ tags = ["entrypoint", "home"]
 deploy = true
 
 [stack.config]
-server = "home"
+server = "raspberry-pi"
 files_on_host = false
 git_provider = "github.com"
 git_https = true
@@ -46,7 +46,7 @@ deploy = true
 after = ["entrypoint"]
 
 [stack.config]
-server = "home"
+server = "raspberry-pi"
 files_on_host = false
 git_provider = "github.com"
 git_https = true

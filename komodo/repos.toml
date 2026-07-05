@@ -4,7 +4,7 @@ description = "Raspberry Pi server configuration repository."
 tags = ["home"]
 
 [repo.config]
-server = "home"
+server = "raspberry-pi"
 git_provider = "github.com"
 git_https = true
 repo = "jrudavicius/home-server"
