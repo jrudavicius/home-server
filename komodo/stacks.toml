@@ -1,0 +1,18 @@
+[[stack]]
+name = "media"
+description = "Plex Media Server and Transmission torrent client."
+tags = ["media", "raspberry-pi"]
+deploy = true
+
+[stack.config]
+server = "raspberry-pi"
+files_on_host = false
+git_provider = "github.com"
+git_https = true
+repo = "jrudavicius/home-server"
+branch = "main"
+run_directory = "stacks/media"
+file_paths = ["docker-compose.yml"]
+project_name = "media"
+auto_pull = true
+webhook_enabled = true

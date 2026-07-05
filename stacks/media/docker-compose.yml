@@ -1,0 +1,40 @@
+services:
+  plex:
+    container_name: media-server
+    image: plexinc/pms-docker:1.42.2.10156-f737b826c
+    restart: unless-stopped
+    ports:
+      - "${PLEX_PORT:?Set PLEX_PORT}:32400"
+    environment:
+      - PLEX_UID=1000
+      - PLEX_GID=1000
+      - TZ=Europe/Vilnius
+      - PLEX_CLAIM=${PLEX_CLAIM:?Set PLEX_CLAIM}
+    volumes:
+      - "${PLEX_CONFIG_PATH:?Set PLEX_CONFIG_PATH}:/config"
+      - "${TRANSCODE_PATH:?Set TRANSCODE_PATH}:/transcode"
+      - "${MEDIA_PATH:?Set MEDIA_PATH}:/data"
+
+  transmission:
+    container_name: torrent-client
+    image: lscr.io/linuxserver/transmission:4.0.6
+    restart: unless-stopped
+    ports:
+      - "${TRANSMISSION_WEB_PORT:-9091}:9091"
+      - "${TRANSMISSION_PEER_PORT:-51413}:51413"
+      - "${TRANSMISSION_PEER_PORT:-51413}:51413/udp"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Vilnius
+      - USER=${TRANSMISSION_USERNAME:?Set TRANSMISSION_USERNAME}
+      - FILE__PASS=/run/secrets/transmission_user_password
+    volumes:
+      - "${TRANSMISSION_CONFIG_PATH:?Set TRANSMISSION_CONFIG_PATH}:/config"
+      - "${MEDIA_PATH:?Set MEDIA_PATH}:/media"
+    secrets:
+      - transmission_user_password
+
+secrets:
+  transmission_user_password:
+    file: ${TRANSMISSION_USER_PASSWORD_FILE:?Set TRANSMISSION_USER_PASSWORD_FILE}
