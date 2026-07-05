@@ -4,8 +4,8 @@ services:
     image: portainer/portainer-ee:2.33.5
     restart: always
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
+      - "${DOCKER_SOCKET_PATH:?Set DOCKER_SOCKET_PATH}:/var/run/docker.sock"
+      - "${PORTAINER_DATA:?Set PORTAINER_DATA}:/data"
     ports:
       - 9443:9443
       - 8000:8000
@@ -30,16 +30,17 @@ services:
     container_name: media-server
     image: plexinc/pms-docker:1.42.2.10156-f737b826c
     restart: unless-stopped
-    network_mode: host
+    ports:
+      - "${PLEX_PORT:?Set PLEX_PORT}:32400"
     environment:
       - PLEX_UID=1000
       - PLEX_GID=1000
       - TZ=Europe/Vilnius
-      - PLEX_CLAIM=claim-BMtUB_8d4xM8NB5Mz3yy
+      - PLEX_CLAIM=${PLEX_CLAIM:?Set PLEX_CLAIM}
     volumes:
-      - ./plex-media-server/config:/config
-      - ./transcode:/transcode
-      - /media/drive:/data
+      - "${PLEX_CONFIG_PATH:?Set PLEX_CONFIG_PATH}:/config"
+      - "${TRANSCODE_PATH:?Set TRANSCODE_PATH}:/transcode"
+      - "${MEDIA_PATH:?Set MEDIA_PATH}:/data"
 
   transmission:
     container_name: torrent-client
@@ -53,16 +54,13 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Vilnius
-      - PASS=/run/secrets/transmission_user_password
+      - USER=${TRANSMISSION_USERNAME:?Set TRANSMISSION_USERNAME}
+      - FILE__PASS=/run/secrets/transmission_user_password
     volumes:
-      - ./transmission/config:/config
+      - "${TRANSMISSION_CONFIG_PATH:?Set TRANSMISSION_CONFIG_PATH}:/config"
+      - "${MEDIA_PATH:?Set MEDIA_PATH}:/media"
     secrets:
       - transmission_user_password
-
-volumes:
-  portainer_data:
-    name: portainer_data
-    external: true
 
 networks:
   default:
@@ -70,4 +68,4 @@ networks:
 
 secrets:
   transmission_user_password:
-    file: transmission_user_password.txt
+    file: ${TRANSMISSION_USER_PASSWORD_FILE:?Set TRANSMISSION_USER_PASSWORD_FILE}
