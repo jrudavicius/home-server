@@ -226,8 +226,9 @@ docker compose up -d
 ```
 
 The ngrok inspection UI/API is published at `http://localhost:4040` by default.
-The stack starts the endpoint declared in `stacks/ngrok/ngrok.yml`; by default
-that is `entrypoint`, which forwards to Traefik.
+The stack starts the endpoints declared in `stacks/ngrok/ngrok.yml`; by default
+those are `webhooks`, an HTTPS endpoint that forwards directly to Komodo, and
+`entrypoint`, an HTTP endpoint that forwards to Traefik.
 
 For Komodo, sync the declarative Stack resources from `komodo/stacks.toml`.
 It creates Git-based Stacks named `entrypoint`, `observability`, `media`, and
@@ -246,7 +247,7 @@ Compose file: docker-compose.yml
 The `observability`, `media`, and `ngrok` Stacks declare
 `after = ["entrypoint"]`, so Resource Sync deploys the reverse proxy and landing
 page before deploying Grafana, Loki, Alloy, Plex, Transmission, or the public
-ngrok endpoint.
+ngrok endpoints.
 
 Komodo clones over HTTPS, not SSH. If the repository is private, add a GitHub
 token account in Komodo and select that account on the Stacks after syncing.
@@ -377,13 +378,14 @@ agent instead. It starts one ngrok container with its endpoint config from
 `stacks/ngrok/ngrok.yml`:
 
 ```text
+webhooks public URL   -> komodo-core:9120
 entrypoint public URL -> home-server-proxy:80
 ```
 
-The `entrypoint` URL opens the Traefik landing page. It also receives
-`/listener` webhook paths because Traefik routes those paths to Komodo before the
-catch-all home page route. The Traefik route is configured in
-`stacks/entrypoint/traefik/dynamic.yml`:
+The `webhooks` HTTPS URL receives `/listener` webhook paths by forwarding
+directly to Komodo. The `entrypoint` HTTP URL opens the Traefik landing page and
+routed services. Traefik still routes `/listener` paths to Komodo locally as a
+fallback:
 
 ```yaml
 komodo:
@@ -394,22 +396,22 @@ komodo:
   service: komodo
 ```
 
-With `KOMODO_WEBHOOK_BASE_URL=https://your-public-ngrok-url`, the GitHub webhook
+With `KOMODO_WEBHOOK_BASE_URL=https://your-webhooks-ngrok-url`, the GitHub webhook
 payload URLs are:
 
 ```text
-https://your-public-ngrok-url/listener/github/sync/home-server-resources/sync
-https://your-public-ngrok-url/listener/github/stack/entrypoint/deploy
-https://your-public-ngrok-url/listener/github/stack/observability/deploy
-https://your-public-ngrok-url/listener/github/stack/media/deploy
-https://your-public-ngrok-url/listener/github/stack/ngrok/deploy
+https://your-webhooks-ngrok-url/listener/github/sync/home-server-resources/sync
+https://your-webhooks-ngrok-url/listener/github/stack/entrypoint/deploy
+https://your-webhooks-ngrok-url/listener/github/stack/observability/deploy
+https://your-webhooks-ngrok-url/listener/github/stack/media/deploy
+https://your-webhooks-ngrok-url/listener/github/stack/ngrok/deploy
 ```
 
-The checked token's free ngrok plan assigned the same `ngrok-free.dev` URL when
-two HTTP endpoints were configured without explicit URLs, so the default config
-keeps one endpoint and routes internally through Traefik. If you later upgrade or
-reserve distinct domains, use `stacks/ngrok/ngrok.multi-endpoint.example.yml` as
-the starting point for separate public `entrypoint` and `komodo` URLs.
+The default config asks ngrok to create an HTTPS URL for `webhooks` and an HTTP
+URL for `entrypoint`. This keeps them distinct on an account that only assigns
+one free hostname. For two HTTPS hostnames, configure explicit reserved or
+custom domains in `stacks/ngrok/ngrok.yml`; use
+`stacks/ngrok/ngrok.multi-endpoint.example.yml` as the starting point.
 
 The local ngrok inspector is available on:
 

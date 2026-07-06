@@ -121,7 +121,7 @@ TRANSMISSION_USER_PASSWORD_FILE=[[TRANSMISSION_USER_PASSWORD_FILE]]
 
 [[stack]]
 name = "ngrok"
-description = "ngrok agent endpoint for external access and GitHub webhook delivery."
+description = "ngrok agent endpoints for external entrypoint access and GitHub webhook delivery."
 tags = ["network", "webhooks", "home"]
 deploy = true
 after = ["entrypoint"]

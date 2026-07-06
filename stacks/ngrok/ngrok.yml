@@ -6,7 +6,14 @@ agent:
   web_addr: 0.0.0.0:4040
 
 endpoints:
+  - name: webhooks
+    url: https://
+    description: Direct Komodo endpoint for GitHub webhook delivery.
+    upstream:
+      url: http://komodo-core:9120
+
   - name: entrypoint
-    description: Traefik entrypoint for the public landing page, routed services, and GitHub webhooks.
+    url: http://
+    description: Traefik entrypoint for the public landing page and routed services.
     upstream:
       url: http://home-server-proxy:80

@@ -4,14 +4,17 @@ Dockerized ngrok agent for external Home Server access and GitHub webhook
 delivery.
 
 The stack uses one ngrok container with endpoints declared in `ngrok.yml`. The
-default config starts a single public endpoint:
+default config starts two public endpoints:
 
 ```text
+webhooks  -> http://komodo-core:9120
 entrypoint -> http://home-server-proxy:80
 ```
 
-The `entrypoint` endpoint opens the Traefik landing page and receives webhooks
-because Traefik routes `/listener/...` to Komodo.
+The `webhooks` endpoint is an HTTPS endpoint for Komodo listener URLs used by
+GitHub webhooks. The `entrypoint` endpoint is an HTTP endpoint that opens the
+Traefik landing page and routed services. Splitting the schemes keeps the two
+endpoints distinct on an ngrok account that only assigns one free hostname.
 
 ## Setup
 
@@ -27,13 +30,13 @@ NGROK_INSPECT_PORT=4040
 NGROK_DOCKER_NETWORK=portainer_network
 ```
 
-Start the endpoint:
+Start the endpoints:
 
 ```sh
 docker compose up -d
 ```
 
-Check the public forwarding URL:
+Check the public forwarding URLs:
 
 ```sh
 docker compose logs -f ngrok
@@ -48,49 +51,47 @@ http://localhost:4040/api/tunnels
 
 ## Endpoint configuration
 
-Edit `ngrok.yml` to change the public endpoint. Each endpoint needs a unique
+Edit `ngrok.yml` to change the public endpoints. Each endpoint needs a unique
 `name` and an `upstream.url` that is reachable on the Docker network:
 
 ```yaml
 endpoints:
+  - name: webhooks
+    url: https://
+    upstream:
+      url: http://komodo-core:9120
   - name: entrypoint
+    url: http://
     upstream:
       url: http://home-server-proxy:80
 ```
 
-## Multiple public endpoints
-
-The free ngrok account used for this stack started two HTTP endpoint definitions
-on the same `ngrok-free.dev` URL. That is not useful for splitting traffic
-between services, so the default config keeps one endpoint and lets Traefik route
-paths internally.
-
-If your ngrok account supports distinct reserved or custom domains, use
-`ngrok.multi-endpoint.example.yml` as the starting point. Each public endpoint
-needs its own `url`:
+By default, `webhooks` uses an HTTPS public URL and `entrypoint` uses an HTTP
+public URL. To use stable reserved or custom domains, or to make both endpoints
+HTTPS, use `ngrok.multi-endpoint.example.yml` as the starting point:
 
 ```yaml
 endpoints:
+  - name: webhooks
+    url: https://your-webhooks-domain.ngrok.app
+    upstream:
+      url: http://komodo-core:9120
   - name: entrypoint
     url: https://your-entrypoint-domain.ngrok.app
     upstream:
       url: http://home-server-proxy:80
-  - name: komodo
-    url: https://your-komodo-domain.ngrok.app
-    upstream:
-      url: http://komodo-core:9120
 ```
 
-On the free plan, keep the account limits in mind: at the time this was checked,
-ngrok allowed up to 3 online endpoints and 3 concurrent agents, but custom or
-reserved domains required a paid plan.
+After startup, verify in the logs or inspector that `webhooks` and `entrypoint`
+have two different public URLs.
 
 ## Komodo webhook base URL
 
-After ngrok is running, copy the public HTTPS URL into the root Server `.env`:
+After ngrok is running, copy the `webhooks` public HTTPS URL into the root
+Server `.env`:
 
 ```env
-KOMODO_WEBHOOK_BASE_URL=https://your-public-ngrok-url
+KOMODO_WEBHOOK_BASE_URL=https://your-webhooks-ngrok-url
 ```
 
 Then restart Komodo from the repository root:
@@ -102,11 +103,11 @@ docker compose up -d
 Use these webhook payload URLs in GitHub:
 
 ```text
-https://your-public-ngrok-url/listener/github/sync/home-server-resources/sync
-https://your-public-ngrok-url/listener/github/stack/entrypoint/deploy
-https://your-public-ngrok-url/listener/github/stack/observability/deploy
-https://your-public-ngrok-url/listener/github/stack/media/deploy
-https://your-public-ngrok-url/listener/github/stack/ngrok/deploy
+https://your-webhooks-ngrok-url/listener/github/sync/home-server-resources/sync
+https://your-webhooks-ngrok-url/listener/github/stack/entrypoint/deploy
+https://your-webhooks-ngrok-url/listener/github/stack/observability/deploy
+https://your-webhooks-ngrok-url/listener/github/stack/media/deploy
+https://your-webhooks-ngrok-url/listener/github/stack/ngrok/deploy
 ```
 
 Use `application/json` as the content type and use the value of
@@ -114,7 +115,8 @@ Use `application/json` as the content type and use the value of
 
 ## Security note
 
-The `entrypoint` endpoint exposes the Traefik landing page and `/listener`
-webhook paths publicly while the container is running. Keep Komodo credentials
-strong, keep the webhook secret private, and stop the endpoint or the ngrok stack
-when it is not needed.
+The `entrypoint` endpoint exposes the Traefik landing page publicly over HTTP by
+default. The `webhooks` endpoint forwards directly to Komodo, so keep Komodo
+credentials strong, keep the webhook secret private, and stop the endpoint or the
+ngrok stack when it is not needed. Use explicit reserved or custom HTTPS domains
+before exposing sensitive routed services through `entrypoint`.
