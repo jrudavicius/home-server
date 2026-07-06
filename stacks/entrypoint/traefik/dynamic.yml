@@ -61,7 +61,7 @@ http:
     transmission:
       loadBalancer:
         servers:
-          - url: "http://torrent-client:9091"
+          - url: "http://media-vpn:9091"
 
     entrypoint:
       loadBalancer:

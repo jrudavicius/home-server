@@ -16,7 +16,7 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
   stack.
 - Exposing Home Server through ngrok for outside access and GitHub webhooks.
 - Hosting Plex Media Server through the `media` stack.
-- Running Transmission for torrent management through the `media` stack.
+- Running Transmission through a WireGuard VPN gateway in the `media` stack.
 
 ## Services
 
@@ -33,6 +33,7 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 | `plex` | `media-server` | Plex Media Server, defined in `stacks/media/docker-compose.yml`. |
 | `transmission` | `torrent-client` | Transmission torrent client, defined in `stacks/media/docker-compose.yml`. |
 | `ngrok` | `home-server-ngrok` | Public tunnel, defined in `stacks/ngrok/docker-compose.yml`. |
+| `vpn` | `media-vpn` | WireGuard/Gluetun VPN gateway for Transmission, defined in `stacks/media/docker-compose.yml`. |
 
 ## Requirements
 
@@ -111,6 +112,10 @@ PLEX_CLAIM=
 PLEX_CONFIG_PATH=/srv/server/config/plex
 TRANSCODE_PATH=/srv/server/cache/plex-transcode
 MEDIA_PATH=/srv/server/media
+
+VPN_IMAGE_TAG=v3.41.1
+WIREGUARD_CONFIG_FILE=/srv/server/config/wireguard/home-server-LT-37.conf
+VPN_OUTBOUND_SUBNETS=192.168.0.0/16,172.16.0.0/12
 
 TRANSMISSION_WEB_PORT=9091
 TRANSMISSION_PEER_PORT=51413
@@ -290,6 +295,8 @@ Git:
 PLEX_CONFIG_PATH
 TRANSCODE_PATH
 MEDIA_PATH
+WIREGUARD_CONFIG_FILE
+VPN_OUTBOUND_SUBNETS
 TRANSMISSION_CONFIG_PATH
 TRANSMISSION_USER_PASSWORD_FILE
 NGROK_INSPECT_PORT
@@ -300,11 +307,27 @@ Create `GRAFANA_ADMIN_PASSWORD` as a secret Komodo variable before deploying
 the observability Stack.
 
 Create the directories referenced by those variables on a new host before
-deploying the media Stack. Set the secret `NGROK_AUTHTOKEN` variable in Komodo
-before deploying the ngrok Stack. `PLEX_CLAIM` is optional; leave it empty for
-an unclaimed Plex server, or set it to a real `claim-...` token in Komodo before
-the first Plex setup. Komodo writes the resolved Stack environment to `.env`
-when deploying.
+deploying the media Stack. Copy the generated WireGuard client config to the
+path in `WIREGUARD_CONFIG_FILE`, keep it out of Git, and restrict its
+permissions to the server user or root because it contains the VPN private key.
+Set the secret `NGROK_AUTHTOKEN` variable in Komodo before deploying the ngrok
+Stack. `PLEX_CLAIM` is optional; leave it empty for an unclaimed Plex server, or
+set it to a real `claim-...` token in Komodo before the first Plex setup. Komodo
+writes the resolved Stack environment to `.env` when deploying.
+
+The media Stack starts `media-vpn` with Gluetun and mounts
+`WIREGUARD_CONFIG_FILE` at `/gluetun/wireguard/wg0.conf`. Transmission uses
+`network_mode: "service:vpn"`, so its web UI and torrent traffic use the VPN
+container's network namespace. Plex stays on the normal Docker network so local
+and remote Plex access are not tied to the VPN.
+
+`VPN_OUTBOUND_SUBNETS` keeps the local LAN and Docker bridge networks reachable
+from the VPN namespace. Do not add a broad `10.0.0.0/8` subnet when using the
+generated Proton config, because its tunnel address is in `10.2.0.0/16`.
+`TRANSMISSION_PEER_PORT` is opened on the VPN interface only; do not forward it
+from the home router to the server's public IP. If Proton assigns a different
+NAT-PMP port, set `TRANSMISSION_PEER_PORT` to that assigned port and update
+Transmission's saved settings if needed.
 
 Stop the Komodo bootstrap stack:
 
@@ -442,7 +465,7 @@ forward only the ports you actually need:
 | Grafana | `http://84.32.117.122:3000` | TCP `3000` to `192.168.0.130:3000` |
 | Plex | `http://84.32.117.122:32400/web` | TCP `32400` to `192.168.0.130:32400` |
 | Transmission UI | `http://84.32.117.122:9091` | TCP `9091` to `192.168.0.130:9091` |
-| Transmission peers | n/a | TCP/UDP `51413` to `192.168.0.130:51413` |
+| Transmission peers | via VPN provider port forwarding | Do not forward from the home router |
 
 Avoid forwarding the Transmission UI unless it has a strong password and you
 really need internet access to it. For admin tools like Komodo, Grafana, and
@@ -461,7 +484,7 @@ between the router and Docker Desktop:
   it.
 - Packet Filter (`pf`): if a custom `/etc/pf.conf`, VPN client, security agent,
   or MDM profile is installed, make sure it does not block inbound TCP `9120`,
-  TCP `32400`, TCP `9091`, or TCP/UDP `51413`.
+  TCP `3000`, TCP `32400`, or TCP `9091`.
 - Third-party firewalls and VPNs: tools such as LuLu, Little Snitch, corporate
   endpoint security, or VPN "kill switch" features can block inbound traffic
   before Docker sees it.
@@ -505,6 +528,8 @@ Apple's current firewall and Local Network settings documentation is here:
   Compose projects.
 - Komodo keys and MongoDB data are stored in Docker-managed volumes.
 - Loki, Grafana, and Alloy data are stored in Docker-managed volumes.
+- Transmission shares the `media-vpn` container network namespace so torrent
+  traffic uses the mounted WireGuard config.
 - Plex, Transmission, media, backup, and periphery paths are expected to be
   provided by the relevant stack `.env` file.
 - Timezone is configured as `Europe/Vilnius`.

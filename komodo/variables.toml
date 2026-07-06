@@ -23,6 +23,18 @@ value = "/srv/server/config/transmission"
 is_secret = false
 
 [[variable]]
+name = "WIREGUARD_CONFIG_FILE"
+description = "WireGuard client config file path for the media VPN gateway."
+value = "/srv/server/config/wireguard/home-server-LT-37.conf"
+is_secret = false
+
+[[variable]]
+name = "VPN_OUTBOUND_SUBNETS"
+description = "LAN and Docker subnets Gluetun should keep reachable outside the VPN tunnel."
+value = "192.168.0.0/16,172.16.0.0/12"
+is_secret = false
+
+[[variable]]
 name = "TRANSMISSION_USER_PASSWORD_FILE"
 description = "Transmission password secret file path."
 value = "/srv/server/config/transmission/transmission_user_password.txt"

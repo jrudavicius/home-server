@@ -85,8 +85,8 @@ DOCKER_SOCKET_PATH=/var/run/docker.sock
 
 [[stack]]
 name = "media"
-description = "Plex Media Server and Transmission torrent client."
-tags = ["media-services", "home"]
+description = "Plex Media Server and Transmission torrent client behind WireGuard."
+tags = ["media-services", "vpn", "home"]
 deploy = true
 after = ["entrypoint"]
 
@@ -110,6 +110,10 @@ PLEX_CLAIM=
 PLEX_CONFIG_PATH=[[PLEX_CONFIG_PATH]]
 TRANSCODE_PATH=[[TRANSCODE_PATH]]
 MEDIA_PATH=[[MEDIA_PATH]]
+
+VPN_IMAGE_TAG=v3.41.1
+WIREGUARD_CONFIG_FILE=[[WIREGUARD_CONFIG_FILE]]
+VPN_OUTBOUND_SUBNETS=[[VPN_OUTBOUND_SUBNETS]]
 
 TRANSMISSION_WEB_PORT=9091
 TRANSMISSION_PEER_PORT=51413

@@ -1,1 +1,5 @@
 .env
+
+# WireGuard client configs contain private keys.
+wg0.conf
+home-server-*.conf
