@@ -1,0 +1,29 @@
+[[variable]]
+name = "PLEX_CONFIG_PATH"
+description = "Plex config bind mount path."
+value = "/srv/server/config/plex"
+is_secret = false
+
+[[variable]]
+name = "TRANSCODE_PATH"
+description = "Plex transcode bind mount path."
+value = "/srv/server/cache/plex-transcode"
+is_secret = false
+
+[[variable]]
+name = "MEDIA_PATH"
+description = "Shared media root for Plex and Transmission."
+value = "/srv/server/media"
+is_secret = false
+
+[[variable]]
+name = "TRANSMISSION_CONFIG_PATH"
+description = "Transmission config bind mount path."
+value = "/srv/server/config/transmission"
+is_secret = false
+
+[[variable]]
+name = "TRANSMISSION_USER_PASSWORD_FILE"
+description = "Transmission password secret file path."
+value = "/srv/server/config/transmission/transmission_user_password.txt"
+is_secret = false

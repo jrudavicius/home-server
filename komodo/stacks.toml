@@ -13,6 +13,10 @@ repo = "jrudavicius/home-server"
 branch = "main"
 run_directory = "stacks/entrypoint"
 file_paths = ["docker-compose.yml"]
+config_files = [
+  { path = "traefik/dynamic.yml", services = ["traefik"], requires = "None" },
+  { path = "entrypoint/index.html.template", services = ["entrypoint"], requires = "Restart" },
+]
 project_name = "entrypoint"
 auto_pull = true
 webhook_enabled = true
@@ -60,7 +64,7 @@ webhook_force_deploy = true
 environment = """
 PLEX_PORT=32400
 PLEX_TRAEFIK_HOST=plex.home.arpa
-PLEX_CLAIM=[[PLEX_CLAIM]]
+PLEX_CLAIM=
 PLEX_CONFIG_PATH=[[PLEX_CONFIG_PATH]]
 TRANSCODE_PATH=[[TRANSCODE_PATH]]
 MEDIA_PATH=[[MEDIA_PATH]]

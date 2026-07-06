@@ -95,19 +95,19 @@ Create a `.env` file next to `stacks/media/docker-compose.yml` for local manual
 testing of the media stack:
 
 ```env
-PLEX_PORT=
-PLEX_TRAEFIK_HOST=
+PLEX_PORT=32400
+PLEX_TRAEFIK_HOST=plex.home.arpa
 PLEX_CLAIM=
-PLEX_CONFIG_PATH=
-TRANSCODE_PATH=
-MEDIA_PATH=
+PLEX_CONFIG_PATH=/srv/server/config/plex
+TRANSCODE_PATH=/srv/server/cache/plex-transcode
+MEDIA_PATH=/srv/server/media
 
 TRANSMISSION_WEB_PORT=9091
 TRANSMISSION_PEER_PORT=51413
-TRANSMISSION_TRAEFIK_HOST=
-TRANSMISSION_USERNAME=
-TRANSMISSION_USER_PASSWORD_FILE=
-TRANSMISSION_CONFIG_PATH=
+TRANSMISSION_TRAEFIK_HOST=transmission.home.arpa
+TRANSMISSION_USERNAME=julius
+TRANSMISSION_USER_PASSWORD_FILE=/srv/server/config/transmission/transmission_user_password.txt
+TRANSMISSION_CONFIG_PATH=/srv/server/config/transmission
 ```
 
 Traefik listens on `TRAEFIK_HTTP_PORT`. The landing page links to services using
@@ -189,10 +189,11 @@ Repo named `home-server` for this Git repository. It is separate from the
 Git-backed Stacks and is useful when you want the repository to appear under
 Komodo's Repos page.
 
-The Resource Sync in `komodo/syncs.toml` makes Komodo read the `komodo/`
-directory from the `home-server` Repo and reconcile the declared resources.
-Deletion is disabled so resources not yet represented in TOML, such as the
-connected server, are left alone.
+The Resource Sync in `komodo/syncs.toml` reads the `komodo/` directory directly
+from `github.com/jrudavicius/home-server` on `main` and reconciles the declared
+resources and non-secret variables. Deletion is disabled so resources not yet
+represented in TOML, such as the connected server and local secrets, are left
+alone.
 
 To deploy from GitHub pushes, set `KOMODO_WEBHOOK_BASE_URL` to a public HTTPS
 URL that can reach Komodo, then add GitHub push webhooks using these payload
@@ -208,11 +209,11 @@ Use content type `application/json` and set the GitHub webhook secret to the
 same value as `KOMODO_WEBHOOK_SECRET`. Both Stacks have
 `webhook_force_deploy = true`, so their Stack webhooks deploy on every push.
 
-Keep `stacks/entrypoint/.env` and `stacks/media/.env` out of Git. The synced
-Stack environments reference Komodo variables for host-specific values:
+Keep `stacks/entrypoint/.env` and `stacks/media/.env` out of Git. The
+non-secret media path variables are declared in `komodo/variables.toml` and are
+synced from Git:
 
 ```text
-PLEX_CLAIM
 PLEX_CONFIG_PATH
 TRANSCODE_PATH
 MEDIA_PATH
@@ -220,8 +221,11 @@ TRANSMISSION_CONFIG_PATH
 TRANSMISSION_USER_PASSWORD_FILE
 ```
 
-Create those variables in Komodo with real local paths/secrets before deploying
-on a new host. Komodo writes the resolved environment to `.env` when deploying.
+Create the directories referenced by those variables on a new host before
+deploying the media Stack. `PLEX_CLAIM` is optional; leave it empty for an
+unclaimed Plex server, or set it to a real `claim-...` token in Komodo before
+the first Plex setup. Komodo writes the resolved Stack environment to `.env`
+when deploying.
 
 Stop the Komodo bootstrap stack:
 

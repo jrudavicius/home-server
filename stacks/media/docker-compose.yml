@@ -15,7 +15,7 @@ services:
       - PLEX_UID=1000
       - PLEX_GID=1000
       - TZ=Europe/Vilnius
-      - PLEX_CLAIM=${PLEX_CLAIM:?Set PLEX_CLAIM}
+      - PLEX_CLAIM=${PLEX_CLAIM:-}
     volumes:
       - "${PLEX_CONFIG_PATH:?Set PLEX_CONFIG_PATH}:/config"
       - "${TRANSCODE_PATH:?Set TRANSCODE_PATH}:/transcode"

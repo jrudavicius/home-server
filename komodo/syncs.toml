@@ -4,12 +4,16 @@ description = "Sync Komodo resources from this repository."
 tags = ["home"]
 
 [resource_sync.config]
-linked_repo = "home-server"
+git_provider = "github.com"
+git_https = true
+repo = "jrudavicius/home-server"
+branch = "main"
+files_on_host = false
 resource_path = ["komodo"]
 managed = false
 delete = false
 include_resources = true
-include_variables = false
+include_variables = true
 include_user_groups = false
 pending_alert = true
 webhook_enabled = true
