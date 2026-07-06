@@ -12,6 +12,8 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 - Running a local Komodo periphery agent.
 - Routing local web traffic with Traefik through the `entrypoint` stack.
 - Opening a local home server landing page through the `entrypoint` stack.
+- Collecting and searching Docker container logs through the `observability`
+  stack.
 - Hosting Plex Media Server through the `media` stack.
 - Running Transmission for torrent management through the `media` stack.
 
@@ -24,6 +26,9 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 | `komodo-periphery` | `komodo-agent` | Local Komodo agent connected to Docker on the Raspberry Pi. |
 | `traefik` | `home-server-proxy` | Reverse proxy, defined in `stacks/entrypoint/docker-compose.yml`. |
 | `entrypoint` | `home-server-entrypoint` | Landing page, defined in `stacks/entrypoint/docker-compose.yml`. |
+| `grafana` | `observability-grafana` | Log search and dashboards, defined in `stacks/observability/docker-compose.yml`. |
+| `loki` | `observability-loki` | Log storage and query API, defined in `stacks/observability/docker-compose.yml`. |
+| `alloy` | `observability-alloy` | Docker log collector, defined in `stacks/observability/docker-compose.yml`. |
 | `plex` | `media-server` | Plex Media Server, defined in `stacks/media/docker-compose.yml`. |
 | `transmission` | `torrent-client` | Transmission torrent client, defined in `stacks/media/docker-compose.yml`. |
 
@@ -80,9 +85,12 @@ ENTRYPOINT_TITLE=Home Server
 ENTRYPOINT_SUBTITLE=Raspberry Pi services
 ENTRYPOINT_KOMODO_URL=
 ENTRYPOINT_PLEX_URL=
+ENTRYPOINT_GRAFANA_URL=
 ENTRYPOINT_TRAEFIK_URL=
 ENTRYPOINT_TRANSMISSION_URL=
 
+GRAFANA_PORT=3000
+GRAFANA_TRAEFIK_HOST=grafana.home.arpa
 KOMODO_PORT=9120
 KOMODO_TRAEFIK_HOST=komodo.home.arpa
 PLEX_PORT=32400
@@ -110,21 +118,49 @@ TRANSMISSION_USER_PASSWORD_FILE=/srv/server/config/transmission/transmission_use
 TRANSMISSION_CONFIG_PATH=/srv/server/config/transmission
 ```
 
+Create a `.env` file next to `stacks/observability/docker-compose.yml` for
+local manual testing of the observability stack:
+
+```env
+GRAFANA_IMAGE_TAG=13.1.0
+LOKI_IMAGE_TAG=3.7.0
+ALLOY_IMAGE_TAG=v1.17.0
+
+GRAFANA_PORT=3000
+GRAFANA_TRAEFIK_HOST=grafana.home.arpa
+GRAFANA_ROOT_URL=http://grafana.home.arpa/
+GRAFANA_ADMIN_USER=admin
+GRAFANA_ADMIN_PASSWORD=
+GRAFANA_PLUGINS_PREINSTALL_DISABLED=true
+GRAFANA_PLUGINS_PREINSTALL_AUTO_UPDATE=false
+
+LOKI_RETENTION_PERIOD=168h
+LOKI_MAX_QUERY_LOOKBACK=168h
+
+DOCKER_SOCKET_PATH=/var/run/docker.sock
+```
+
 Traefik listens on `TRAEFIK_HTTP_PORT`. The landing page links to services using
 the current browser hostname and each service's exposed port, so it works before
 local DNS is configured.
 
 Traefik also supports hostname routes. Point the hostnames in
-`TRAEFIK_DASHBOARD_HOST`, `KOMODO_TRAEFIK_HOST`, `PLEX_TRAEFIK_HOST`, and
-`TRANSMISSION_TRAEFIK_HOST` at the Raspberry Pi using your router DNS, Pi-hole,
-AdGuard Home, or local hosts files when you want clean local domains.
+`TRAEFIK_DASHBOARD_HOST`, `KOMODO_TRAEFIK_HOST`, `GRAFANA_TRAEFIK_HOST`,
+`PLEX_TRAEFIK_HOST`, and `TRANSMISSION_TRAEFIK_HOST` at the Raspberry Pi using
+your router DNS, Pi-hole, AdGuard Home, or local hosts files when you want clean
+local domains.
 
 Set `KOMODO_HOST` to the public URL you use for Komodo. Before local DNS exists,
 use the direct server address, such as `http://192.168.1.50:9120`. After DNS is
 configured, the default Traefik hostname would be `http://komodo.home.arpa`.
 
-Set `ENTRYPOINT_KOMODO_URL`, `ENTRYPOINT_PLEX_URL`, `ENTRYPOINT_TRAEFIK_URL`,
-and `ENTRYPOINT_TRANSMISSION_URL` only when you want fully custom URLs.
+Set `ENTRYPOINT_KOMODO_URL`, `ENTRYPOINT_PLEX_URL`, `ENTRYPOINT_GRAFANA_URL`,
+`ENTRYPOINT_TRAEFIK_URL`, and `ENTRYPOINT_TRANSMISSION_URL` only when you want
+fully custom URLs.
+
+The observability stack stores Loki, Grafana, and Alloy data in Docker-managed
+volumes. Loki keeps container logs for 168 hours by default. Increase
+`LOKI_RETENTION_PERIOD` only after checking available disk space.
 
 `TRANSMISSION_USER_PASSWORD_FILE` must point to a local file containing the
 Transmission password. Docker Compose mounts it as a secret. Keep this file to
@@ -164,20 +200,29 @@ cd stacks/media
 docker compose up -d
 ```
 
+Start the observability stack manually for local testing:
+
+```sh
+cd stacks/observability
+docker compose up -d
+```
+
 For Komodo, sync the declarative Stack resources from `komodo/stacks.toml`.
-It creates Git-based Stacks named `entrypoint` and `media` on the
-`home-server` server:
+It creates Git-based Stacks named `entrypoint`, `observability`, and `media` on
+the `home-server` server:
 
 ```text
 Repo: github.com/jrudavicius/home-server
 Branch: main
 Entrypoint run directory: stacks/entrypoint
+Observability run directory: stacks/observability
 Media run directory: stacks/media
 Compose file: docker-compose.yml
 ```
 
-The `media` Stack declares `after = ["entrypoint"]`, so Resource Sync deploys
-the reverse proxy and landing page before deploying Plex and Transmission.
+The `observability` and `media` Stacks declare `after = ["entrypoint"]`, so
+Resource Sync deploys the reverse proxy and landing page before deploying
+Grafana, Loki, Alloy, Plex, and Transmission.
 
 Komodo clones over HTTPS, not SSH. If the repository is private, add a GitHub
 token account in Komodo and select that account on the Stacks after syncing.
@@ -202,16 +247,17 @@ URLs:
 ```text
 https://<komodo-public-host>/listener/github/sync/home-server-resources/sync
 https://<komodo-public-host>/listener/github/stack/entrypoint/deploy
+https://<komodo-public-host>/listener/github/stack/observability/deploy
 https://<komodo-public-host>/listener/github/stack/media/deploy
 ```
 
 Use content type `application/json` and set the GitHub webhook secret to the
-same value as `KOMODO_WEBHOOK_SECRET`. Both Stacks have
+same value as `KOMODO_WEBHOOK_SECRET`. All three Stacks have
 `webhook_force_deploy = true`, so their Stack webhooks deploy on every push.
 
-Keep `stacks/entrypoint/.env` and `stacks/media/.env` out of Git. The
-non-secret media path variables are declared in `komodo/variables.toml` and are
-synced from Git:
+Keep `stacks/entrypoint/.env`, `stacks/observability/.env`, and
+`stacks/media/.env` out of Git. The non-secret media path variables are
+declared in `komodo/variables.toml` and are synced from Git:
 
 ```text
 PLEX_CONFIG_PATH
@@ -220,6 +266,9 @@ MEDIA_PATH
 TRANSMISSION_CONFIG_PATH
 TRANSMISSION_USER_PASSWORD_FILE
 ```
+
+Create `GRAFANA_ADMIN_PASSWORD` as a secret Komodo variable before deploying
+the observability Stack.
 
 Create the directories referenced by those variables on a new host before
 deploying the media Stack. `PLEX_CLAIM` is optional; leave it empty for an
@@ -256,6 +305,7 @@ means HTTPS on TCP `443`, but the stack currently publishes the services on
 their own HTTP ports:
 
 - Komodo: `http://84.32.117.122:9120`
+- Grafana: `http://84.32.117.122:3000`
 - Plex: `http://84.32.117.122:32400/web`
 - Transmission UI: `http://84.32.117.122:9091`
 
@@ -270,6 +320,8 @@ internal or self-signed certificate and will show a browser warning.
 The current working ngrok examples use these listener paths:
 
 - `/listener/github/sync/home-server-resources/sync`
+- `/listener/github/stack/entrypoint/deploy`
+- `/listener/github/stack/observability/deploy`
 - `/listener/github/stack/media/deploy`
 
 With `KOMODO_WEBHOOK_BASE_URL=http://84.32.117.122:9120`, the GitHub webhook
@@ -277,13 +329,9 @@ payload URLs are:
 
 ```text
 http://84.32.117.122:9120/listener/github/sync/home-server-resources/sync
-http://84.32.117.122:9120/listener/github/stack/media/deploy
-```
-
-If the `entrypoint` stack is also deployed by webhook, use:
-
-```text
 http://84.32.117.122:9120/listener/github/stack/entrypoint/deploy
+http://84.32.117.122:9120/listener/github/stack/observability/deploy
+http://84.32.117.122:9120/listener/github/stack/media/deploy
 ```
 
 These URLs require the router to forward TCP `9120` to `192.168.0.130:9120`.
@@ -323,6 +371,7 @@ the GitHub webhook payload URLs are:
 
 ```text
 https://apprehend-crock-backfire.ngrok-free.dev/listener/github/sync/home-server-resources/sync
+https://apprehend-crock-backfire.ngrok-free.dev/listener/github/stack/observability/deploy
 https://apprehend-crock-backfire.ngrok-free.dev/listener/github/stack/media/deploy
 https://apprehend-crock-backfire.ngrok-free.dev/listener/github/stack/entrypoint/deploy
 ```
@@ -353,13 +402,14 @@ forward only the ports you actually need:
 | Service | External access URL | Router forward |
 | --- | --- | --- |
 | Komodo | `http://84.32.117.122:9120` | TCP `9120` to `192.168.0.130:9120` |
+| Grafana | `http://84.32.117.122:3000` | TCP `3000` to `192.168.0.130:3000` |
 | Plex | `http://84.32.117.122:32400/web` | TCP `32400` to `192.168.0.130:32400` |
 | Transmission UI | `http://84.32.117.122:9091` | TCP `9091` to `192.168.0.130:9091` |
 | Transmission peers | n/a | TCP/UDP `51413` to `192.168.0.130:51413` |
 
 Avoid forwarding the Transmission UI unless it has a strong password and you
-really need internet access to it. For admin tools like Komodo and Transmission,
-a VPN or HTTPS reverse proxy is safer than direct public HTTP.
+really need internet access to it. For admin tools like Komodo, Grafana, and
+Transmission, a VPN or HTTPS reverse proxy is safer than direct public HTTP.
 
 ### macOS Firewall Checklist
 
@@ -413,9 +463,11 @@ Apple's current firewall and Local Network settings documentation is here:
 ## Notes
 
 - The root Komodo bootstrap network is named `portainer_network`.
-- The `entrypoint` and `media` Stacks attach to `portainer_network` as an
-  external Docker network so Traefik can route across Compose projects.
+- The `entrypoint`, `observability`, and `media` Stacks attach to
+  `portainer_network` as an external Docker network so Traefik can route across
+  Compose projects.
 - Komodo keys and MongoDB data are stored in Docker-managed volumes.
+- Loki, Grafana, and Alloy data are stored in Docker-managed volumes.
 - Plex, Transmission, media, backup, and periphery paths are expected to be
   provided by the relevant stack `.env` file.
 - Timezone is configured as `Europe/Vilnius`.

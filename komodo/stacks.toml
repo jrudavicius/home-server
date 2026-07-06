@@ -30,15 +30,57 @@ ENTRYPOINT_TITLE=Home Server
 ENTRYPOINT_SUBTITLE=Raspberry Pi services
 ENTRYPOINT_KOMODO_URL=
 ENTRYPOINT_PLEX_URL=
+ENTRYPOINT_GRAFANA_URL=
 ENTRYPOINT_TRAEFIK_URL=
 ENTRYPOINT_TRANSMISSION_URL=
 
+GRAFANA_PORT=3000
+GRAFANA_TRAEFIK_HOST=grafana.home.arpa
 KOMODO_PORT=9120
 KOMODO_TRAEFIK_HOST=komodo.home.arpa
 PLEX_PORT=32400
 PLEX_TRAEFIK_HOST=plex.home.arpa
 TRANSMISSION_WEB_PORT=9091
 TRANSMISSION_TRAEFIK_HOST=transmission.home.arpa
+"""
+
+[[stack]]
+name = "observability"
+description = "Grafana, Loki, and Alloy for Docker container log search."
+tags = ["observability", "logs", "home"]
+deploy = true
+after = ["entrypoint"]
+
+[stack.config]
+server = "home-server"
+files_on_host = false
+git_provider = "github.com"
+git_https = true
+repo = "jrudavicius/home-server"
+branch = "main"
+run_directory = "stacks/observability"
+file_paths = ["docker-compose.yml"]
+project_name = "observability"
+auto_pull = true
+webhook_enabled = true
+webhook_force_deploy = true
+environment = """
+GRAFANA_IMAGE_TAG=13.1.0
+LOKI_IMAGE_TAG=3.7.0
+ALLOY_IMAGE_TAG=v1.17.0
+
+GRAFANA_PORT=3000
+GRAFANA_TRAEFIK_HOST=grafana.home.arpa
+GRAFANA_ROOT_URL=http://grafana.home.arpa/
+GRAFANA_ADMIN_USER=admin
+GRAFANA_ADMIN_PASSWORD=[[GRAFANA_ADMIN_PASSWORD]]
+GRAFANA_PLUGINS_PREINSTALL_DISABLED=true
+GRAFANA_PLUGINS_PREINSTALL_AUTO_UPDATE=false
+
+LOKI_RETENTION_PERIOD=168h
+LOKI_MAX_QUERY_LOOKBACK=168h
+
+DOCKER_SOCKET_PATH=/var/run/docker.sock
 """
 
 [[stack]]

@@ -21,6 +21,13 @@ http:
       priority: 20
       service: plex
 
+    grafana:
+      rule: "Host(`grafana.home.arpa`)"
+      entryPoints:
+        - web
+      priority: 20
+      service: grafana
+
     transmission:
       rule: "Host(`transmission.home.arpa`)"
       entryPoints:
@@ -45,6 +52,11 @@ http:
       loadBalancer:
         servers:
           - url: "http://media-server:32400"
+
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://observability-grafana:3000"
 
     transmission:
       loadBalancer:

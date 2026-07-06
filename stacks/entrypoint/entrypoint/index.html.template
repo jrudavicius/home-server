@@ -237,6 +237,23 @@
 
         <a
           class="service"
+          data-url="${ENTRYPOINT_GRAFANA_URL}"
+          data-host="${GRAFANA_TRAEFIK_HOST}"
+          data-port="${GRAFANA_PORT}"
+          data-path="/"
+          href="#"
+        >
+          <div class="service-top">
+            <span class="mark">G</span>
+            <span class="badge">Logs</span>
+          </div>
+          <h2>Grafana</h2>
+          <p class="description">Search container logs and inspect observability dashboards.</p>
+          <p class="url"></p>
+        </a>
+
+        <a
+          class="service"
           data-url="${ENTRYPOINT_TRANSMISSION_URL}"
           data-host="${TRANSMISSION_TRAEFIK_HOST}"
           data-port="${TRANSMISSION_WEB_PORT}"
@@ -255,7 +272,8 @@
 
       <footer>
         Configure custom links with ENTRYPOINT_KOMODO_URL, ENTRYPOINT_PLEX_URL,
-        ENTRYPOINT_TRAEFIK_URL, and ENTRYPOINT_TRANSMISSION_URL.
+        ENTRYPOINT_GRAFANA_URL, ENTRYPOINT_TRAEFIK_URL, and
+        ENTRYPOINT_TRANSMISSION_URL.
       </footer>
     </main>
 
