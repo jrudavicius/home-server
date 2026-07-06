@@ -74,7 +74,7 @@ secrets:
   transmission_user_password:
     file: ${TRANSMISSION_USER_PASSWORD_FILE:?Set TRANSMISSION_USER_PASSWORD_FILE}
   wireguard_config:
-    file: ${WIREGUARD_CONFIG_FILE:?Set WIREGUARD_CONFIG_FILE}
+    file: ${WIREGUARD_CONFIG_FILE:-/srv/server/config/wireguard/home-server-LT-37.conf}
 
 networks:
   default:
