@@ -1,0 +1,19 @@
+version: 3
+
+agent:
+  log: stdout
+  log_format: term
+  web_addr: 0.0.0.0:4040
+
+endpoints:
+  - name: entrypoint
+    url: https://your-entrypoint-domain.ngrok.app
+    description: Traefik entrypoint for the public landing page and routed services.
+    upstream:
+      url: http://home-server-proxy:80
+
+  - name: komodo
+    url: https://your-komodo-domain.ngrok.app
+    description: Direct Komodo endpoint for external UI access and GitHub webhooks.
+    upstream:
+      url: http://komodo-core:9120

@@ -14,7 +14,7 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 - Opening a local home server landing page through the `entrypoint` stack.
 - Collecting and searching Docker container logs through the `observability`
   stack.
-- Exposing Komodo through ngrok for outside access and GitHub webhooks.
+- Exposing Home Server through ngrok for outside access and GitHub webhooks.
 - Hosting Plex Media Server through the `media` stack.
 - Running Transmission for torrent management through the `media` stack.
 
@@ -147,10 +147,8 @@ testing of the public tunnel stack:
 
 ```env
 NGROK_AUTHTOKEN=your-ngrok-authtoken
-NGROK_DOMAIN=
 NGROK_INSPECT_PORT=4040
 NGROK_DOCKER_NETWORK=portainer_network
-NGROK_TUNNEL_TARGET=http://komodo-core:9120
 ```
 
 Traefik listens on `TRAEFIK_HTTP_PORT`. The landing page links to services using
@@ -228,6 +226,8 @@ docker compose up -d
 ```
 
 The ngrok inspection UI/API is published at `http://localhost:4040` by default.
+The stack starts the endpoint declared in `stacks/ngrok/ngrok.yml`; by default
+that is `entrypoint`, which forwards to Traefik.
 
 For Komodo, sync the declarative Stack resources from `komodo/stacks.toml`.
 It creates Git-based Stacks named `entrypoint`, `observability`, `media`, and
@@ -243,10 +243,10 @@ Ngrok run directory: stacks/ngrok
 Compose file: docker-compose.yml
 ```
 
-The `observability` and `media` Stacks declare `after = ["entrypoint"]`, so
-Resource Sync deploys the reverse proxy and landing page before deploying
-Grafana, Loki, Alloy, Plex, or Transmission. The ngrok Stack can deploy
-independently because the default tunnel target is Komodo itself.
+The `observability`, `media`, and `ngrok` Stacks declare
+`after = ["entrypoint"]`, so Resource Sync deploys the reverse proxy and landing
+page before deploying Grafana, Loki, Alloy, Plex, Transmission, or the public
+ngrok endpoint.
 
 Komodo clones over HTTPS, not SSH. If the repository is private, add a GitHub
 token account in Komodo and select that account on the Stacks after syncing.
@@ -292,9 +292,7 @@ MEDIA_PATH
 TRANSMISSION_CONFIG_PATH
 TRANSMISSION_USER_PASSWORD_FILE
 NGROK_INSPECT_PORT
-NGROK_DOMAIN
 NGROK_DOCKER_NETWORK
-NGROK_TUNNEL_TARGET
 ```
 
 Create `GRAFANA_ADMIN_PASSWORD` as a secret Komodo variable before deploying
@@ -375,17 +373,17 @@ proxy instead; that only works if the proxy routes `/listener` paths to
 ### ngrok Fallback
 
 When direct public-IP forwarding is not working, deploy the `stacks/ngrok`
-tunnel instead. By default it forwards directly to Komodo:
+agent instead. It starts one ngrok container with its endpoint config from
+`stacks/ngrok/ngrok.yml`:
 
 ```text
-https://your-public-ngrok-url/ -> komodo-core:9120
+entrypoint public URL -> home-server-proxy:80
 ```
 
-That exposes the Komodo UI and the `/listener` webhook paths through the same
-public HTTPS URL. To expose the Traefik landing page instead, set
-`NGROK_TUNNEL_TARGET=http://home-server-proxy:80`. In that mode the proxy must
-route `/listener` paths to Komodo before the catch-all home page route. This is
-already configured in `stacks/entrypoint/traefik/dynamic.yml`:
+The `entrypoint` URL opens the Traefik landing page. It also receives
+`/listener` webhook paths because Traefik routes those paths to Komodo before the
+catch-all home page route. The Traefik route is configured in
+`stacks/entrypoint/traefik/dynamic.yml`:
 
 ```yaml
 komodo:
@@ -406,6 +404,12 @@ https://your-public-ngrok-url/listener/github/stack/observability/deploy
 https://your-public-ngrok-url/listener/github/stack/media/deploy
 https://your-public-ngrok-url/listener/github/stack/ngrok/deploy
 ```
+
+The checked token's free ngrok plan assigned the same `ngrok-free.dev` URL when
+two HTTP endpoints were configured without explicit URLs, so the default config
+keeps one endpoint and routes internally through Traefik. If you later upgrade or
+reserve distinct domains, use `stacks/ngrok/ngrok.multi-endpoint.example.yml` as
+the starting point for separate public `entrypoint` and `komodo` URLs.
 
 The local ngrok inspector is available on:
 

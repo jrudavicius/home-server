@@ -121,9 +121,10 @@ TRANSMISSION_USER_PASSWORD_FILE=[[TRANSMISSION_USER_PASSWORD_FILE]]
 
 [[stack]]
 name = "ngrok"
-description = "ngrok tunnel for external access and GitHub webhook delivery."
+description = "ngrok agent endpoint for external access and GitHub webhook delivery."
 tags = ["network", "webhooks", "home"]
 deploy = true
+after = ["entrypoint"]
 
 [stack.config]
 server = "home-server"
@@ -134,14 +135,15 @@ repo = "jrudavicius/home-server"
 branch = "main"
 run_directory = "stacks/ngrok"
 file_paths = ["docker-compose.yml"]
+config_files = [
+  { path = "ngrok.yml", services = ["ngrok"], requires = "Restart" },
+]
 project_name = "ngrok"
 auto_pull = true
 webhook_enabled = true
 webhook_force_deploy = true
 environment = """
 NGROK_AUTHTOKEN=[[NGROK_AUTHTOKEN]]
-NGROK_DOMAIN=[[NGROK_DOMAIN]]
 NGROK_INSPECT_PORT=[[NGROK_INSPECT_PORT]]
 NGROK_DOCKER_NETWORK=[[NGROK_DOCKER_NETWORK]]
-NGROK_TUNNEL_TARGET=[[NGROK_TUNNEL_TARGET]]
 """

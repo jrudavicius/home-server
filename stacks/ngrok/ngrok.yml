@@ -1,0 +1,12 @@
+version: 3
+
+agent:
+  log: stdout
+  log_format: term
+  web_addr: 0.0.0.0:4040
+
+endpoints:
+  - name: entrypoint
+    description: Traefik entrypoint for the public landing page, routed services, and GitHub webhooks.
+    upstream:
+      url: http://home-server-proxy:80

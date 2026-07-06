@@ -41,19 +41,7 @@ value = "4040"
 is_secret = false
 
 [[variable]]
-name = "NGROK_DOMAIN"
-description = "Reserved ngrok domain. Leave empty unless docker-compose.domain.yml is enabled."
-value = ""
-is_secret = false
-
-[[variable]]
 name = "NGROK_DOCKER_NETWORK"
 description = "Docker network shared by ngrok, Traefik, and Komodo."
 value = "portainer_network"
-is_secret = false
-
-[[variable]]
-name = "NGROK_TUNNEL_TARGET"
-description = "Internal URL exposed by ngrok."
-value = "http://komodo-core:9120"
 is_secret = false

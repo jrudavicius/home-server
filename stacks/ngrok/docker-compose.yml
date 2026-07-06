@@ -4,12 +4,14 @@ services:
     image: ngrok/ngrok:3
     restart: unless-stopped
     command:
-      - http
-      - --log=stdout
-      - --log-format=term
-      - "${NGROK_TUNNEL_TARGET:-http://komodo-core:9120}"
+      - start
+      - --all
+      - --config
+      - /etc/ngrok/ngrok.yml
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:?Set NGROK_AUTHTOKEN}
+    volumes:
+      - ./ngrok.yml:/etc/ngrok/ngrok.yml:ro
     ports:
       - "${NGROK_INSPECT_PORT:-4040}:4040"
 
