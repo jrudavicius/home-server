@@ -1,0 +1,19 @@
+services:
+  ngrok:
+    container_name: home-server-ngrok
+    image: ngrok/ngrok:3
+    restart: unless-stopped
+    command:
+      - http
+      - --log=stdout
+      - --log-format=term
+      - "${NGROK_TUNNEL_TARGET:-http://komodo-core:9120}"
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:?Set NGROK_AUTHTOKEN}
+    ports:
+      - "${NGROK_INSPECT_PORT:-4040}:4040"
+
+networks:
+  default:
+    external: true
+    name: ${NGROK_DOCKER_NETWORK:-portainer_network}

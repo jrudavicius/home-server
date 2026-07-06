@@ -27,3 +27,33 @@ name = "TRANSMISSION_USER_PASSWORD_FILE"
 description = "Transmission password secret file path."
 value = "/srv/server/config/transmission/transmission_user_password.txt"
 is_secret = false
+
+[[variable]]
+name = "NGROK_AUTHTOKEN"
+description = "ngrok auth token for the public tunnel stack. Set the real value in Komodo."
+value = ""
+is_secret = true
+
+[[variable]]
+name = "NGROK_INSPECT_PORT"
+description = "Host port for the local ngrok inspection UI and API."
+value = "4040"
+is_secret = false
+
+[[variable]]
+name = "NGROK_DOMAIN"
+description = "Reserved ngrok domain. Leave empty unless docker-compose.domain.yml is enabled."
+value = ""
+is_secret = false
+
+[[variable]]
+name = "NGROK_DOCKER_NETWORK"
+description = "Docker network shared by ngrok, Traefik, and Komodo."
+value = "portainer_network"
+is_secret = false
+
+[[variable]]
+name = "NGROK_TUNNEL_TARGET"
+description = "Internal URL exposed by ngrok."
+value = "http://komodo-core:9120"
+is_secret = false

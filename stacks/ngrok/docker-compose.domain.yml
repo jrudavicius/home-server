@@ -1,0 +1,8 @@
+services:
+  ngrok:
+    command:
+      - http
+      - --log=stdout
+      - --log-format=term
+      - --domain=${NGROK_DOMAIN:?Set NGROK_DOMAIN}
+      - "${NGROK_TUNNEL_TARGET:-http://komodo-core:9120}"

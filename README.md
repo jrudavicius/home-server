@@ -14,6 +14,7 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 - Opening a local home server landing page through the `entrypoint` stack.
 - Collecting and searching Docker container logs through the `observability`
   stack.
+- Exposing Komodo through ngrok for outside access and GitHub webhooks.
 - Hosting Plex Media Server through the `media` stack.
 - Running Transmission for torrent management through the `media` stack.
 
@@ -31,6 +32,7 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 | `alloy` | `observability-alloy` | Docker log collector, defined in `stacks/observability/docker-compose.yml`. |
 | `plex` | `media-server` | Plex Media Server, defined in `stacks/media/docker-compose.yml`. |
 | `transmission` | `torrent-client` | Transmission torrent client, defined in `stacks/media/docker-compose.yml`. |
+| `ngrok` | `home-server-ngrok` | Public tunnel, defined in `stacks/ngrok/docker-compose.yml`. |
 
 ## Requirements
 
@@ -140,6 +142,17 @@ LOKI_MAX_QUERY_LOOKBACK=168h
 DOCKER_SOCKET_PATH=/var/run/docker.sock
 ```
 
+Create a `.env` file next to `stacks/ngrok/docker-compose.yml` for local manual
+testing of the public tunnel stack:
+
+```env
+NGROK_AUTHTOKEN=your-ngrok-authtoken
+NGROK_DOMAIN=
+NGROK_INSPECT_PORT=4040
+NGROK_DOCKER_NETWORK=portainer_network
+NGROK_TUNNEL_TARGET=http://komodo-core:9120
+```
+
 Traefik listens on `TRAEFIK_HTTP_PORT`. The landing page links to services using
 the current browser hostname and each service's exposed port, so it works before
 local DNS is configured.
@@ -207,9 +220,18 @@ cd stacks/observability
 docker compose up -d
 ```
 
+Start the ngrok stack manually for local testing:
+
+```sh
+cd stacks/ngrok
+docker compose up -d
+```
+
+The ngrok inspection UI/API is published at `http://localhost:4040` by default.
+
 For Komodo, sync the declarative Stack resources from `komodo/stacks.toml`.
-It creates Git-based Stacks named `entrypoint`, `observability`, and `media` on
-the `home-server` server:
+It creates Git-based Stacks named `entrypoint`, `observability`, `media`, and
+`ngrok` on the `home-server` server:
 
 ```text
 Repo: github.com/jrudavicius/home-server
@@ -217,12 +239,14 @@ Branch: main
 Entrypoint run directory: stacks/entrypoint
 Observability run directory: stacks/observability
 Media run directory: stacks/media
+Ngrok run directory: stacks/ngrok
 Compose file: docker-compose.yml
 ```
 
 The `observability` and `media` Stacks declare `after = ["entrypoint"]`, so
 Resource Sync deploys the reverse proxy and landing page before deploying
-Grafana, Loki, Alloy, Plex, and Transmission.
+Grafana, Loki, Alloy, Plex, or Transmission. The ngrok Stack can deploy
+independently because the default tunnel target is Komodo itself.
 
 Komodo clones over HTTPS, not SSH. If the repository is private, add a GitHub
 token account in Komodo and select that account on the Stacks after syncing.
@@ -249,15 +273,17 @@ https://<komodo-public-host>/listener/github/sync/home-server-resources/sync
 https://<komodo-public-host>/listener/github/stack/entrypoint/deploy
 https://<komodo-public-host>/listener/github/stack/observability/deploy
 https://<komodo-public-host>/listener/github/stack/media/deploy
+https://<komodo-public-host>/listener/github/stack/ngrok/deploy
 ```
 
 Use content type `application/json` and set the GitHub webhook secret to the
-same value as `KOMODO_WEBHOOK_SECRET`. All three Stacks have
+same value as `KOMODO_WEBHOOK_SECRET`. The Stacks use
 `webhook_force_deploy = true`, so their Stack webhooks deploy on every push.
 
-Keep `stacks/entrypoint/.env`, `stacks/observability/.env`, and
-`stacks/media/.env` out of Git. The non-secret media path variables are
-declared in `komodo/variables.toml` and are synced from Git:
+Keep `stacks/entrypoint/.env`, `stacks/observability/.env`,
+`stacks/media/.env`, and `stacks/ngrok/.env` out of Git. The non-secret media
+and ngrok variables are declared in `komodo/variables.toml` and are synced from
+Git:
 
 ```text
 PLEX_CONFIG_PATH
@@ -265,14 +291,19 @@ TRANSCODE_PATH
 MEDIA_PATH
 TRANSMISSION_CONFIG_PATH
 TRANSMISSION_USER_PASSWORD_FILE
+NGROK_INSPECT_PORT
+NGROK_DOMAIN
+NGROK_DOCKER_NETWORK
+NGROK_TUNNEL_TARGET
 ```
 
 Create `GRAFANA_ADMIN_PASSWORD` as a secret Komodo variable before deploying
 the observability Stack.
 
 Create the directories referenced by those variables on a new host before
-deploying the media Stack. `PLEX_CLAIM` is optional; leave it empty for an
-unclaimed Plex server, or set it to a real `claim-...` token in Komodo before
+deploying the media Stack. Set the secret `NGROK_AUTHTOKEN` variable in Komodo
+before deploying the ngrok Stack. `PLEX_CLAIM` is optional; leave it empty for
+an unclaimed Plex server, or set it to a real `claim-...` token in Komodo before
 the first Plex setup. Komodo writes the resolved Stack environment to `.env`
 when deploying.
 
@@ -317,12 +348,13 @@ internal or self-signed certificate and will show a browser warning.
 
 ### Komodo Webhook URLs
 
-The current working ngrok examples use these listener paths:
+The webhook examples use these listener paths:
 
 - `/listener/github/sync/home-server-resources/sync`
 - `/listener/github/stack/entrypoint/deploy`
 - `/listener/github/stack/observability/deploy`
 - `/listener/github/stack/media/deploy`
+- `/listener/github/stack/ngrok/deploy`
 
 With `KOMODO_WEBHOOK_BASE_URL=http://84.32.117.122:9120`, the GitHub webhook
 payload URLs are:
@@ -332,6 +364,7 @@ http://84.32.117.122:9120/listener/github/sync/home-server-resources/sync
 http://84.32.117.122:9120/listener/github/stack/entrypoint/deploy
 http://84.32.117.122:9120/listener/github/stack/observability/deploy
 http://84.32.117.122:9120/listener/github/stack/media/deploy
+http://84.32.117.122:9120/listener/github/stack/ngrok/deploy
 ```
 
 These URLs require the router to forward TCP `9120` to `192.168.0.130:9120`.
@@ -339,23 +372,20 @@ Using `http://84.32.117.122/listener/...` without `:9120` would hit the port 80
 proxy instead; that only works if the proxy routes `/listener` paths to
 `komodo-core`.
 
-### Ngrok Port 80 Fallback
+### ngrok Fallback
 
-When direct public-IP forwarding is not working, use the ngrok tunnel instead.
-The current tunnel is:
-
-```text
-https://apprehend-crock-backfire.ngrok-free.dev
-```
-
-It forwards to the port 80 proxy:
+When direct public-IP forwarding is not working, deploy the `stacks/ngrok`
+tunnel instead. By default it forwards directly to Komodo:
 
 ```text
-https://apprehend-crock-backfire.ngrok-free.dev/ -> home-server-proxy:80
+https://your-public-ngrok-url/ -> komodo-core:9120
 ```
 
-The proxy must route `/listener` paths to Komodo before the catch-all home page
-route:
+That exposes the Komodo UI and the `/listener` webhook paths through the same
+public HTTPS URL. To expose the Traefik landing page instead, set
+`NGROK_TUNNEL_TARGET=http://home-server-proxy:80`. In that mode the proxy must
+route `/listener` paths to Komodo before the catch-all home page route. This is
+already configured in `stacks/entrypoint/traefik/dynamic.yml`:
 
 ```yaml
 komodo:
@@ -366,14 +396,15 @@ komodo:
   service: komodo
 ```
 
-With `KOMODO_WEBHOOK_BASE_URL=https://apprehend-crock-backfire.ngrok-free.dev`,
-the GitHub webhook payload URLs are:
+With `KOMODO_WEBHOOK_BASE_URL=https://your-public-ngrok-url`, the GitHub webhook
+payload URLs are:
 
 ```text
-https://apprehend-crock-backfire.ngrok-free.dev/listener/github/sync/home-server-resources/sync
-https://apprehend-crock-backfire.ngrok-free.dev/listener/github/stack/observability/deploy
-https://apprehend-crock-backfire.ngrok-free.dev/listener/github/stack/media/deploy
-https://apprehend-crock-backfire.ngrok-free.dev/listener/github/stack/entrypoint/deploy
+https://your-public-ngrok-url/listener/github/sync/home-server-resources/sync
+https://your-public-ngrok-url/listener/github/stack/entrypoint/deploy
+https://your-public-ngrok-url/listener/github/stack/observability/deploy
+https://your-public-ngrok-url/listener/github/stack/media/deploy
+https://your-public-ngrok-url/listener/github/stack/ngrok/deploy
 ```
 
 The local ngrok inspector is available on:
