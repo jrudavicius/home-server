@@ -27,7 +27,7 @@ services:
     container_name: media-torrent-client
     image: lscr.io/linuxserver/transmission:4.0.6@sha256:452310cb020c036d293e879698097acb6cc653db2676610bf8e3b58a3f4d2af5
     restart: unless-stopped
-    # Only this LAN identity is routed through Proton by MikroTik.
+    # Dedicated IP/MAC guards supplement MikroTik's whole-home Proton policy.
     # Never attach Transmission to the ordinary portainer_network.
     networks:
       transmission_lan:

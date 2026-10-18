@@ -16,7 +16,7 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
   stack.
 - Exposing Home Server through ngrok for outside access and GitHub webhooks.
 - Hosting Plex Media Server through the `media` stack.
-- Routing only Transmission through the MikroTik Proton VPN using a dedicated LAN identity.
+- Routing the home LAN and server through Proton on MikroTik, with internet blocked if the VPN disconnects.
 
 ## Services
 
@@ -50,7 +50,7 @@ variables, and public hostnames keep their existing names.
 - Docker Engine.
 - Docker Compose 2.33.1 or newer.
 - A wired Linux host for Transmission macvlan networking; Docker Desktop on macOS can validate configuration but cannot run this network.
-- The [MikroTik Transmission policy](router/README.md), installed and tested before deploying media.
+- The [MikroTik whole-home VPN policy](router/README.md), including Transmission's dedicated protections, installed and tested before deploying media.
 - Persistent directories for configuration, media, backups, and transcode data.
 - A private bootstrap environment file, for example `/srv/komodo/bootstrap.env`.
 - Komodo variables and server-side secret files described below.
@@ -725,7 +725,7 @@ Complete [Credential setup](#credential-setup) before running the deployment
 Procedure: the Stacks require Core secrets loaded from the private bootstrap file.
 
 Create the directories referenced by those variables before deploying media.
-Install and test the [MikroTik Transmission-only VPN policy](router/README.md),
+Install and test the [MikroTik whole-home VPN policy](router/README.md),
 reserve Transmission's LAN identity, and create the external `transmission_lan`
 macvlan network on the Pi. The entrypoint stack creates the internal
 `transmission_ui` bridge, so it must be deployed before media.
@@ -740,9 +740,10 @@ and blocked by MAC on the router; DNS uses Proton's tunnel resolver.
 Transmission also joins the internal `transmission_ui` bridge, where Traefik
 connects to `media-torrent-client:9091`. Traefik publishes `TRANSMISSION_WEB_PORT`
 (default 9091), preserving direct Pi URLs and hostname routes. Transmission
-never joins the ordinary `portainer_network`. Plex, ngrok, Komodo and other
-services use ordinary WAN routing. VPN keys stay on the router; Docker does not
-need them.
+never joins the ordinary `portainer_network`. The Pi, Plex, ngrok, Komodo, other
+services and home devices also use Proton through the router. If the tunnel
+fails, internet access stops for the whole LAN while local access stays
+available. VPN keys stay on the router; Docker does not need them.
 
 Proton inbound port allocation and NAT-PMP renewal are not configured here.
 Transmission can initiate outgoing connections. Do not forward its peer port
@@ -766,7 +767,8 @@ entrypoint URL     -> entrypoint-reverse-proxy:80
 ```
 
 Set `KOMODO_WEBHOOK_BASE_URL` to the public HTTPS webhook URL. ngrok uses the
-normal Docker network and ordinary WAN routing. Periphery remains in Docker;
+normal Docker network and the router's whole-home Proton policy. Its public
+endpoints depend on the VPN being connected. Periphery remains in Docker;
 no host VPN installer or deployment hook is required.
 
 ## Notes
