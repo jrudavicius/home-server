@@ -48,7 +48,7 @@ TRANSMISSION_TRAEFIK_HOST=transmission.home.arpa
 
 [[stack]]
 name = "observability"
-description = "Grafana, Loki, and Alloy for Docker container log search."
+description = "Grafana dashboards and log alerts, with Loki and Alloy for Docker logs."
 tags = ["observability", "logs", "home"]
 deploy = true
 after = ["entrypoint"]
@@ -62,6 +62,15 @@ repo = "jrudavicius/home-server"
 branch = "main"
 run_directory = "stacks/observability"
 file_paths = ["docker-compose.yml"]
+config_files = [
+  { path = "alloy/config.alloy", services = ["alloy"], requires = "Restart" },
+  { path = "loki/loki.yml", services = ["loki"], requires = "Restart" },
+  { path = "grafana/provisioning/datasources/loki.yml", services = ["grafana"], requires = "Restart" },
+  { path = "grafana/provisioning/dashboards/docker-logs.yml", services = ["grafana"], requires = "Restart" },
+  { path = "grafana/provisioning/alerting/docker-alerts.json", services = ["grafana"], requires = "Restart" },
+  { path = "grafana/dashboards/home-server-overview.json", services = ["grafana"], requires = "Restart" },
+  { path = "grafana/dashboards/docker-logs.json", services = ["grafana"], requires = "Restart" },
+]
 project_name = "observability"
 auto_pull = true
 webhook_enabled = true

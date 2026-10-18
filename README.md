@@ -185,6 +185,76 @@ The observability stack stores Loki, Grafana, and Alloy data in Docker-managed
 volumes. Loki keeps container logs for 168 hours by default. Increase
 `LOKI_RETENTION_PERIOD` only after checking available disk space.
 
+### Grafana dashboards and alerts
+
+Grafana opens **Home Server Overview** by default. It shows five-minute log
+counts, containers that are logging, recent errors, and alerts needing attention.
+The charts follow the dashboard time range. Stack, service, and container filters
+apply to log panels; the alert list always shows all stacks so filtering cannot
+hide another service's problem. An existing personal home-dashboard preference
+can override the server default; open `/d/home-server-overview` directly if needed.
+
+**Docker Container Logs** keeps its existing URL (`/d/docker-container-logs`).
+Use the stack → service → container filters, a severity preset, and literal,
+case-sensitive search. Quotes and backslashes are supported; use Explore for
+searches containing a backtick. Counts and the timeline follow those same filters.
+Logs are newest first, wrapped, and limited to 500 lines; expand a line for its labels
+or narrow the time range to find older entries.
+
+Grafana evaluates these provisioned rules every minute, across all Docker logs:
+
+| Rule | Condition | Pending time |
+| --- | --- | --- |
+| Docker container error burst | At least 10 error-like lines per container in the last 5 minutes | 2 minutes |
+| Docker container fatal or panic | At least one fatal, panic, or critical line per container in the last 5 minutes | None |
+| Docker log ingestion silent | No Docker logs at all in the last 15 minutes | 5 minutes |
+
+The first two rules recognize common logfmt/JSON severity fields, bracketed or
+plain severity markers, and MongoDB `"s":"E"` / `"s":"F"` JSON severity codes.
+This is a text heuristic, not a universal application error parser. Adjust the queries if a
+service uses a different format or routinely emits harmless error messages.
+Containers with logs but no matching errors return zero. No matching streams is
+normal for error rules; Loki query failures appear as evaluation errors instead
+of being hidden. The silence rule can also fire on a genuinely quiet server.
+These rules do not monitor CPU, memory, disk space, container uptime, or a failure
+of Grafana/the Raspberry Pi itself.
+
+Alerts stay in Grafana: each rule explicitly selects Grafana 13.1's built-in
+`empty` contact point, which has no notification integrations. No email, webhook,
+or other external destination is configured, and the existing notification policy
+tree is preserved. Keep `empty` without integrations. If upgrading a Grafana data
+volume from a version predating that default, create an empty contact point named
+`empty` under **Alerting → Contact points** before deploying. To enable delivery
+later, create a real contact point and replace `notification_settings.receiver`
+in `stacks/observability/grafana/provisioning/alerting/docker-alerts.json`.
+
+Rules link back to their overview panels. Open **Alerting → Alert rules** to
+inspect healthy rules, pending/firing instances, and evaluation errors. Rule
+thresholds and pending times are Git-managed in `docker-alerts.json`; dashboard
+JSON files live under `stacks/observability/grafana/dashboards/`. Edit those files
+instead of relying on UI edits that provisioning can overwrite.
+
+After syncing and redeploying the `observability` Stack in Komodo, Grafana loads
+the rules at startup. The Stack tracks provisioning files so later rule edits
+restart Grafana too. For a manual deployment:
+
+```sh
+docker compose --env-file stacks/observability/.env -f stacks/observability/docker-compose.yml up -d
+docker compose --env-file stacks/observability/.env -f stacks/observability/docker-compose.yml restart grafana
+```
+
+With Docker running, validate the dashboards and alerts in an isolated temporary
+Grafana/Loki stack (no access to the host Docker socket or production volumes):
+
+```sh
+python3 stacks/observability/tests/smoke.py
+```
+
+The smoke test injects sample logs, checks dashboard and alert queries, confirms
+the empty notification route, and waits for both immediate critical and delayed
+error-burst alerts to fire. Allow about three minutes. It removes its test
+containers, network, and volumes when it exits.
+
 `TRANSMISSION_USER_PASSWORD_FILE` must point to a local file containing the
 Transmission password. Docker Compose mounts it as a secret. Keep this file to
 the password value only, without a trailing newline.

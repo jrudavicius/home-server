@@ -17,11 +17,173 @@
   },
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
+  "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "type": "link",
+      "title": "Server overview",
+      "url": "/d/home-server-overview",
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false
+    },
+    {
+      "type": "link",
+      "title": "Alert rules",
+      "url": "/alerting/list",
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "targetBlank": false
+    }
+  ],
   "liveNow": false,
   "panels": [
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Matching lines",
+      "description": "All filters apply.",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({job=\"docker\", compose_project=~`${compose_project:regex}`, service=~`${service:regex}`, container=~`${container:regex}`} |~ `${severity:raw}` |= `${search:raw}`[$__range])) or vector(0)",
+          "legendFormat": "",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Matching containers",
+      "description": "Containers with matching logs, not a running-container health check.",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "editorMode": "code",
+          "expr": "count(sum by (container) (count_over_time({job=\"docker\", compose_project=~`${compose_project:regex}`, service=~`${service:regex}`, container=~`${container:regex}`} |~ `${severity:raw}` |= `${search:raw}`[$__range]))) or vector(0)",
+          "legendFormat": "",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "No data",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "text",
+      "title": "Find the relevant logs",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 4
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "Choose a **stack \u2192 service \u2192 container**, then narrow by severity or literal search. Counts and the timeline follow all filters. Expand a log line to see its labels.\n\n[Overview](/d/home-server-overview) \u00b7 [Alert rules](/alerting/list)"
+      }
+    },
     {
       "datasource": {
         "type": "loki",
@@ -79,23 +241,26 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 4
       },
       "id": 1,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
           "hideZeros": false,
           "mode": "multi",
-          "sort": "none"
+          "sort": "desc"
         }
       },
       "targets": [
@@ -105,14 +270,15 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "sum by (container) (rate({job=\"docker\", compose_project=~\"$compose_project\", container=~\"$container\"}[$__rate_interval]))",
+          "expr": "sum by (container) (rate({job=\"docker\", compose_project=~`${compose_project:regex}`, service=~`${service:regex}`, container=~`${container:regex}`} |~ `${severity:raw}` |= `${search:raw}`[$__interval]))",
           "legendFormat": "{{container}}",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Log rate by container",
-      "type": "timeseries"
+      "title": "Matching log rate by container",
+      "type": "timeseries",
+      "interval": "1m"
     },
     {
       "datasource": {
@@ -120,18 +286,18 @@
         "uid": "loki"
       },
       "gridPos": {
-        "h": 16,
+        "h": 17,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 11
       },
       "id": 2,
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
-        "prettifyLogMessage": false,
+        "prettifyLogMessage": true,
         "showCommonLabels": false,
-        "showLabels": true,
+        "showLabels": false,
         "showTime": true,
         "sortOrder": "Descending",
         "wrapLogMessage": true
@@ -143,13 +309,16 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\", compose_project=~\"$compose_project\", container=~\"$container\"} |= \"$search\"",
+          "expr": "{job=\"docker\", compose_project=~`${compose_project:regex}`, service=~`${service:regex}`, container=~`${container:regex}`} |~ `${severity:raw}` |= `${search:raw}`",
+          "legendFormat": "{{container}}",
           "queryType": "range",
-          "refId": "A"
+          "refId": "A",
+          "maxLines": 500
         }
       ],
       "title": "Container logs",
-      "type": "logs"
+      "type": "logs",
+      "description": "Newest first, up to 500 lines. Expand a line for stack, service and container labels. Search is literal and case-sensitive; severity is inferred from common log markers. Backticks are not supported in Search; use Explore for those queries."
     }
   ],
   "refresh": "30s",
@@ -174,12 +343,12 @@
         "definition": "label_values({job=\"docker\"}, compose_project)",
         "hide": 0,
         "includeAll": true,
-        "label": "Compose project",
+        "label": "Stack",
         "multi": true,
         "name": "compose_project",
         "options": [],
         "query": "label_values({job=\"docker\"}, compose_project)",
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 1,
@@ -196,19 +365,81 @@
           "type": "loki",
           "uid": "loki"
         },
-        "definition": "label_values({job=\"docker\", compose_project=~\"$compose_project\"}, container)",
+        "definition": "label_values({job=\"docker\", compose_project=~`${compose_project:regex}`}, service)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Service",
+        "multi": true,
+        "name": "service",
+        "options": [],
+        "query": "label_values({job=\"docker\", compose_project=~`${compose_project:regex}`}, service)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "loki"
+        },
+        "definition": "label_values({job=\"docker\", compose_project=~`${compose_project:regex}`, service=~`${service:regex}`}, container)",
         "hide": 0,
         "includeAll": true,
         "label": "Container",
         "multi": true,
         "name": "container",
         "options": [],
-        "query": "label_values({job=\"docker\", compose_project=~\"$compose_project\"}, container)",
-        "refresh": 1,
+        "query": "label_values({job=\"docker\", compose_project=~`${compose_project:regex}`, service=~`${service:regex}`}, container)",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 1,
         "type": "query"
+      },
+      {
+        "name": "severity",
+        "label": "Severity",
+        "type": "custom",
+        "hide": 0,
+        "multi": false,
+        "includeAll": false,
+        "skipUrlSync": false,
+        "query": "All : .*, Errors : (?i)(\\b(level|severity)=\"?(error|fatal|panic|critical)\\b|\"(level|severity|lvl)\"\\s*:\\s*\"(error|fatal|panic|critical)\"|\\[(error|fatal|panic|critical)\\]|(^|[[:space:]])(error|fatal|panic|critical)(:|[[:space:]]|$)|\"s\"\\s*:\\s*\"(E|F)\"), Warnings : (?i)(\\b(level|severity)=\"?(warn|warning)\\b|\"(level|severity|lvl)\"\\s*:\\s*\"(warn|warning)\"|\\[(warn|warning)\\]|(^|[[:space:]])(warn|warning)(:|[[:space:]]|$)|\"s\"\\s*:\\s*\"(W)\"), Fatal / panic : (?i)(\\b(level|severity)=\"?(fatal|panic|critical)\\b|\"(level|severity|lvl)\"\\s*:\\s*\"(fatal|panic|critical)\"|\\[(fatal|panic|critical)\\]|(^|[[:space:]])(fatal|panic|critical)(:|[[:space:]]|$)|\"s\"\\s*:\\s*\"(F)\")",
+        "current": {
+          "text": "All",
+          "value": ".*",
+          "selected": true
+        },
+        "options": [
+          {
+            "text": "All",
+            "value": ".*",
+            "selected": true
+          },
+          {
+            "text": "Errors",
+            "value": "(?i)(\\b(level|severity)=\"?(error|fatal|panic|critical)\\b|\"(level|severity|lvl)\"\\s*:\\s*\"(error|fatal|panic|critical)\"|\\[(error|fatal|panic|critical)\\]|(^|[[:space:]])(error|fatal|panic|critical)(:|[[:space:]]|$)|\"s\"\\s*:\\s*\"(E|F)\")",
+            "selected": false
+          },
+          {
+            "text": "Warnings",
+            "value": "(?i)(\\b(level|severity)=\"?(warn|warning)\\b|\"(level|severity|lvl)\"\\s*:\\s*\"(warn|warning)\"|\\[(warn|warning)\\]|(^|[[:space:]])(warn|warning)(:|[[:space:]]|$)|\"s\"\\s*:\\s*\"(W)\")",
+            "selected": false
+          },
+          {
+            "text": "Fatal / panic",
+            "value": "(?i)(\\b(level|severity)=\"?(fatal|panic|critical)\\b|\"(level|severity|lvl)\"\\s*:\\s*\"(fatal|panic|critical)\"|\\[(fatal|panic|critical)\\]|(^|[[:space:]])(fatal|panic|critical)(:|[[:space:]]|$)|\"s\"\\s*:\\s*\"(F)\")",
+            "selected": false
+          }
+        ]
       },
       {
         "current": {
@@ -236,10 +467,27 @@
     "from": "now-1h",
     "to": "now"
   },
-  "timepicker": {},
+  "timepicker": {
+    "refresh_intervals": [
+      "30s",
+      "1m",
+      "5m",
+      "15m"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "24h",
+      "2d",
+      "7d"
+    ]
+  },
   "timezone": "browser",
   "title": "Docker Container Logs",
   "uid": "docker-container-logs",
-  "version": 1,
-  "weekStart": ""
+  "version": 2,
+  "weekStart": "",
+  "description": "Search Docker logs by stack, service, container and severity."
 }

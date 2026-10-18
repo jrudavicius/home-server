@@ -1,0 +1,271 @@
+{
+  "apiVersion": 1,
+  "groups": [
+    {
+      "orgId": 1,
+      "name": "Docker log health",
+      "folder": "Observability",
+      "interval": "1m",
+      "rules": [
+        {
+          "uid": "docker-error-burst",
+          "title": "Docker container error burst",
+          "condition": "B",
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "loki",
+              "queryType": "instant",
+              "relativeTimeRange": {
+                "from": 900,
+                "to": 0
+              },
+              "model": {
+                "datasource": {
+                  "type": "loki",
+                  "uid": "loki"
+                },
+                "editorMode": "code",
+                "expr": "sum by (compose_project, service, container) (count_over_time({job=\"docker\"} |~ `(?i)(\\b(level|severity)=\"?(error|fatal|panic|critical)\\b|\"(level|severity|lvl)\"\\s*:\\s*\"(error|fatal|panic|critical)\"|\\[(error|fatal|panic|critical)\\]|(^|[[:space:]])(error|fatal|panic|critical)(:|[[:space:]]|$)|\"s\"\\s*:\\s*\"(E|F)\")` [5m])) or sum by (compose_project, service, container) (count_over_time({job=\"docker\"}[5m])) * 0",
+                "legendFormat": "{{container}}",
+                "queryType": "instant",
+                "refId": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "model": {
+                "refId": "B",
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "type": "threshold",
+                "expression": "A",
+                "conditions": [
+                  {
+                    "type": "query",
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        9
+                      ]
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": [
+                        "B"
+                      ]
+                    },
+                    "reducer": {
+                      "type": "last",
+                      "params": []
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dashboardUid": "home-server-overview",
+          "panelId": 8,
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "2m",
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "empty"
+          },
+          "annotations": {
+            "summary": "Repeated errors in {{ $labels.container }}",
+            "description": "{{ $values.A.Value }} error-like log lines in the last 5 minutes for {{ $labels.compose_project }}/{{ $labels.service }}. The threshold is 10 lines, sustained for 2 minutes. Open the linked dashboard and filter by container to investigate."
+          },
+          "labels": {
+            "scope": "home-server",
+            "severity": "warning"
+          }
+        },
+        {
+          "uid": "docker-critical-logs",
+          "title": "Docker container fatal or panic",
+          "condition": "B",
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "loki",
+              "queryType": "instant",
+              "relativeTimeRange": {
+                "from": 900,
+                "to": 0
+              },
+              "model": {
+                "datasource": {
+                  "type": "loki",
+                  "uid": "loki"
+                },
+                "editorMode": "code",
+                "expr": "sum by (compose_project, service, container) (count_over_time({job=\"docker\"} |~ `(?i)(\\b(level|severity)=\"?(fatal|panic|critical)\\b|\"(level|severity|lvl)\"\\s*:\\s*\"(fatal|panic|critical)\"|\\[(fatal|panic|critical)\\]|(^|[[:space:]])(fatal|panic|critical)(:|[[:space:]]|$)|\"s\"\\s*:\\s*\"(F)\")` [5m])) or sum by (compose_project, service, container) (count_over_time({job=\"docker\"}[5m])) * 0",
+                "legendFormat": "{{container}}",
+                "queryType": "instant",
+                "refId": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "model": {
+                "refId": "B",
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "type": "threshold",
+                "expression": "A",
+                "conditions": [
+                  {
+                    "type": "query",
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0
+                      ]
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": [
+                        "B"
+                      ]
+                    },
+                    "reducer": {
+                      "type": "last",
+                      "params": []
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dashboardUid": "home-server-overview",
+          "panelId": 4,
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "0s",
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "empty"
+          },
+          "annotations": {
+            "summary": "Fatal or panic log in {{ $labels.container }}",
+            "description": "{{ $values.A.Value }} fatal, panic or critical log lines in the last 5 minutes for {{ $labels.compose_project }}/{{ $labels.service }}. Inspect the logs and container state; matching text alone does not prove the process exited."
+          },
+          "labels": {
+            "scope": "home-server",
+            "severity": "critical"
+          }
+        },
+        {
+          "uid": "docker-log-silence",
+          "title": "Docker log ingestion silent",
+          "condition": "B",
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "loki",
+              "queryType": "instant",
+              "relativeTimeRange": {
+                "from": 900,
+                "to": 0
+              },
+              "model": {
+                "datasource": {
+                  "type": "loki",
+                  "uid": "loki"
+                },
+                "editorMode": "code",
+                "expr": "sum(absent_over_time({job=\"docker\"}[15m])) or vector(0)",
+                "legendFormat": "{{container}}",
+                "queryType": "instant",
+                "refId": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "model": {
+                "refId": "B",
+                "datasource": {
+                  "type": "__expr__",
+                  "uid": "__expr__"
+                },
+                "type": "threshold",
+                "expression": "A",
+                "conditions": [
+                  {
+                    "type": "query",
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0
+                      ]
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "query": {
+                      "params": [
+                        "B"
+                      ]
+                    },
+                    "reducer": {
+                      "type": "last",
+                      "params": []
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dashboardUid": "home-server-overview",
+          "panelId": 2,
+          "noDataState": "Alerting",
+          "execErrState": "Error",
+          "for": "5m",
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "empty"
+          },
+          "annotations": {
+            "summary": "No Docker logs received for at least 20 minutes",
+            "description": "No job=docker logs were found in the last 15 minutes, sustained for another 5 minutes. Check Alloy, its Docker socket and Loki ingestion. A quiet server can also trigger this alert; it does not prove a container is down."
+          },
+          "labels": {
+            "scope": "home-server",
+            "severity": "warning"
+          }
+        }
+      ]
+    }
+  ]
+}
