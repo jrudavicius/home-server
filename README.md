@@ -16,7 +16,7 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
   stack.
 - Exposing Home Server through ngrok for outside access and GitHub webhooks.
 - Hosting Plex Media Server through the `media` stack.
-- Running Transmission through a WireGuard VPN gateway in the `media` stack.
+- Routing only Transmission through the MikroTik Proton VPN using a dedicated LAN identity.
 
 ## Services
 
@@ -33,14 +33,14 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 | `plex` | `media-server` | Plex Media Server, defined in `stacks/media/docker-compose.yml`. |
 | `transmission` | `torrent-client` | Transmission torrent client, defined in `stacks/media/docker-compose.yml`. |
 | `ngrok` | `home-server-ngrok` | Public tunnel, defined in `stacks/ngrok/docker-compose.yml`. |
-| `vpn` | `media-vpn` | WireGuard/Gluetun VPN gateway for Transmission, defined in `stacks/media/docker-compose.yml`. |
 
 ## Requirements
 
 - Raspberry Pi running a 64-bit Linux distribution.
 - Docker Engine.
-- Docker Compose plugin.
-- On macOS, Docker Desktop.
+- Docker Compose 2.33.1 or newer.
+- A wired Linux host for Transmission macvlan networking; Docker Desktop on macOS can validate configuration but cannot run this network.
+- The [MikroTik Transmission policy](router/README.md), installed and tested before deploying media.
 - Persistent directories for configuration, media, backups, and transcode data.
 - A `.env` file containing the required environment variables.
 - A Komodo periphery work directory outside this repository, for example
@@ -115,11 +115,9 @@ PLEX_CONFIG_PATH=/srv/server/config/plex
 TRANSCODE_PATH=/srv/server/cache/plex-transcode
 MEDIA_PATH=/srv/server/media
 
-VPN_IMAGE_TAG=v3.41.1
-WIREGUARD_CONFIG_FILE=/srv/server/config/wireguard/home-server-LT-37.conf
-VPN_OUTBOUND_SUBNETS=192.168.0.0/16,172.16.0.0/12
-
-TRANSMISSION_WEB_PORT=9091
+TRANSMISSION_LAN_IP=192.168.88.9
+TRANSMISSION_LAN_MAC=02:54:52:00:00:01
+TRANSMISSION_DNS=10.2.0.1
 TRANSMISSION_PEER_PORT=51413
 TRANSMISSION_TRAEFIK_HOST=transmission.home.arpa
 TRANSMISSION_USERNAME=julius
@@ -286,7 +284,8 @@ cd stacks/entrypoint
 docker compose up -d
 ```
 
-Start the media stack manually for local testing:
+With the [router policy and Transmission networks](router/README.md) in place
+and the entrypoint stack running, start media on the Linux server:
 
 ```sh
 cd stacks/media
@@ -372,8 +371,9 @@ Git:
 PLEX_CONFIG_PATH
 TRANSCODE_PATH
 MEDIA_PATH
-WIREGUARD_CONFIG_FILE
-VPN_OUTBOUND_SUBNETS
+TRANSMISSION_LAN_IP
+TRANSMISSION_LAN_MAC
+TRANSMISSION_DNS
 TRANSMISSION_CONFIG_PATH
 TRANSMISSION_USER_PASSWORD_FILE
 NGROK_INSPECT_PORT
@@ -383,43 +383,32 @@ NGROK_DOCKER_NETWORK
 Create `GRAFANA_ADMIN_PASSWORD` as a secret Komodo variable before deploying
 the observability Stack.
 
-Create the directories referenced by those variables on a new host before
-deploying the media Stack. Copy the generated WireGuard client config to the
-path in `WIREGUARD_CONFIG_FILE`, keep it out of Git, and restrict its
-permissions to the server user or root because it contains the VPN private key.
-Set the secret `NGROK_AUTHTOKEN` variable in Komodo before deploying the ngrok
-Stack. `PLEX_CLAIM` is optional; leave it empty for an unclaimed Plex server, or
-set it to a real `claim-...` token in Komodo before the first Plex setup. Komodo
-writes the resolved Stack environment to `.env` when deploying.
+Create the directories referenced by those variables before deploying media.
+Install and test the [MikroTik Transmission-only VPN policy](router/README.md),
+reserve Transmission's LAN identity, and create the external `transmission_lan`
+macvlan network on the Pi. The entrypoint stack creates the internal
+`transmission_ui` bridge, so it must be deployed before media.
 
-The media Stack starts `media-vpn` with Gluetun and mounts
-`WIREGUARD_CONFIG_FILE` at `/gluetun/wireguard/wg0.conf`. Transmission uses
-`network_mode: "service:vpn"`, so its web UI and torrent traffic use the VPN
-container's network namespace. Plex stays on the normal Docker network and
-does not depend on the Gluetun container.
+Set the secret `NGROK_AUTHTOKEN` variable in Komodo before deploying ngrok.
+`PLEX_CLAIM` is optional; leave it empty for an unclaimed server, or set a real
+`claim-...` token before the first Plex setup. Komodo writes the resolved stack
+environment to `.env` when deploying.
 
-The VPN container publishes Transmission's web port, and Traefik connects to
-`media-vpn:9091`. Traefik reads the configured hostname variables through its
-file provider.
+Transmission has a fixed LAN IP/MAC that MikroTik routes through its existing
+Proton WireGuard tunnel. The router's firewall blocks other routed egress,
+including WAN fallback when the tunnel fails. IPv6 is disabled in the container
+and blocked by MAC on the router; DNS uses Proton's tunnel resolver.
 
-The [router VPN reference](router/README.md) describes an alternative policy
-covering the whole Pi. It is not required by this media Stack. Existing router
-policies are not removed by Compose and can still affect Plex, ngrok, and the
-VPN container's connection to its provider.
+Transmission also joins the internal `transmission_ui` bridge, where Traefik
+connects to `torrent-client:9091`. Traefik publishes `TRANSMISSION_WEB_PORT`
+(default 9091), preserving direct Pi URLs and hostname routes. Transmission
+never joins the ordinary `portainer_network`. Plex, ngrok, Komodo and other
+services use ordinary WAN routing. VPN keys stay on the router; Docker does not
+need them.
 
-Compose waits for Gluetun's health check to pass before starting Transmission.
-The dependency also restarts Transmission when an explicit Compose operation
-updates or restarts the VPN. Later VPN health failures are handled by Gluetun's
-own reconnect logic and firewall; the Compose dependency does not continuously
-monitor health or stop an already running Transmission container.
-
-`VPN_OUTBOUND_SUBNETS` keeps the local LAN and Docker bridge networks reachable
-from the VPN namespace. Do not add a broad `10.0.0.0/8` subnet when using the
-generated Proton config, because its tunnel address is in `10.2.0.0/16`.
-`TRANSMISSION_PEER_PORT` is opened on the VPN interface only; do not forward it
-from the home router to the server's public IP. If Proton assigns a different
-NAT-PMP port, set `TRANSMISSION_PEER_PORT` to that assigned port and update
-Transmission's saved settings if needed.
+Proton inbound port allocation and NAT-PMP renewal are not configured here.
+Transmission can initiate outgoing connections. Do not forward its peer port
+from the home WAN; see the router guide for details.
 
 Stop the Komodo bootstrap stack:
 
@@ -439,8 +428,8 @@ entrypoint URL     -> home-server-proxy:80
 ```
 
 Set `KOMODO_WEBHOOK_BASE_URL` to the public HTTPS webhook URL. ngrok uses the
-normal Docker network and does not depend on the Gluetun container. Periphery
-remains in Docker; no host VPN installer or deployment hook is required.
+normal Docker network and ordinary WAN routing. Periphery remains in Docker;
+no host VPN installer or deployment hook is required.
 
 ## Notes
 
@@ -450,8 +439,8 @@ remains in Docker; no host VPN installer or deployment hook is required.
   Compose projects.
 - Komodo keys and MongoDB data are stored in Docker-managed volumes.
 - Loki, Grafana, and Alloy data are stored in Docker-managed volumes.
-- Transmission shares the `media-vpn` container network namespace so torrent
-  traffic uses the mounted WireGuard config.
+- Transmission uses its dedicated macvlan LAN identity for Proton routing and
+  an internal bridge for Traefik; there is no VPN container.
 - Plex, Transmission, media, backup, and periphery paths are expected to be
   provided by the relevant stack `.env` file.
 - Timezone is configured as `Europe/Vilnius`.

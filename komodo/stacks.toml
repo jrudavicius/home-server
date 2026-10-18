@@ -96,7 +96,7 @@ DOCKER_SOCKET_PATH=/var/run/docker.sock
 
 [[stack]]
 name = "media"
-description = "Plex Media Server and Transmission torrent client behind WireGuard."
+description = "Plex on normal internet; Transmission routed through MikroTik's Proton VPN."
 tags = ["media-services", "vpn", "home"]
 deploy = true
 after = ["entrypoint"]
@@ -122,11 +122,10 @@ PLEX_CONFIG_PATH=[[PLEX_CONFIG_PATH]]
 TRANSCODE_PATH=[[TRANSCODE_PATH]]
 MEDIA_PATH=[[MEDIA_PATH]]
 
-VPN_IMAGE_TAG=v3.41.1
-WIREGUARD_CONFIG_FILE=[[WIREGUARD_CONFIG_FILE]]
-VPN_OUTBOUND_SUBNETS=[[VPN_OUTBOUND_SUBNETS]]
+TRANSMISSION_LAN_IP=[[TRANSMISSION_LAN_IP]]
+TRANSMISSION_LAN_MAC=[[TRANSMISSION_LAN_MAC]]
+TRANSMISSION_DNS=[[TRANSMISSION_DNS]]
 
-TRANSMISSION_WEB_PORT=9091
 TRANSMISSION_PEER_PORT=51413
 TRANSMISSION_TRAEFIK_HOST=transmission.home.arpa
 TRANSMISSION_USERNAME=julius

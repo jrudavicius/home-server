@@ -35,6 +35,12 @@ http:
       priority: 20
       service: transmission
 
+    transmission-direct:
+      rule: 'PathPrefix(`/`)'
+      entryPoints:
+        - transmission
+      service: transmission
+
     entrypoint:
       rule: 'PathPrefix(`/`)'
       entryPoints:
@@ -61,7 +67,7 @@ http:
     transmission:
       loadBalancer:
         servers:
-          - url: "http://media-vpn:9091"
+          - url: "http://torrent-client:9091"
 
     entrypoint:
       loadBalancer:

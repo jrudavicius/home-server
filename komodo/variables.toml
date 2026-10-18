@@ -23,15 +23,21 @@ value = "/srv/server/config/transmission"
 is_secret = false
 
 [[variable]]
-name = "WIREGUARD_CONFIG_FILE"
-description = "WireGuard client config file path for the media VPN gateway."
-value = "/srv/server/config/wireguard/home-server-LT-37.conf"
+name = "TRANSMISSION_LAN_IP"
+description = "Reserved macvlan IPv4 address protected by the MikroTik Transmission VPN policy."
+value = "192.168.88.9"
 is_secret = false
 
 [[variable]]
-name = "VPN_OUTBOUND_SUBNETS"
-description = "LAN and Docker subnets Gluetun should keep reachable outside the VPN tunnel."
-value = "192.168.0.0/16,172.16.0.0/12"
+name = "TRANSMISSION_LAN_MAC"
+description = "Fixed macvlan MAC matched by MikroTik's Transmission IPv4/IPv6 guard."
+value = "02:54:52:00:00:01"
+is_secret = false
+
+[[variable]]
+name = "TRANSMISSION_DNS"
+description = "Proton tunnel DNS server, reached through the router VPN."
+value = "10.2.0.1"
 is_secret = false
 
 [[variable]]

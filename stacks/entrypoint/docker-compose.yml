@@ -6,6 +6,7 @@ services:
     command:
       - --api.dashboard=true
       - --entrypoints.web.address=:80
+      - --entrypoints.transmission.address=:9091
       - --providers.file.filename=/etc/traefik/dynamic/dynamic.yml
       - --providers.file.watch=true
       - --log.level=${TRAEFIK_LOG_LEVEL:-INFO}
@@ -17,6 +18,10 @@ services:
       TRANSMISSION_TRAEFIK_HOST: ${TRANSMISSION_TRAEFIK_HOST:-transmission.home.arpa}
     ports:
       - "${TRAEFIK_HTTP_PORT:-80}:80"
+      - "${TRANSMISSION_WEB_PORT:-9091}:9091"
+    networks:
+      - default
+      - transmission_ui
     volumes:
       - ./traefik/dynamic.yml:/etc/traefik/dynamic/dynamic.yml:ro
 
@@ -54,3 +59,8 @@ networks:
   default:
     external: true
     name: portainer_network
+  transmission_ui:
+    name: transmission_ui
+    driver: bridge
+    internal: true
+    enable_ipv6: false

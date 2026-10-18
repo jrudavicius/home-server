@@ -1,26 +1,4 @@
 services:
-  vpn:
-    container_name: media-vpn
-    image: qmcgaw/gluetun:${VPN_IMAGE_TAG:-v3.41.1}
-    restart: unless-stopped
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun:/dev/net/tun
-    ports:
-      - "${TRANSMISSION_WEB_PORT:-9091}:9091"
-    environment:
-      TZ: Europe/Vilnius
-      VPN_SERVICE_PROVIDER: custom
-      VPN_TYPE: wireguard
-      FIREWALL_INPUT_PORTS: "9091"
-      FIREWALL_OUTBOUND_SUBNETS: ${VPN_OUTBOUND_SUBNETS:-192.168.0.0/16,172.16.0.0/12}
-      FIREWALL_VPN_INPUT_PORTS: ${TRANSMISSION_PEER_PORT:-51413}
-    secrets:
-      - source: wireguard_config
-        target: /gluetun/wireguard/wg0.conf
-        mode: 0440
-
   plex:
     container_name: media-server
     image: plexinc/pms-docker:1.42.2.10156-f737b826c
@@ -47,11 +25,19 @@ services:
     container_name: torrent-client
     image: lscr.io/linuxserver/transmission:4.0.6
     restart: unless-stopped
-    depends_on:
-      vpn:
-        condition: service_healthy
-        restart: true
-    network_mode: "service:vpn"
+    # Only this LAN identity is routed through Proton by MikroTik.
+    # Never attach Transmission to the ordinary portainer_network.
+    networks:
+      transmission_lan:
+        ipv4_address: ${TRANSMISSION_LAN_IP:?Set the router-protected TRANSMISSION_LAN_IP}
+        mac_address: ${TRANSMISSION_LAN_MAC:?Set the router-protected TRANSMISSION_LAN_MAC}
+        gw_priority: 1
+      transmission_ui: {}
+    dns:
+      - ${TRANSMISSION_DNS:?Set TRANSMISSION_DNS to the Proton tunnel DNS address}
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: "1"
+      net.ipv6.conf.default.disable_ipv6: "1"
     labels:
       traefik.enable: "true"
       traefik.http.routers.transmission.rule: "Host(`${TRANSMISSION_TRAEFIK_HOST:-transmission.home.arpa}`)"
@@ -75,10 +61,16 @@ services:
 secrets:
   transmission_user_password:
     file: ${TRANSMISSION_USER_PASSWORD_FILE:?Set TRANSMISSION_USER_PASSWORD_FILE}
-  wireguard_config:
-    file: ${WIREGUARD_CONFIG_FILE:-/srv/server/config/wireguard/home-server-LT-37.conf}
 
 networks:
   default:
     external: true
     name: portainer_network
+  # Provisioned on the Pi after its router policy; see router/README.md.
+  transmission_lan:
+    external: true
+    name: transmission_lan
+  # Internal bridge owned by the entrypoint stack, with no internet gateway.
+  transmission_ui:
+    external: true
+    name: transmission_ui
