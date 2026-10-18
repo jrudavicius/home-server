@@ -1,42 +1,42 @@
 http:
   routers:
     traefik:
-      rule: "Host(`traefik.home.arpa`) || PathPrefix(`/api`) || PathPrefix(`/dashboard`)"
+      rule: 'Host(`{{ env "TRAEFIK_DASHBOARD_HOST" | default "traefik.home.arpa" }}`) || PathPrefix(`/api`) || PathPrefix(`/dashboard`)'
       entryPoints:
         - web
       priority: 20
       service: api@internal
 
     komodo:
-      rule: "Host(`komodo.home.arpa`) || PathPrefix(`/listener`)"
+      rule: 'Host(`{{ env "KOMODO_TRAEFIK_HOST" | default "komodo.home.arpa" }}`) || PathPrefix(`/listener`)'
       entryPoints:
         - web
       priority: 30
       service: komodo
 
     plex:
-      rule: "Host(`plex.home.arpa`)"
+      rule: 'Host(`{{ env "PLEX_TRAEFIK_HOST" | default "plex.home.arpa" }}`)'
       entryPoints:
         - web
       priority: 20
       service: plex
 
     grafana:
-      rule: "Host(`grafana.home.arpa`)"
+      rule: 'Host(`{{ env "GRAFANA_TRAEFIK_HOST" | default "grafana.home.arpa" }}`)'
       entryPoints:
         - web
       priority: 20
       service: grafana
 
     transmission:
-      rule: "Host(`transmission.home.arpa`)"
+      rule: 'Host(`{{ env "TRANSMISSION_TRAEFIK_HOST" | default "transmission.home.arpa" }}`)'
       entryPoints:
         - web
       priority: 20
       service: transmission
 
     entrypoint:
-      rule: "PathPrefix(`/`)"
+      rule: 'PathPrefix(`/`)'
       entryPoints:
         - web
       priority: 1

@@ -1,0 +1,154 @@
+# Proton VPN for one Raspberry Pi -- MikroTik RouterOS 7.18.2
+# Prepared for the supplied 2026-10-18 hAP ax3 export.
+# Template for one active Pi interface at 192.168.88.250 on bridge.
+# Fill its actual MAC after checking DHCP/ARP; keep other Pi uplinks off.
+# Main routing and both WANs (ether1 and wifi2) remain in use by the router.
+#
+# BEFORE IMPORT:
+# 1. Use a fresh Proton WireGuard configuration dedicated to this router.
+# 2. Replace all REPLACE values below, including the Pi MAC; check the port too.
+#    Address and DNS must be the IPv4 entries from that configuration.
+#    PublicKey is the PEER/server key. Do not put PrivateKey in this file.
+# 3. Use a different LAN computer to configure the router. Disconnect the Pi
+#    from ALL uplinks during installation (including any Wi-Fi connection).
+# 4. Upload this file to the router's Files page, then use Terminal:
+#      /import file-name=mikrotik-proton-pi.rsc verbose=yes dry-run
+#      /import file-name=mikrotik-proton-pi.rsc
+#    Do not proceed past an error or reimport a partially applied file.
+#
+# AFTER SUCCESSFUL IMPORT:
+# - WebFig -> WireGuard -> wg-proton-pi: replace its automatically generated
+#   Private Key with the PrivateKey from the NEW Proton file; Apply; enable.
+# - Check the peer's Last Handshake and RX/TX counters.
+# - Reboot the router BEFORE reconnecting the Pi. This clears all pre-existing
+#   FastTrack and NAT state. This causes a brief outage for the whole LAN.
+# - If using Safe Mode, explicitly commit it before rebooting.
+# - Reconnect the Pi using the identified interface; keep other Pi uplinks off.
+#
+# Scope: IPv4-only VPN. Routed IPv6 from this Pi is blocked by MAC. Local
+# same-subnet IPv6 is not filtered. Other devices keep their existing settings.
+# Routed TCP/UDP DNS from the Pi is redirected to Proton, including requests
+# addressed to 192.168.88.1. Thus the PI ITSELF will not resolve router-local
+# names through router DNS; use /etc/hosts for its local names if needed.
+# Other LAN devices can still use the router's local DNS normally.
+# This is not isolation from other trusted LAN devices, DNS proxies, or an
+# administrator changing the Pi's MAC. Alternate Pi MACs/uplinks need rules.
+# Provider port forwarding / NAT-PMP renewal is not configured by this file.
+# Existing Pi-side WireGuard/Gluetun needs a separate controlled handover.
+#
+# One-time installation, not an update script. The tunnel is left DISABLED.
+# It intentionally does not remove its protection when the tunnel is disabled.
+# Reviewed against documentation; not executed on a RouterOS instance here.
+# Sources:
+# https://protonvpn.com/support/wireguard-mikrotik-routers
+# https://help.mikrotik.com/docs/spaces/ROS/pages/59965508/Policy+Routing
+# https://help.mikrotik.com/docs/spaces/ROS/pages/328227/Packet+Flow+in+RouterOS
+
+{
+    :local protonAddress "REPLACE_PROTON_IPV4_CIDR"
+    :local protonDNS "REPLACE_PROTON_DNS_IPV4"
+    :local protonEndpoint "REPLACE_PROTON_ENDPOINT_IPV4"
+    :local protonPort 51820
+    :local protonServerKey "REPLACE_PROTON_PEER_PUBLIC_KEY"
+
+    :local piIP 192.168.88.250
+    :local piMAC "REPLACE_ACTIVE_PI_MAC"
+    :local wgName "wg-proton-pi"
+    :local tableName "proton-pi"
+
+    # Validate values and the assumptions from the reviewed export before edits.
+    :if (($piMAC ~ "REPLACE") || ([:len $piMAC] != 17)) do={ :error "Fill the active Pi MAC before importing." }
+    :if (($protonAddress ~ "REPLACE") || ($protonDNS ~ "REPLACE") || ($protonEndpoint ~ "REPLACE") || ($protonServerKey ~ "REPLACE")) do={ :error "Fill the four Proton values before importing." }
+    :if ([:typeof [:toip $protonDNS]] != "ip") do={ :error "Proton DNS must be one IPv4 address." }
+    :if ([:typeof [:toip $protonEndpoint]] != "ip") do={ :error "Proton endpoint must be a numeric IPv4 address." }
+    :local slash [:find $protonAddress "/"]
+    :if ([:typeof $slash] = "nil") do={ :error "Proton Address must include its prefix, e.g. 10.2.0.2/32." }
+    :if ([:typeof [:toip [:pick $protonAddress 0 $slash]]] != "ip") do={ :error "Use only the IPv4 Address entry." }
+    :local prefix [:tonum [:pick $protonAddress ($slash + 1) [:len $protonAddress]]]
+    :if ([:typeof $prefix] != "num") do={ :error "Invalid IPv4 prefix." }
+    :if (($prefix < 1) || ($prefix > 32)) do={ :error "Invalid IPv4 prefix length." }
+    :if ([:len $protonServerKey] != 44) do={ :error "Peer PublicKey must be the complete 44-character WireGuard key." }
+    :if (($protonPort < 1) || ($protonPort > 65535)) do={ :error "Invalid endpoint port." }
+    :if ([:len [/interface find where name="bridge"]] != 1) do={ :error "Expected bridge interface is missing." }
+    :if ([:len [/ip address find where address="192.168.88.1/24" and interface="bridge"]] != 1) do={ :error "LAN address changed since review." }
+    :if ([:len [/interface find where name=$wgName]] != 0) do={ :error "wg-proton-pi already exists; do not reimport." }
+    :if ([:len [/routing table find where name=$tableName]] != 0) do={ :error "proton-pi table already exists; do not reimport." }
+    :if ([:len [/routing rule find]] != 0) do={ :error "Routing rules changed since review." }
+    :if ([:len [/ip firewall mangle find where dynamic=no]] != 0) do={ :error "Review existing mangle rules before installing." }
+    :if ([:len [/ip firewall nat find where chain="dstnat"]] != 0) do={ :error "Review existing destination NAT rules before installing." }
+    :if ([:len [/ip firewall filter find where comment~"^proton-pi:"]] != 0) do={ :error "Previous/partial installation found; do not reimport." }
+    :if ([:len [/ipv6 firewall filter find where comment~"^proton-pi:"]] != 0) do={ :error "Previous/partial IPv6 installation found; do not reimport." }
+
+    :local filterAnchor [/ip firewall filter find where chain="input" and comment="defconf: accept established,related,untracked"]
+    :local filter6Anchor [/ipv6 firewall filter find where chain="input" and comment="defconf: accept established,related,untracked"]
+    :if ([:len $filterAnchor] != 1) do={ :error "Expected IPv4 firewall anchor is missing or duplicated." }
+    :if ([:len $filter6Anchor] != 1) do={ :error "Expected IPv6 firewall anchor is missing or duplicated." }
+    :if ([:len [/ip dhcp-server find where name="defconf" and interface="bridge"]] != 1) do={ :error "DHCP server changed since review." }
+    :local piLease [/ip dhcp-server lease find where mac-address=$piMAC]
+    :if ([:len $piLease] > 1) do={ :error "Multiple leases for the Pi MAC; review first." }
+    :foreach lease in=[/ip dhcp-server lease find where address=$piIP] do={
+        :if ([:tostr [/ip dhcp-server lease get $lease mac-address]] != $piMAC) do={ :error "192.168.88.250 belongs to another DHCP client." }
+    }
+    :if ([:len $piLease] = 1) do={
+        :if ([/ip dhcp-server lease get $piLease address] != $piIP) do={ :error "Pi lease address changed since review." }
+    }
+
+    # Empty/disabled tunnel first. RouterOS generates a temporary private key;
+    # replace it in WebFig before enabling the interface.
+    /interface wireguard add name=$wgName mtu=1420 disabled=yes comment="proton-pi: enter Proton private key before enabling"
+
+    # This chain handles every routed IPv4 packet sent by the Pi, before
+    # FastTrack, IPsec accepts and established/related accepts in forward.
+    # Only the exact local bridge subnet and the VPN are permitted.
+    /ip firewall filter add chain="proton-pi-out" action=drop connection-state=invalid comment="proton-pi: drop invalid"
+    /ip firewall filter add chain="proton-pi-out" action=accept out-interface=bridge dst-address=192.168.88.0/24 comment="proton-pi: local LAN"
+    /ip firewall filter add chain="proton-pi-out" action=accept out-interface=$wgName comment="proton-pi: VPN egress"
+    /ip firewall filter add chain="proton-pi-out" action=drop comment="proton-pi: block every other routed egress"
+    /ip firewall filter add chain=forward action=jump jump-target="proton-pi-out" src-address=$piIP place-before=$filterAnchor comment="proton-pi: guard IP before FastTrack"
+    /ip firewall filter add chain=forward action=jump jump-target="proton-pi-out" in-interface=bridge src-mac-address=$piMAC place-before=$filterAnchor comment="proton-pi: guard MAC if IP changes"
+
+    # Accept VPN replies without FastTracking them. Unsolicited VPN ingress
+    # is dropped; the VPN interface is deliberately not added to LAN or WAN.
+    /ip firewall filter add chain="proton-pi-in" action=accept connection-state=established,related dst-address=$piIP comment="proton-pi: VPN replies"
+    /ip firewall filter add chain="proton-pi-in" action=drop comment="proton-pi: block other VPN ingress"
+    /ip firewall filter add chain=forward action=jump jump-target="proton-pi-in" in-interface=$wgName place-before=$filterAnchor comment="proton-pi: inspect VPN ingress before FastTrack"
+
+    # A DNS proxy on the router originates new queries under the router's own
+    # IP and would escape Pi source policy. Block that fallback; DNAT below
+    # normally redirects these requests before they reach the input chain.
+    /ip firewall filter add chain=input action=drop in-interface=bridge src-mac-address=$piMAC protocol=udp dst-port=53 place-before=$filterAnchor comment="proton-pi: no router DNS fallback UDP"
+    /ip firewall filter add chain=input action=drop in-interface=bridge src-mac-address=$piMAC protocol=tcp dst-port=53 place-before=$filterAnchor comment="proton-pi: no router DNS fallback TCP"
+
+    # MAC matching covers IPv6 privacy addresses. Place before FastTrack6 and
+    # existing accepts. Leave link-local neighbour discovery intact.
+    /ipv6 firewall filter add chain=forward action=drop in-interface=bridge src-mac-address=$piMAC place-before=$filter6Anchor comment="proton-pi: block routed IPv6"
+    /ipv6 firewall filter add chain=input action=drop in-interface=bridge src-mac-address=$piMAC protocol=udp dst-port=53 place-before=$filter6Anchor comment="proton-pi: no router IPv6 DNS UDP"
+    /ipv6 firewall filter add chain=input action=drop in-interface=bridge src-mac-address=$piMAC protocol=tcp dst-port=53 place-before=$filter6Anchor comment="proton-pi: no router IPv6 DNS TCP"
+
+    /ip address add address=$protonAddress interface=$wgName comment="proton-pi: Proton tunnel address"
+    /interface wireguard peers add interface=$wgName public-key=$protonServerKey endpoint-address=$protonEndpoint endpoint-port=$protonPort allowed-address=0.0.0.0/0 persistent-keepalive=25s comment="proton-pi: Proton peer"
+
+    # Preserve main routing, including wired health-probe /32 routes and the
+    # phone's backup default. Only Pi payload uses this separate VPN table.
+    /routing table add name=$tableName fib
+    /ip route add dst-address=0.0.0.0/0 gateway=$wgName routing-table=$tableName comment="proton-pi: VPN default"
+    /routing rule add src-address=$piIP dst-address=192.168.88.0/24 action=lookup-only-in-table table=main comment="proton-pi: exact LAN exception"
+    /routing rule add src-address=$piIP action=lookup-only-in-table table=$tableName comment="proton-pi: never fall back to main"
+
+    /ip firewall nat add chain=srcnat src-address=$piIP out-interface=$wgName action=masquerade comment="proton-pi: VPN NAT"
+    /ip firewall nat add chain=dstnat in-interface=bridge src-address=$piIP protocol=udp dst-port=53 action=dst-nat to-addresses=$protonDNS to-ports=53 comment="proton-pi: Proton DNS UDP"
+    /ip firewall nat add chain=dstnat in-interface=bridge src-address=$piIP protocol=tcp dst-port=53 action=dst-nat to-addresses=$protonDNS to-ports=53 comment="proton-pi: Proton DNS TCP"
+
+    # Keep the address stable even though .250 is inside the DHCP pool.
+    :if ([:len $piLease] = 0) do={
+        /ip dhcp-server lease add address=$piIP mac-address=$piMAC server=defconf comment="proton-pi: reserved server address"
+    } else={
+        :if ([/ip dhcp-server lease get $piLease dynamic]) do={ /ip dhcp-server lease make-static $piLease }
+        /ip dhcp-server lease set [find where mac-address=$piMAC] address=$piIP server=defconf comment="proton-pi: reserved server address"
+    }
+
+    :put "Installed. Pi internet is blocked until the VPN is configured and enabled."
+    :put "In WebFig set wg-proton-pi Private Key from the new Proton file, then enable it."
+    :put "Reboot the router with the Pi disconnected to clear existing FastTrack/NAT state."
+    :put "Reconnect and test VPN egress, tunnel-down blocking, reboot and phone failover."
+}

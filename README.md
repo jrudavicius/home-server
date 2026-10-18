@@ -318,8 +318,17 @@ writes the resolved Stack environment to `.env` when deploying.
 The media Stack starts `media-vpn` with Gluetun and mounts
 `WIREGUARD_CONFIG_FILE` at `/gluetun/wireguard/wg0.conf`. Transmission uses
 `network_mode: "service:vpn"`, so its web UI and torrent traffic use the VPN
-container's network namespace. Plex stays on the normal Docker network so local
-and remote Plex access are not tied to the VPN.
+container's network namespace. Plex stays on the normal Docker network and
+does not depend on the Gluetun container.
+
+The VPN container publishes Transmission's web port, and Traefik connects to
+`media-vpn:9091`. Traefik reads the configured hostname variables through its
+file provider.
+
+The [router VPN reference](router/README.md) describes an alternative policy
+covering the whole Pi. It is not required by this media Stack. Existing router
+policies are not removed by Compose and can still affect Plex, ngrok, and the
+VPN container's connection to its provider.
 
 Compose waits for Gluetun's health check to pass before starting Transmission.
 The dependency also restarts Transmission when an explicit Compose operation
@@ -341,190 +350,20 @@ Stop the Komodo bootstrap stack:
 docker compose down
 ```
 
-## External Access From This MacBook
+## External access and webhooks
 
-The root compose file publishes Komodo on `HOST_BIND_ADDRESS`, which should be
-`0.0.0.0` when it must be reachable from outside the MacBook.
-
-For the current network:
-
-- Public IP: `84.32.117.122`
-- MacBook LAN IP: `192.168.0.130`
-
-For direct public-IP access, use these settings in the root `.env`:
-
-```env
-HOST_BIND_ADDRESS=0.0.0.0
-KOMODO_HOST=http://84.32.117.122:9120
-KOMODO_WEBHOOK_BASE_URL=http://84.32.117.122:9120
-```
-
-`https://84.32.117.122/` will not work with this compose file alone. That URL
-means HTTPS on TCP `443`, but the stack currently publishes the services on
-their own HTTP ports:
-
-- Komodo: `http://84.32.117.122:9120`
-- Grafana: `http://84.32.117.122:3000`
-- Plex: `http://84.32.117.122:32400/web`
-- Transmission UI: `http://84.32.117.122:9091`
-
-To make `https://84.32.117.122/` or a normal `https://...` URL work, add a
-reverse proxy such as Caddy, Traefik, or Nginx, publish TCP `80` and `443`, and
-forward those ports from the router to the MacBook. For browser-trusted HTTPS,
-use a DNS name pointed at `84.32.117.122`; IP-only HTTPS usually requires an
-internal or self-signed certificate and will show a browser warning.
-
-### Komodo Webhook URLs
-
-The webhook examples use these listener paths:
-
-- `/listener/github/sync/home-server-resources/sync`
-- `/listener/github/stack/entrypoint/deploy`
-- `/listener/github/stack/observability/deploy`
-- `/listener/github/stack/media/deploy`
-- `/listener/github/stack/ngrok/deploy`
-
-With `KOMODO_WEBHOOK_BASE_URL=http://84.32.117.122:9120`, the GitHub webhook
-payload URLs are:
+Use the existing ngrok stack for inbound webhooks and the entrypoint. See
+[ngrok configuration](stacks/ngrok/README.md) for endpoint configuration and the
+individual Resource Sync and Stack webhook URLs.
 
 ```text
-http://84.32.117.122:9120/listener/github/sync/home-server-resources/sync
-http://84.32.117.122:9120/listener/github/stack/entrypoint/deploy
-http://84.32.117.122:9120/listener/github/stack/observability/deploy
-http://84.32.117.122:9120/listener/github/stack/media/deploy
-http://84.32.117.122:9120/listener/github/stack/ngrok/deploy
+webhooks HTTPS URL -> komodo-core:9120
+entrypoint URL     -> home-server-proxy:80
 ```
 
-These URLs require the router to forward TCP `9120` to `192.168.0.130:9120`.
-Using `http://84.32.117.122/listener/...` without `:9120` would hit the port 80
-proxy instead; that only works if the proxy routes `/listener` paths to
-`komodo-core`.
-
-### ngrok Fallback
-
-When direct public-IP forwarding is not working, deploy the `stacks/ngrok`
-agent instead. It starts one ngrok container with its endpoint config from
-`stacks/ngrok/ngrok.yml`:
-
-```text
-webhooks public URL   -> komodo-core:9120
-entrypoint public URL -> home-server-proxy:80
-```
-
-The `webhooks` HTTPS URL receives `/listener` webhook paths by forwarding
-directly to Komodo. The `entrypoint` HTTP URL opens the Traefik landing page and
-routed services. Traefik still routes `/listener` paths to Komodo locally as a
-fallback:
-
-```yaml
-komodo:
-  rule: "Host(`komodo.home.arpa`) || PathPrefix(`/listener`)"
-  entryPoints:
-    - web
-  priority: 30
-  service: komodo
-```
-
-With `KOMODO_WEBHOOK_BASE_URL=https://your-webhooks-ngrok-url`, the GitHub webhook
-payload URLs are:
-
-```text
-https://your-webhooks-ngrok-url/listener/github/sync/home-server-resources/sync
-https://your-webhooks-ngrok-url/listener/github/stack/entrypoint/deploy
-https://your-webhooks-ngrok-url/listener/github/stack/observability/deploy
-https://your-webhooks-ngrok-url/listener/github/stack/media/deploy
-https://your-webhooks-ngrok-url/listener/github/stack/ngrok/deploy
-```
-
-The default config asks ngrok to create an HTTPS URL for `webhooks` and an HTTP
-URL for `entrypoint`. This keeps them distinct on an account that only assigns
-one free hostname. For two HTTPS hostnames, configure explicit reserved or
-custom domains in `stacks/ngrok/ngrok.yml`; use
-`stacks/ngrok/ngrok.multi-endpoint.example.yml` as the starting point.
-
-The local ngrok inspector is available on:
-
-```text
-http://127.0.0.1:4040
-```
-
-If GitHub says "failed to connect to host" for one of these URLs and Komodo has
-no matching webhook log entry, GitHub did not reach the MacBook. Check the
-router before changing Komodo:
-
-- The router's WAN or Internet IP must be `84.32.117.122`.
-- TCP `9120` must forward to `192.168.0.130:9120`.
-- The forwarding rule must apply to the active WAN interface.
-- `192.168.0.130` should be reserved for this MacBook in DHCP so it does not
-  change.
-- If the router WAN IP is private, such as `10.x.x.x`, `172.16-31.x.x`,
-  `192.168.x.x`, or `100.64-127.x.x`, there is another NAT layer upstream and
-  direct inbound webhooks will not work without changing that upstream router,
-  requesting a public/static IP from the ISP, or using a tunnel such as ngrok.
-
-Then reserve `192.168.0.130` for this MacBook in the router DHCP settings and
-forward only the ports you actually need:
-
-| Service | External access URL | Router forward |
-| --- | --- | --- |
-| Komodo | `http://84.32.117.122:9120` | TCP `9120` to `192.168.0.130:9120` |
-| Grafana | `http://84.32.117.122:3000` | TCP `3000` to `192.168.0.130:3000` |
-| Plex | `http://84.32.117.122:32400/web` | TCP `32400` to `192.168.0.130:32400` |
-| Transmission UI | `http://84.32.117.122:9091` | TCP `9091` to `192.168.0.130:9091` |
-| Transmission peers | via VPN provider port forwarding | Do not forward from the home router |
-
-Avoid forwarding the Transmission UI unless it has a strong password and you
-really need internet access to it. For admin tools like Komodo, Grafana, and
-Transmission, a VPN or HTTPS reverse proxy is safer than direct public HTTP.
-
-### macOS Firewall Checklist
-
-Because this runs on a MacBook, there can be more than one firewall-like layer
-between the router and Docker Desktop:
-
-- macOS Application Firewall: System Settings > Network > Firewall. If enabled,
-  open Options, keep "Block all incoming connections" off, and allow Docker
-  Desktop if macOS asks about incoming connections.
-- Local Network privacy: System Settings > Privacy & Security > Local Network.
-  If Docker Desktop or the terminal app used to run Compose appears there, allow
-  it.
-- Packet Filter (`pf`): if a custom `/etc/pf.conf`, VPN client, security agent,
-  or MDM profile is installed, make sure it does not block inbound TCP `9120`,
-  TCP `3000`, TCP `32400`, or TCP `9091`.
-- Third-party firewalls and VPNs: tools such as LuLu, Little Snitch, corporate
-  endpoint security, or VPN "kill switch" features can block inbound traffic
-  before Docker sees it.
-
-Useful read-only checks on the MacBook:
-
-```sh
-/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
-/usr/libexec/ApplicationFirewall/socketfilterfw --getblockall
-/usr/libexec/ApplicationFirewall/socketfilterfw --getstealthmode
-sudo pfctl -s info
-sudo pfctl -sr
-```
-
-Useful reachability checks after the stack is running:
-
-```sh
-nc -vz 127.0.0.1 9120
-nc -vz 192.168.0.130 9120
-```
-
-Run the second command from another device on the same network if possible. If
-that works but `84.32.117.122:9120` does not work from mobile data or another
-outside network, the problem is usually router forwarding, ISP CGNAT, or an
-upstream firewall rather than Docker.
-
-If the services work on the MacBook but not from outside, check that the router's
-WAN address is actually `84.32.117.122`, macOS Firewall allows Docker Desktop
-incoming connections, and the test is from a device outside the home network.
-
-Apple's current firewall and Local Network settings documentation is here:
-
-- [Block connections to your Mac with a firewall](https://support.apple.com/guide/mac-help/block-connections-to-your-mac-with-a-firewall-mh34041/mac)
-- [Control access to your local network on Mac](https://support.apple.com/guide/mac-help/control-access-to-your-local-network-on-mac-mchla4f49138/mac)
+Set `KOMODO_WEBHOOK_BASE_URL` to the public HTTPS webhook URL. ngrok uses the
+normal Docker network and does not depend on the Gluetun container. Periphery
+remains in Docker; no host VPN installer or deployment hook is required.
 
 ## Notes
 
