@@ -1,6 +1,25 @@
 name: management
 
 services:
+  secret-bootstrap:
+    container_name: management-secret-bootstrap
+    image: python:3.13-alpine
+    restart: "no"
+    network_mode: none
+    read_only: true
+    labels:
+      komodo.skip: "true"
+    command: ["python", "-B", "/scripts/render_komodo_secrets.py"]
+    environment:
+      GRAFANA_ADMIN_USER: ${GRAFANA_ADMIN_USER:?Set GRAFANA_ADMIN_USER in bootstrap.env}
+      GRAFANA_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in bootstrap.env}
+      TRANSMISSION_USERNAME: ${TRANSMISSION_USERNAME:?Set TRANSMISSION_USERNAME in bootstrap.env}
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:?Set NGROK_AUTHTOKEN in bootstrap.env}
+      PLEX_CLAIM: ${PLEX_CLAIM:-}
+    volumes:
+      - ./scripts/render_komodo_secrets.py:/scripts/render_komodo_secrets.py:ro
+      - komodo-bootstrap-config:/bootstrap
+
   database:
     container_name: management-database
     image: mongo:8.0
@@ -21,7 +40,11 @@ services:
     init: true
     restart: unless-stopped
     depends_on:
-      - database
+      database:
+        condition: service_started
+      secret-bootstrap:
+        condition: service_completed_successfully
+        restart: true
     labels:
       traefik.enable: "true"
       traefik.http.routers.control-plane.rule: "Host(`${KOMODO_TRAEFIK_HOST:-komodo.home.arpa}`)"
@@ -32,6 +55,7 @@ services:
       - "${HOST_BIND_ADDRESS:-0.0.0.0}:${KOMODO_PORT:?Set KOMODO_PORT}:9120"
     environment:
       TZ: Europe/Vilnius
+      KOMODO_CONFIG_PATH: /config/bootstrap/core.config.json
       KOMODO_DATABASE_ADDRESS: database:27017
       KOMODO_DATABASE_USERNAME: ${KOMODO_DATABASE_USERNAME:?Set KOMODO_DATABASE_USERNAME}
       KOMODO_DATABASE_PASSWORD: ${KOMODO_DATABASE_PASSWORD:?Set KOMODO_DATABASE_PASSWORD}
@@ -61,6 +85,7 @@ services:
       KOMODO_PRETTY_STARTUP_CONFIG: false
     volumes:
       - komodo-keys:/config/keys
+      - komodo-bootstrap-config:/config/bootstrap:ro
       - "${KOMODO_BACKUPS_PATH:?Set KOMODO_BACKUPS_PATH}:/backups"
 
   host-agent:
@@ -99,3 +124,4 @@ volumes:
     name: ${MANAGEMENT_VOLUME_PREFIX:-server}_komodo-mongo-config
   komodo-keys:
     name: ${MANAGEMENT_VOLUME_PREFIX:-server}_komodo-keys
+  komodo-bootstrap-config:

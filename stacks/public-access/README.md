@@ -23,17 +23,24 @@ deploying the renamed stack.
 
 ## Setup
 
-Copy the example environment file and add your ngrok auth token:
+For manual deployment, copy the example environment file and add your ngrok
+auth token only in the private `.env` copy:
 
 ```sh
-cp .env.example .env
+umask 077
+cp -n .env.example .env
+chmod 600 .env
 ```
 
 ```env
-NGROK_AUTHTOKEN=your-ngrok-authtoken
+NGROK_AUTHTOKEN=
 NGROK_INSPECT_PORT=4040
 NGROK_DOCKER_NETWORK=portainer_network
 ```
+
+Fill `NGROK_AUTHTOKEN` with your token from the ngrok dashboard before starting.
+The `.env` file is ignored by Git; leave `.env.example` empty. For the full
+credential inventory, see [Credential setup](../../README.md#credential-setup).
 
 Start the endpoints:
 
@@ -60,19 +67,28 @@ Komodo deploys the Git-based stack from its own checkout and writes the Stack
 environment to `.env` before deploying. It does not read the `.env` in your local
 Server checkout.
 
-In Komodo, open **Settings → Variables** and set `NGROK_AUTHTOKEN` to your ngrok
-auth token with **Secret** enabled. The variable must have a nonempty value;
-creating the variable without a value is not enough. The Stack environment in
-`komodo/stacks.toml` references it as:
+Set `NGROK_AUTHTOKEN` to your ngrok auth token in the Pi's private
+`/srv/komodo/bootstrap.env`, then run this from the repository root:
+
+```sh
+docker compose --env-file /srv/komodo/bootstrap.env up -d
+```
+
+The bootstrap service loads it into Komodo as a Core secret automatically.
+The Stack environment in `komodo/stacks.toml` already references it as:
 
 ```env
 NGROK_AUTHTOKEN=[[NGROK_AUTHTOKEN]]
 ```
 
-Save the variable and deploy the `public-access` Stack. If Compose reports that
-`NGROK_AUTHTOKEN` is missing even though your local `.env` contains it, check the
-Komodo variable's value. Editing the generated `.env` in Komodo's checkout is
-temporary: the next deployment rewrites it from the Stack environment.
+Deploy the `public-access` Stack after the root stack has updated. If the old value is
+still used, remove any editable `NGROK_AUTHTOKEN` variable previously created
+in Komodo's UI; it overrides the Core secret. See the main
+[migration instructions](../../README.md#existing-installations).
+
+Editing the generated `.env` in Komodo's checkout is temporary: the next
+deployment rewrites it. Update `/srv/komodo/bootstrap.env` and rerun the root
+command above before redeploying `public-access`.
 
 ## Endpoint configuration
 
@@ -112,8 +128,8 @@ have two different public URLs.
 
 ## Komodo webhook base URL
 
-After ngrok is running, copy the `webhooks` public HTTPS URL into the root
-Server `.env`:
+After ngrok is running, copy the `webhooks` public HTTPS URL into
+`/srv/komodo/bootstrap.env` on the server:
 
 ```env
 KOMODO_WEBHOOK_BASE_URL=https://your-webhooks-ngrok-url
@@ -122,7 +138,7 @@ KOMODO_WEBHOOK_BASE_URL=https://your-webhooks-ngrok-url
 Then restart Komodo from the repository root:
 
 ```sh
-docker compose up -d
+docker compose --env-file /srv/komodo/bootstrap.env up -d
 ```
 
 Use these webhook payload URLs in GitHub:
@@ -136,7 +152,7 @@ https://your-webhooks-ngrok-url/listener/github/stack/public-access/deploy
 ```
 
 Use `application/json` as the content type and use the value of
-`KOMODO_WEBHOOK_SECRET` from the root Server `.env` as the webhook secret.
+`KOMODO_WEBHOOK_SECRET` from `/srv/komodo/bootstrap.env` as the webhook secret.
 
 ## Security note
 

@@ -15,6 +15,8 @@ def compose_config(stack):
     # Do not let an operator's shell override the committed example settings.
     env = {key: value for key, value in os.environ.items()
            if not key.startswith(("TRANSMISSION_", "PLEX_", "MEDIA_", "TRANSCODE_"))}
+    # The credential template is deliberately empty; use a test-only username.
+    env["TRANSMISSION_USERNAME"] = "test-only-user"
     result = subprocess.run(
         ["docker", "compose", "--env-file", str(directory / ".env.example"),
          "-f", str(directory / "docker-compose.yml"), "config", "--format", "json"],

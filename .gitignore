@@ -1,4 +1,16 @@
+# Runtime environment files; only empty credential templates belong in Git.
 .env
+.env.*
+*.env
+*.env.*
+!.env.example
+!*.env.example
+
+# Local secret directories and the default Transmission password file.
+secrets/
+.secrets/
+transmission_user_password.txt
+core.config.json
 
 # WireGuard client configs contain private keys.
 wg0.conf

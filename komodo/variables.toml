@@ -1,3 +1,9 @@
+# Only non-sensitive settings and file paths are Git-managed here.
+# Set GRAFANA_ADMIN_USER, GRAFANA_ADMIN_PASSWORD, TRANSMISSION_USERNAME,
+# NGROK_AUTHTOKEN, and optional PLEX_CLAIM in the Pi's private bootstrap.env.
+# secret-bootstrap exposes them as Core secrets automatically.
+# See README.md: Credential setup for bootstrap credentials and secret files.
+
 [[variable]]
 name = "PLEX_CONFIG_PATH"
 description = "Plex config bind mount path."
@@ -45,9 +51,6 @@ name = "TRANSMISSION_USER_PASSWORD_FILE"
 description = "Transmission password secret file path."
 value = "/srv/server/config/transmission/transmission_user_password.txt"
 is_secret = false
-
-# NGROK_AUTHTOKEN is intentionally not Git-managed. Create it as a secret
-# Komodo variable before deploying the public-access Stack.
 
 [[variable]]
 name = "NGROK_INSPECT_PORT"

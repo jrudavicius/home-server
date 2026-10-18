@@ -26,6 +26,7 @@ root bootstrap stack.
 
 | Stack | Service | Container | Implementation / purpose |
 | --- | --- | --- | --- |
+| `management` | `secret-bootstrap` | `management-secret-bootstrap` | Prepares private application secrets before Komodo starts. |
 | `management` | `database` | `management-database` | MongoDB database used by Komodo. |
 | `management` | `control-plane` | `management-control-plane` | Komodo control plane and web UI. |
 | `management` | `host-agent` | `management-host-agent` | Komodo agent managing Docker and host resources. |
@@ -51,40 +52,161 @@ variables, and public hostnames keep their existing names.
 - A wired Linux host for Transmission macvlan networking; Docker Desktop on macOS can validate configuration but cannot run this network.
 - The [MikroTik Transmission policy](router/README.md), installed and tested before deploying media.
 - Persistent directories for configuration, media, backups, and transcode data.
-- A `.env` file containing the required environment variables.
+- A private bootstrap environment file, for example `/srv/komodo/bootstrap.env`.
+- Komodo variables and server-side secret files described below.
 - A Komodo periphery work directory outside this repository, for example
   `/srv/komodo/periphery`.
 
 ## Configuration
 
-Create a `.env` file next to the root `docker-compose.yml` for the Komodo
-`management` bootstrap stack:
+### Credential setup
 
-```env
-HOST_BIND_ADDRESS=0.0.0.0
-MANAGEMENT_VOLUME_PREFIX=server
+Committed files contain empty credential fields or variable references only.
+Store actual usernames, passwords, tokens, and private keys in the locations
+below. Do not fill them into `bootstrap.env.example`, stack `.env.example`
+files, or `komodo/variables.toml`.
 
-KOMODO_DATABASE_USERNAME=
-KOMODO_DATABASE_PASSWORD=
-KOMODO_IMAGE_TAG=2
-KOMODO_PORT=
-KOMODO_HOST=
-KOMODO_WEBHOOK_BASE_URL=
-KOMODO_TRAEFIK_HOST=
-KOMODO_INIT_ADMIN_USERNAME=
-KOMODO_INIT_ADMIN_PASSWORD=
-KOMODO_FIRST_SERVER_NAME=
-KOMODO_WEBHOOK_SECRET=
-KOMODO_JWT_SECRET=
-KOMODO_BACKUPS_PATH=
+#### Komodo bootstrap credentials
 
-PERIPHERY_ROOT_DIRECTORY=/srv/komodo/periphery
-DOCKER_SOCKET_PATH=/var/run/docker.sock
+Keep the root stack's environment outside the Git checkout at
+`/srv/komodo/bootstrap.env`. Komodo needs these credentials before its variable
+system is available. On a fresh installation, run the following from the
+repository root, then edit the private copy. Do not overwrite an existing
+bootstrap file with the example.
+
+```sh
+sudo mkdir -p /srv/komodo
+test -e /srv/komodo/bootstrap.env || sudo install -o "$(id -u)" -g "$(id -g)" -m 600 bootstrap.env.example /srv/komodo/bootstrap.env
 ```
+
+Fill all six of these fields in `/srv/komodo/bootstrap.env`:
+
+| Variable | Value to set |
+| --- | --- |
+| `KOMODO_DATABASE_USERNAME` | MongoDB account used by Komodo. |
+| `KOMODO_DATABASE_PASSWORD` | Password for that MongoDB account. |
+| `KOMODO_INIT_ADMIN_USERNAME` | Initial Komodo administrator username. |
+| `KOMODO_INIT_ADMIN_PASSWORD` | Initial Komodo administrator password. |
+| `KOMODO_WEBHOOK_SECRET` | A separate random secret; also enter it in GitHub's webhook Secret field. |
+| `KOMODO_JWT_SECRET` | A separate random secret for signing authentication tokens. |
+
+For new installations, generate independent passwords and secrets with your
+password manager. Keep a recovery copy there. In environment files, quote
+values containing special characters according to the
+[Compose environment-file rules](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/#env-file-syntax).
+
+The example supplies the non-secret ports and paths. Keep
+`MANAGEMENT_VOLUME_PREFIX` equal to the existing Docker volume prefix (`server`
+by default) so Komodo keeps its database and keys. Adjust `KOMODO_HOST` to
+your server URL; leave `KOMODO_WEBHOOK_BASE_URL` empty until ngrok is running.
+Keep `KOMODO_FIRST_SERVER_NAME=home-server` to match the managed Stack resources.
+Use `--env-file /srv/komodo/bootstrap.env` for every root Compose command, as
+shown under [Running](#running).
 
 Do not point `PERIPHERY_ROOT_DIRECTORY` at this repository. Komodo uses that
 directory for managed Git checkouts, generated environment files, and stack
 working state.
+
+#### Managed application credentials
+
+Set these four values in the same private `/srv/komodo/bootstrap.env` file
+before starting the root stack. Every value must be nonempty and single-line.
+
+| Bootstrap variable | Value to set | Used by |
+| --- | --- | --- |
+| `GRAFANA_ADMIN_USER` | Grafana administrator username. | `observability` |
+| `GRAFANA_ADMIN_PASSWORD` | Grafana administrator password. | `observability` |
+| `TRANSMISSION_USERNAME` | Transmission web UI username. | `media` |
+| `NGROK_AUTHTOKEN` | Your authentication token from the ngrok dashboard. | `public-access` |
+
+On `docker compose --env-file /srv/komodo/bootstrap.env up -d`, the
+`secret-bootstrap` service validates the values and writes a private JSON
+configuration into the `komodo-bootstrap-config` Docker volume. The directory
+has mode `700` and the file has mode `600`. Komodo mounts it read-only and waits
+for preparation to succeed before starting. No API key or manual variable
+creation is needed. The initializer has no network access and logs no values.
+
+These are native **Core secrets**, visible by name under **Settings → Variables**;
+their values cannot be read through Komodo's API. `komodo/stacks.toml` references
+them using `[[VARIABLE_NAME]]`, and `komodo/variables.toml` deliberately omits
+them. Keep these references unquoted: the initializer supplies the quoting and
+escaping needed for Compose environment files. See
+[Variables and Secrets](https://komo.do/docs/configuration/variables).
+
+Komodo writes the resolved Stack environment to a deployment `.env` file. The
+values remain on the server, so restrict access to the periphery working
+directory and its backups. Editing that generated `.env` is temporary: set
+credentials in `/srv/komodo/bootstrap.env` instead. After changing a value,
+rerun the root `up -d` command, then redeploy the affected application Stack.
+The generated configuration contains credentials too, so protect the Docker
+volume and its backups. See
+[Komodo Compose deployment](https://komo.do/docs/deploy/compose).
+
+#### Server-side secret files
+
+Create the Transmission password file on the Docker host before deploying
+`media`. Its path is non-secret and is declared in `komodo/variables.toml`.
+
+| Path variable | Default server path | File contents |
+| --- | --- | --- |
+| `TRANSMISSION_USER_PASSWORD_FILE` | `/srv/server/config/transmission/transmission_user_password.txt` | Only the Transmission password, without a trailing newline. |
+
+Keep this file outside the checkout. Restrict it to the deployment account
+and the container user/root that reads it; use mode `600` where that ownership
+allows it. Compose mounts it as a secret. The Transmission password belongs
+in its file, not in a Komodo password variable. WireGuard credentials stay on
+the MikroTik router; the media stack does not need a VPN key file.
+
+`PLEX_CLAIM` is optional. For first-time setup, set it in
+`/srv/komodo/bootstrap.env`, rerun the root `up -d` command, and deploy `media`.
+After claiming Plex, clear it and repeat those commands. The initializer
+always provides this Core secret, including when empty; the Stack reference
+stays `PLEX_CLAIM=[[PLEX_CLAIM]]`. For manual deployments, use the private
+media `.env` file instead.
+
+#### Existing installations
+
+Preserve your current credentials during this migration. If the root stack
+already uses a `.env`, copy its full contents to `/srv/komodo/bootstrap.env`,
+make that file readable only by the deployment account (`chmod 600`), and
+switch root Compose commands to the explicit `--env-file` path.
+
+Add the four application values above using your existing usernames, Grafana
+password, and ngrok token. Add `PLEX_CLAIM=` unless you need a current claim
+token. Preserve existing non-secret settings and `MANAGEMENT_VOLUME_PREFIX`.
+Run the root `up -d` command to prepare and load the Core secrets before syncing
+the updated application Stacks.
+
+If editable variables with the same names already exist in Komodo's UI, they
+override Core secrets. After the root stack starts successfully, remove those
+duplicate UI variables so the bootstrap file becomes the source of truth,
+then sync and redeploy the affected Stacks. Resource Sync has deletion disabled
+and will not remove these duplicates for you. Keep the server-side Transmission
+password file in place.
+
+Moving settings does not rotate credentials or rename existing accounts.
+MongoDB, Komodo, and Grafana administrator initialization settings do not update
+existing accounts; use each application's account-management flow for later
+password changes and keep the private bootstrap file consistent.
+
+#### Manual application deployments
+
+For manual testing, copy each stack's `.env.example` to `.env` in that stack's
+directory and fill the same credentials there. Set file permissions before
+adding values:
+
+```sh
+umask 077
+cp -n .env.example .env
+chmod 600 .env
+```
+
+The `-n` option preserves an existing file. A local `.env` is used by manual
+Compose commands; Komodo uses the Core secrets loaded by the root stack. Git
+ignores runtime `.env` variants, `*.env` files, local `secrets/` and `.secrets/`
+directories, and the default Transmission password filename. The committed
+`bootstrap.env.example` and stack `.env.example` templates remain available
+with empty credential fields.
 
 Create a `.env` file next to `stacks/entrypoint/docker-compose.yml` for local
 manual testing of the entrypoint stack:
@@ -130,7 +252,7 @@ TRANSMISSION_LAN_MAC=02:54:52:00:00:01
 TRANSMISSION_DNS=10.2.0.1
 TRANSMISSION_PEER_PORT=51413
 TRANSMISSION_TRAEFIK_HOST=transmission.home.arpa
-TRANSMISSION_USERNAME=julius
+TRANSMISSION_USERNAME=
 TRANSMISSION_USER_PASSWORD_FILE=/srv/server/config/transmission/transmission_user_password.txt
 TRANSMISSION_CONFIG_PATH=/srv/server/config/transmission
 ```
@@ -146,7 +268,7 @@ ALLOY_IMAGE_TAG=v1.17.0
 GRAFANA_PORT=3000
 GRAFANA_TRAEFIK_HOST=grafana.home.arpa
 GRAFANA_ROOT_URL=http://grafana.home.arpa/
-GRAFANA_ADMIN_USER=admin
+GRAFANA_ADMIN_USER=
 GRAFANA_ADMIN_PASSWORD=
 GRAFANA_PLUGINS_PREINSTALL_DISABLED=true
 GRAFANA_PLUGINS_PREINSTALL_AUTO_UPDATE=false
@@ -161,7 +283,7 @@ Create a `.env` file next to `stacks/public-access/docker-compose.yml` for local
 manual testing of the public tunnel stack:
 
 ```env
-NGROK_AUTHTOKEN=your-ngrok-authtoken
+NGROK_AUTHTOKEN=
 NGROK_INSPECT_PORT=4040
 NGROK_DOCKER_NETWORK=portainer_network
 ```
@@ -263,10 +385,6 @@ the empty notification route, and waits for both immediate critical and delayed
 error-burst alerts to fire. Allow about three minutes. It removes its test
 containers, network, and volumes when it exits.
 
-`TRANSMISSION_USER_PASSWORD_FILE` must point to a local file containing the
-Transmission password. Docker Compose mounts it as a secret. Keep this file to
-the password value only, without a trailing newline.
-
 ## Migrating existing deployments
 
 Renaming Compose services creates new containers. The root project also changes
@@ -283,7 +401,7 @@ tunnel will be stopped.
    docker inspect komodo-database komodo-core --format '{{.Name}}{{range .Mounts}}{{if eq .Type "volume"}} {{.Name}}:{{.Destination}}{{end}}{{end}}'
    ```
 
-   Set `MANAGEMENT_VOLUME_PREFIX` in the root `.env` to that old project name
+   Set `MANAGEMENT_VOLUME_PREFIX` in `/srv/komodo/bootstrap.env` to that old project name
    (`server` by default). The root Compose file explicitly reuses
    `<prefix>_komodo-mongo-data`, `<prefix>_komodo-mongo-config`, and
    `<prefix>_komodo-keys`. Verify those match the recorded volumes and take your
@@ -297,8 +415,10 @@ tunnel will be stopped.
 3. Update the checkout. For manual deployments, move the old
    `stacks/ngrok/.env` to `stacks/public-access/.env`. Remove any old
    `COMPOSE_PROJECT_NAME` override or update it to the corresponding stack name.
-   Confirm `MANAGEMENT_VOLUME_PREFIX` still matches the old root volumes, then
-   run `docker compose up -d` from the repository root to start `management`.
+   Complete [Credential setup](#credential-setup) and confirm
+   `MANAGEMENT_VOLUME_PREFIX` still matches the old root volumes, then run
+   `docker compose --env-file /srv/komodo/bootstrap.env up -d` from the
+   repository root to start `management`.
 4. In Komodo, rename the existing `ngrok` Stack resource to `public-access`
    before syncing `komodo/stacks.toml`. Sync updates its project name, run
    directory, and config-file service references. Resource Sync has deletion
@@ -317,19 +437,19 @@ tunnel will be stopped.
 Start the Komodo `management` bootstrap stack from the repository root:
 
 ```sh
-docker compose up -d
+docker compose --env-file /srv/komodo/bootstrap.env up -d
 ```
 
 Check Komodo container status:
 
 ```sh
-docker compose ps
+docker compose --env-file /srv/komodo/bootstrap.env ps
 ```
 
 View Komodo logs:
 
 ```sh
-docker compose logs -f
+docker compose --env-file /srv/komodo/bootstrap.env logs -f
 ```
 
 Start the entrypoint stack manually for local testing:
@@ -435,8 +555,8 @@ NGROK_INSPECT_PORT
 NGROK_DOCKER_NETWORK
 ```
 
-Create `GRAFANA_ADMIN_PASSWORD` as a secret Komodo variable before deploying
-the observability Stack.
+Complete [Credential setup](#credential-setup) before syncing: the Stacks deploy
+automatically and require the Core secrets loaded from the private bootstrap file.
 
 Create the directories referenced by those variables before deploying media.
 Install and test the [MikroTik Transmission-only VPN policy](router/README.md),
@@ -444,11 +564,7 @@ reserve Transmission's LAN identity, and create the external `transmission_lan`
 macvlan network on the Pi. The entrypoint stack creates the internal
 `transmission_ui` bridge, so it must be deployed before media.
 
-Set the secret `NGROK_AUTHTOKEN` variable in Komodo before deploying the
-`public-access` stack.
-`PLEX_CLAIM` is optional; leave it empty for an unclaimed server, or set a real
-`claim-...` token before the first Plex setup. Komodo writes the resolved stack
-environment to `.env` when deploying.
+The optional `PLEX_CLAIM` setup is also described under Credential setup.
 
 Transmission has a fixed LAN IP/MAC that MikroTik routes through its existing
 Proton WireGuard tunnel. The router's firewall blocks other routed egress,
@@ -469,7 +585,7 @@ from the home WAN; see the router guide for details.
 Stop the Komodo `management` bootstrap stack:
 
 ```sh
-docker compose down
+docker compose --env-file /srv/komodo/bootstrap.env down
 ```
 
 ## External access and webhooks
@@ -497,6 +613,7 @@ no host VPN installer or deployment hook is required.
 - Loki, Grafana, and Alloy data are stored in Docker-managed volumes.
 - Transmission uses its dedicated macvlan LAN identity for Proton routing and
   an internal bridge for Traefik; there is no VPN container.
-- Plex, Transmission, media, backup, and periphery paths are expected to be
-  provided by the relevant stack `.env` file.
+- Bootstrap settings come from `/srv/komodo/bootstrap.env`; managed application
+  settings come from Komodo. Manual application deployments use stack `.env`
+  files.
 - Timezone is configured as `Europe/Vilnius`.
