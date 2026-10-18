@@ -90,12 +90,14 @@ ENTRYPOINT_KOMODO_URL=
 ENTRYPOINT_PLEX_URL=
 ENTRYPOINT_GRAFANA_URL=
 ENTRYPOINT_TRAEFIK_URL=
+ENTRYPOINT_NGROK_URL=
 ENTRYPOINT_TRANSMISSION_URL=
 
 GRAFANA_PORT=3000
 GRAFANA_TRAEFIK_HOST=grafana.home.arpa
 KOMODO_PORT=9120
 KOMODO_TRAEFIK_HOST=komodo.home.arpa
+NGROK_INSPECT_PORT=4040
 PLEX_PORT=32400
 PLEX_TRAEFIK_HOST=plex.home.arpa
 TRANSMISSION_WEB_PORT=9091
@@ -171,8 +173,13 @@ use the direct server address, such as `http://192.168.1.50:9120`. After DNS is
 configured, the default Traefik hostname would be `http://komodo.home.arpa`.
 
 Set `ENTRYPOINT_KOMODO_URL`, `ENTRYPOINT_PLEX_URL`, `ENTRYPOINT_GRAFANA_URL`,
-`ENTRYPOINT_TRAEFIK_URL`, and `ENTRYPOINT_TRANSMISSION_URL` only when you want
-fully custom URLs.
+`ENTRYPOINT_TRAEFIK_URL`, `ENTRYPOINT_NGROK_URL`, and
+`ENTRYPOINT_TRANSMISSION_URL` only when you want fully custom URLs.
+
+The ngrok card opens the server's local inspection UI on `NGROK_INSPECT_PORT`
+(4040 by default). For manual deployments, set this port to the same value in
+the entrypoint and ngrok stacks. Komodo uses the shared `NGROK_INSPECT_PORT`
+variable for both stacks.
 
 The observability stack stores Loki, Grafana, and Alloy data in Docker-managed
 volumes. Loki keeps container logs for 168 hours by default. Increase
