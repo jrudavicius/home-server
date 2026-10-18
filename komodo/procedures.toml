@@ -40,3 +40,24 @@ name = "Deploy public access"
 executions = [
   { execution.type = "DeployStackIfChanged", execution.params.stack = "public-access" },
 ]
+
+# Reconcile Komodo's built-in procedure by name instead of scheduling a duplicate.
+[[procedure]]
+name = "Backup Core Database"
+description = "Back up Komodo daily; retain the configured number of local snapshots."
+tags = ["system", "home"]
+
+[procedure.config]
+schedule = "Every day at 01:00"
+schedule_timezone = "Europe/Vilnius"
+schedule_enabled = true
+schedule_alert = false
+failure_alert = true
+webhook_enabled = false
+
+[[procedure.config.stage]]
+name = "Back up Komodo database"
+enabled = true
+executions = [
+  { execution.type = "BackupCoreDatabase", execution.params = {}, enabled = true },
+]

@@ -477,9 +477,23 @@ python3 tests/smoke_management.py
 The test holds MongoDB initialization open to verify Core waits, checks valid
 and invalid credentials, verifies Core is reachable from the application
 network while MongoDB is blocked by both name and IP, and restarts MongoDB with
-its existing test volume. It uses fixture credentials, temporary networks and
-volumes, no host Docker socket or production data, and removes its containers,
-networks, and volumes on exit.
+its existing test volume. It also exercises the backup Procedure, retention,
+and recovery into a fresh database. It uses fixture credentials, temporary
+networks and volumes, no host Docker socket or production data, and removes its
+containers, networks, and volumes on exit.
+
+## Komodo backups
+
+`komodo/procedures.toml` manages **Backup Core Database**, scheduled daily at
+**01:00 Europe/Vilnius**. Core stores snapshots in `KOMODO_BACKUPS_PATH` and
+retains the most recent **14 snapshots**, configurable with
+`KOMODO_CLI_MAX_BACKUPS` in the private bootstrap file. The Procedure reports
+failures and has its webhook disabled.
+
+Follow [Komodo backups and recovery](docs/komodo-backups.md) to apply the schedule,
+verify the first backup, preserve keys and secrets off-host, and restore into a
+fresh database before switching Core. An off-host copy still needs your chosen
+encrypted backup destination; the configured snapshots are local to the Pi.
 
 ## Migrating existing deployments
 
@@ -585,7 +599,8 @@ By default those are `webhooks`, an HTTPS endpoint that forwards to Komodo, and
 For Komodo, sync the full `komodo/` directory, including `repos.toml`,
 `stacks.toml`, and `procedures.toml`. It creates the `home-server` Repo, Stacks
 named `entrypoint`, `observability`, `media`, and `public-access` on the
-`home-server` server, and the `home-server-deploy` Procedure.
+`home-server` server, the `home-server-deploy` Procedure, and the scheduled
+`Backup Core Database` Procedure.
 Every Stack uses `linked_repo = "home-server"` to source its Compose files
 through that Repo:
 

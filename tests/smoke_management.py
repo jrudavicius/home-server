@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test management readiness and network isolation with disposable Docker state."""
+"""Test management readiness, isolation, and recovery with disposable Docker state."""
 
 import copy
 import json
@@ -9,6 +9,8 @@ import subprocess
 import tempfile
 import time
 import uuid
+
+from management_backup_checks import check_backups, check_restored_login
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,6 +74,7 @@ def main():
              'target': '/test-control', 'read_only': True},
         ])
         core = config['services']['control-plane']
+        core['environment']['KOMODO_CLI_MAX_BACKUPS'] = '2'
         core['volumes'] = [mount for mount in core['volumes'] if mount['target'] != '/backups']
         core['volumes'].append({'type': 'volume', 'source': 'test-backups', 'target': '/backups'})
         agent = config['services']['host-agent']
@@ -82,7 +85,7 @@ def main():
         for name, network in [('app-probe', 'default'), ('backend-probe', 'backend')]:
             config['services'][name] = {
                 'image': config['services']['secret-bootstrap']['image'],
-                'command': ['python', '-c', 'import time; time.sleep(600)'],
+                'command': ['python', '-c', 'import time; time.sleep(1200)'],
                 'networks': [network],
             }
         compose = folder / 'compose.json'
@@ -91,9 +94,12 @@ def main():
         command = ['docker', 'compose', '--env-file', os.devnull,
                    '-p', project, '-f', str(compose)]
 
-        def run(*args, check=True):
-            return subprocess.run(command + list(args), env=env, text=True,
-                                  capture_output=True, check=check, timeout=180)
+        def run(*args, check=True, input=None):
+            result = subprocess.run(command + list(args), env=env, text=True,
+                                    input=input, capture_output=True, timeout=180)
+            if check and result.returncode:
+                raise RuntimeError(result.stdout + result.stderr)
+            return result
 
         def inspect(service):
             container = run('ps', '--all', '--quiet', service).stdout.strip()
@@ -157,7 +163,15 @@ def main():
             run('restart', 'database')
             eventually(database_healthy)
             eventually(core_responds)
-            print('Existing database volume restarts successfully. All management smoke checks passed.', flush=True)
+            print('Existing database volume restarts successfully.', flush=True)
+
+            restored_database = check_backups(run, ROOT, folder, env)
+            core['environment']['KOMODO_DATABASE_DB_NAME'] = restored_database
+            compose.write_text(json.dumps(config).replace('$', '$$'))
+            run('up', '-d', 'control-plane', 'host-agent')
+            eventually(core_responds)
+            check_restored_login(run, env)
+            print('Core starts against the restored database and accepts login. All management smoke checks passed.', flush=True)
         finally:
             (folder / 'release').touch()
             if pending is not None and pending.poll() is None:
