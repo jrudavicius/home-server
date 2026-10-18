@@ -1,9 +1,11 @@
 name: management
 
+# Update Core and Periphery to the same release together, including both digests.
+# All image pins are maintained in Git; see README.md: Image versions and updates.
 services:
   secret-bootstrap:
     container_name: management-secret-bootstrap
-    image: python:3.13-alpine
+    image: python:3.13.16-alpine3.24@sha256:2d9aefe2fef018a7eb2c13064c89c71929800fd2e5dccdbf52ea5da5bb8d929a
     restart: "no"
     network_mode: none
     read_only: true
@@ -22,7 +24,7 @@ services:
 
   database:
     container_name: management-database
-    image: mongo:8.0
+    image: mongo:8.0.34@sha256:4a4ab5d4834207389e0d7270fac988e21ffedccecba77991a552f755df229907
     restart: unless-stopped
     command: ["--quiet", "--wiredTigerCacheSizeGB", "0.25"]
     labels:
@@ -36,7 +38,7 @@ services:
 
   control-plane:
     container_name: management-control-plane
-    image: ghcr.io/moghtech/komodo-core:${KOMODO_IMAGE_TAG:-2}
+    image: ghcr.io/moghtech/komodo-core:2.3.3@sha256:bca73d0eee143066228fb9b80c38a5a2726e573ad2758f7aa92b5c91a8aef1c7
     init: true
     restart: unless-stopped
     depends_on:
@@ -90,7 +92,7 @@ services:
 
   host-agent:
     container_name: management-host-agent
-    image: ghcr.io/moghtech/komodo-periphery:${KOMODO_IMAGE_TAG:-2}
+    image: ghcr.io/moghtech/komodo-periphery:2.3.3@sha256:fa3f1a641a265216066676950d5eecdf506955a7bafe2f01996135ae93115cd5
     init: true
     restart: unless-stopped
     depends_on:

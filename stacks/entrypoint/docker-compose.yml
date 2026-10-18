@@ -3,7 +3,7 @@ name: entrypoint
 services:
   reverse-proxy:
     container_name: entrypoint-reverse-proxy
-    image: traefik:v3.1
+    image: traefik:v3.1.7@sha256:74d72c7a1345984f186bddbabcc462b2128d0d8054177dc84afaeac4db1f0f56
     restart: unless-stopped
     command:
       - --api.dashboard=true
@@ -29,7 +29,7 @@ services:
 
   landing-page:
     container_name: entrypoint-landing-page
-    image: nginx:1.27-alpine
+    image: nginx:1.27.5-alpine3.21@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
     restart: unless-stopped
     depends_on:
       - reverse-proxy

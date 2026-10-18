@@ -261,10 +261,6 @@ Create a `.env` file next to `stacks/observability/docker-compose.yml` for
 local manual testing of the observability stack:
 
 ```env
-GRAFANA_IMAGE_TAG=13.1.0
-LOKI_IMAGE_TAG=3.7.0
-ALLOY_IMAGE_TAG=v1.17.0
-
 GRAFANA_PORT=3000
 GRAFANA_TRAEFIK_HOST=grafana.home.arpa
 GRAFANA_ROOT_URL=http://grafana.home.arpa/
@@ -383,7 +379,63 @@ python3 stacks/observability/tests/smoke.py
 The smoke test injects sample logs, checks dashboard and alert queries, confirms
 the empty notification route, and waits for both immediate critical and delayed
 error-burst alerts to fire. Allow about three minutes. It removes its test
-containers, network, and volumes when it exits.
+containers, network, and volumes when it exits. It reads the image pins directly
+from the observability Compose file, so it exercises the deployed versions.
+
+## Image versions and updates
+
+All twelve service images use an exact release tag plus a registry digest in
+their Compose files (`image: repository:version@sha256:...`). The digest fixes
+the image contents even if the publisher moves a tag. The pins use manifest
+lists/image indexes with Linux ARM64 support, so Docker selects the Raspberry
+Pi image while retaining support for other published architectures. Registry
+references and ARM64 availability were verified on 2026-10-18.
+
+Komodo Core and Periphery are both pinned to **2.3.3**. Update their two image
+references together in the root `docker-compose.yml`. Other management images
+are pinned there too; application image pins live in each Stack's Compose file.
+See [Komodo releases](https://github.com/moghtech/komodo/releases) and
+[Docker image digests](https://docs.docker.com/dhi/explore/security-concepts/digests/).
+
+Image selection is Git-managed. The old `KOMODO_IMAGE_TAG`, `GRAFANA_IMAGE_TAG`,
+`LOKI_IMAGE_TAG`, and `ALLOY_IMAGE_TAG` environment settings are no longer used.
+Remove those entries from existing private environment files; keep their
+credentials and other settings. Changing a tag variable or running `pull` alone
+does not upgrade a pinned image. `auto_pull = true` remains useful for fetching
+the exact image selected by the committed digest.
+
+To update deliberately:
+
+1. Choose the next supported release and review its migration notes. For Core
+   and Periphery, choose the same release for both. Inspect each candidate:
+
+   ```sh
+   docker buildx imagetools inspect ghcr.io/moghtech/komodo-core:2.3.3
+   docker buildx imagetools inspect ghcr.io/moghtech/komodo-periphery:2.3.3
+   ```
+
+   Replace the example version with the candidate. Confirm `linux/arm64` is
+   present and use the **top-level Digest** for the image index, not an individual
+   architecture's child digest.
+2. Edit the relevant `image:` references, updating both tag and digest. Validate
+   Compose using the deployment's environment file and `config --quiet`. Run
+   the observability smoke test when updating Grafana or Loki. Confirm a usable
+   backup before upgrades that can change persistent data.
+3. Commit the reviewed pins. Application Compose changes are deployed through
+   `home-server-deploy` after they reach `main`. For the management stack, run
+   these commands from a host terminal in the updated repository checkout:
+
+   ```sh
+   docker compose --env-file /srv/komodo/bootstrap.env pull
+   docker compose --env-file /srv/komodo/bootstrap.env up -d
+   docker compose --env-file /srv/komodo/bootstrap.env ps
+   ```
+
+4. Verify Komodo login, the `home-server` connection, and the affected service.
+   To roll back, restore the previous image references from Git and redeploy.
+   If the upgrade migrated stored data, follow the application's supported
+   restore procedure using the pre-upgrade backup; reverting an image alone
+   may not support downgrading that data.
 
 ## Migrating existing deployments
 
@@ -589,8 +641,8 @@ to be applied to the Sync's own configuration while it is idle.
 After changing private Core secrets, restart the root stack and manually deploy
 the affected application Stack, as described in [Credential setup](#credential-setup).
 File change detection does not see secrets changed outside Git. Manually deploy
-an unchanged Stack when recovering stopped services or intentionally pulling
-updated images.
+an unchanged Stack when recovering stopped services. For image upgrades, update
+the committed tag and digest as described in [Image versions and updates](#image-versions-and-updates).
 
 Keep `stacks/entrypoint/.env`, `stacks/observability/.env`,
 `stacks/media/.env`, and `stacks/public-access/.env` out of Git. The non-secret

@@ -3,7 +3,7 @@ name: public-access
 services:
   tunnel:
     container_name: public-access-tunnel
-    image: ngrok/ngrok:3
+    image: ngrok/ngrok:3.39.8-debian@sha256:14d80d083e5b53145f416bbbd36238336c9de4016c43fd950eb2eb845670583b
     restart: unless-stopped
     command:
       - start

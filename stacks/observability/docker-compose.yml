@@ -3,7 +3,7 @@ name: observability
 services:
   log-store:
     container_name: observability-log-store
-    image: grafana/loki:${LOKI_IMAGE_TAG:-3.7.0}
+    image: grafana/loki:3.7.0@sha256:c316b7c7589a5eeca843b6926c7446149d18300b79ac8538dc4ae063bc478da2
     restart: unless-stopped
     command:
       - -config.file=/etc/loki/loki.yml
@@ -17,7 +17,7 @@ services:
 
   log-collector:
     container_name: observability-log-collector
-    image: grafana/alloy:${ALLOY_IMAGE_TAG:-v1.17.0}
+    image: grafana/alloy:v1.17.0@sha256:41c41849989b7e054ccbadc17938ee1e5592fe26bfbc56ef3ffc109c0b0b2739
     restart: unless-stopped
     depends_on:
       - log-store
@@ -34,7 +34,7 @@ services:
 
   log-dashboard:
     container_name: observability-log-dashboard
-    image: grafana/grafana:${GRAFANA_IMAGE_TAG:-13.1.0}
+    image: grafana/grafana:13.1.0@sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63
     restart: unless-stopped
     depends_on:
       - log-store

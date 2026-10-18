@@ -5,6 +5,9 @@ delivery.
 
 The `public-access` stack uses the `tunnel` service (`public-access-tunnel`
 container), powered by ngrok, with endpoints declared in `ngrok.yml`.
+The agent image is pinned by exact version and digest in `docker-compose.yml`;
+follow [Image versions and updates](../../README.md#image-versions-and-updates)
+to upgrade it.
 The default config starts two public endpoints:
 
 ```text

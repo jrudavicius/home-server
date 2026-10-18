@@ -45,10 +45,22 @@ def eventually(check, timeout=90):
     raise AssertionError('Timed out waiting for readiness or alert state: ' + str(last_error))
 
 
+def deployment_images():
+    # Read the same pins used in production without loading private .env files
+    # or requiring production credentials. This command does not start services.
+    config = json.loads(subprocess.check_output([
+        'docker', 'compose', '--env-file', os.devnull,
+        '-f', str(ROOT / 'docker-compose.yml'),
+        'config', '--no-interpolate', '--format', 'json',
+    ], text=True))
+    return {name: service['image'] for name, service in config['services'].items()}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--keep', action='store_true', help='Keep the isolated stack for visual inspection')
     args = parser.parse_args()
+    images = deployment_images()
     project = 'observability-smoke-' + uuid.uuid4().hex[:8]
     temp = Path(tempfile.mkdtemp(prefix=project + '-'))
     compose_path = temp / 'compose.json'
@@ -56,13 +68,13 @@ def main():
     compose = {
         'services': {
             'log-store': {
-                'image': 'grafana/loki:' + os.getenv('LOKI_IMAGE_TAG', '3.7.0'),
+                'image': images['log-store'],
                 'command': ['-config.file=/etc/loki/loki.yml', '-config.expand-env=true'],
                 'ports': ['127.0.0.1::3100'],
                 'volumes': [str(ROOT / 'loki/loki.yml') + ':/etc/loki/loki.yml:ro', 'loki-data:/loki'],
             },
             'log-dashboard': {
-                'image': 'grafana/grafana:' + os.getenv('GRAFANA_IMAGE_TAG', '13.1.0'),
+                'image': images['log-dashboard'],
                 'ports': ['127.0.0.1::3000'],
                 'environment': {
                     'GF_SECURITY_ADMIN_PASSWORD': PASSWORD,
