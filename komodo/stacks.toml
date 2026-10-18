@@ -1,8 +1,12 @@
+# The home-server-deploy Procedure owns deployment ordering. Resource Sync only
+# updates definitions; direct Stack webhooks are disabled.
+# Track shared TOML inputs because DeployStackIfChanged compares file contents,
+# not changes to Stack environment settings or Komodo variables by themselves.
 [[stack]]
 name = "entrypoint"
 description = "Traefik reverse proxy and local home server landing page."
 tags = ["entrypoint", "home"]
-deploy = true
+deploy = false
 
 [stack.config]
 server = "home-server"
@@ -11,13 +15,16 @@ linked_repo = "home-server"
 run_directory = "stacks/entrypoint"
 file_paths = ["docker-compose.yml"]
 config_files = [
+  { path = "../../komodo/stacks.toml", requires = "Redeploy" },
+  { path = "../../komodo/variables.toml", requires = "Redeploy" },
+  { path = "../../komodo/repos.toml", requires = "Redeploy" },
   { path = "traefik/dynamic.yml", services = ["reverse-proxy"], requires = "None" },
   { path = "entrypoint/index.html.template", services = ["landing-page"], requires = "Restart" },
 ]
 project_name = "entrypoint"
 auto_pull = true
-webhook_enabled = true
-webhook_force_deploy = true
+webhook_enabled = false
+webhook_force_deploy = false
 environment = """
 TRAEFIK_HTTP_PORT=80
 TRAEFIK_DASHBOARD_HOST=traefik.home.arpa
@@ -47,8 +54,7 @@ TRANSMISSION_TRAEFIK_HOST=transmission.home.arpa
 name = "observability"
 description = "Grafana dashboards and log alerts, with Loki and Alloy for Docker logs."
 tags = ["observability", "logs", "home"]
-deploy = true
-after = ["entrypoint"]
+deploy = false
 
 [stack.config]
 server = "home-server"
@@ -57,6 +63,9 @@ linked_repo = "home-server"
 run_directory = "stacks/observability"
 file_paths = ["docker-compose.yml"]
 config_files = [
+  { path = "../../komodo/stacks.toml", requires = "Redeploy" },
+  { path = "../../komodo/variables.toml", requires = "Redeploy" },
+  { path = "../../komodo/repos.toml", requires = "Redeploy" },
   { path = "alloy/config.alloy", services = ["log-collector"], requires = "Restart" },
   { path = "loki/loki.yml", services = ["log-store"], requires = "Restart" },
   { path = "grafana/provisioning/datasources/loki.yml", services = ["log-dashboard"], requires = "Restart" },
@@ -67,8 +76,8 @@ config_files = [
 ]
 project_name = "observability"
 auto_pull = true
-webhook_enabled = true
-webhook_force_deploy = true
+webhook_enabled = false
+webhook_force_deploy = false
 environment = """
 GRAFANA_IMAGE_TAG=13.1.0
 LOKI_IMAGE_TAG=3.7.0
@@ -92,8 +101,7 @@ DOCKER_SOCKET_PATH=/var/run/docker.sock
 name = "media"
 description = "Plex on normal internet; Transmission routed through MikroTik's Proton VPN."
 tags = ["media-services", "vpn", "home"]
-deploy = true
-after = ["entrypoint"]
+deploy = false
 
 [stack.config]
 server = "home-server"
@@ -101,10 +109,15 @@ files_on_host = false
 linked_repo = "home-server"
 run_directory = "stacks/media"
 file_paths = ["docker-compose.yml"]
+config_files = [
+  { path = "../../komodo/stacks.toml", requires = "Redeploy" },
+  { path = "../../komodo/variables.toml", requires = "Redeploy" },
+  { path = "../../komodo/repos.toml", requires = "Redeploy" },
+]
 project_name = "media"
 auto_pull = true
-webhook_enabled = true
-webhook_force_deploy = true
+webhook_enabled = false
+webhook_force_deploy = false
 environment = """
 PLEX_PORT=32400
 PLEX_TRAEFIK_HOST=plex.home.arpa
@@ -128,8 +141,7 @@ TRANSMISSION_USER_PASSWORD_FILE=[[TRANSMISSION_USER_PASSWORD_FILE]]
 name = "public-access"
 description = "Public tunnel for external entrypoint access and GitHub webhook delivery, provided by ngrok."
 tags = ["network", "webhooks", "home"]
-deploy = true
-after = ["entrypoint"]
+deploy = false
 
 [stack.config]
 server = "home-server"
@@ -138,12 +150,15 @@ linked_repo = "home-server"
 run_directory = "stacks/public-access"
 file_paths = ["docker-compose.yml"]
 config_files = [
+  { path = "../../komodo/stacks.toml", requires = "Redeploy" },
+  { path = "../../komodo/variables.toml", requires = "Redeploy" },
+  { path = "../../komodo/repos.toml", requires = "Redeploy" },
   { path = "ngrok.yml", services = ["tunnel"], requires = "Restart" },
 ]
 project_name = "public-access"
 auto_pull = true
-webhook_enabled = true
-webhook_force_deploy = true
+webhook_enabled = false
+webhook_force_deploy = false
 environment = """
 NGROK_AUTHTOKEN=[[NGROK_AUTHTOKEN]]
 NGROK_INSPECT_PORT=[[NGROK_INSPECT_PORT]]

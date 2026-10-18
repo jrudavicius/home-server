@@ -1,0 +1,42 @@
+[[procedure]]
+name = "home-server-deploy"
+description = "Sync configuration, then deploy changed Stacks in dependency order."
+tags = ["home"]
+
+[procedure.config]
+webhook_enabled = true
+failure_alert = true
+
+# Stages are sequential and stop on failure. Keep one execution per stage so
+# deployments using the shared Repo cannot overlap. Update this Procedure via
+# a manual Resource Sync while it is idle before running a changed definition.
+[[procedure.config.stage]]
+name = "Sync resource definitions"
+executions = [
+  { execution.type = "RunSync", execution.params.sync = "home-server-resources" },
+]
+
+[[procedure.config.stage]]
+name = "Deploy entrypoint"
+executions = [
+  { execution.type = "DeployStackIfChanged", execution.params.stack = "entrypoint" },
+]
+
+[[procedure.config.stage]]
+name = "Deploy observability"
+executions = [
+  { execution.type = "DeployStackIfChanged", execution.params.stack = "observability" },
+]
+
+[[procedure.config.stage]]
+name = "Deploy media"
+executions = [
+  { execution.type = "DeployStackIfChanged", execution.params.stack = "media" },
+]
+
+# Keep the webhook tunnel available until the other deployments finish.
+[[procedure.config.stage]]
+name = "Deploy public access"
+executions = [
+  { execution.type = "DeployStackIfChanged", execution.params.stack = "public-access" },
+]

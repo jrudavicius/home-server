@@ -426,10 +426,10 @@ tunnel will be stopped.
    resource alongside the new one. Deploy `entrypoint` before `observability`,
    `media`, and `public-access`. For manual deployments, start those stacks
    from their updated directories in the same order.
-5. Update the former ngrok Stack webhook to
-   `/listener/github/stack/public-access/deploy`, verify the renamed containers
-   and service URLs, then resume automatic deployments. Update any external
-   scripts that use the old container names. Historical logs retain their old
+5. Follow [Coordinated deployments](#coordinated-deployments) to replace the
+   individual webhooks with the `home-server-deploy` Procedure webhook. Verify
+   the renamed containers and service URLs, then resume automatic deployments.
+   Update any external scripts that use the old container names. Historical logs retain their old
    container/service labels; new logs use the names in the table above.
 
 ## Running
@@ -486,9 +486,10 @@ The stack starts the endpoints declared in `stacks/public-access/ngrok.yml`.
 By default those are `webhooks`, an HTTPS endpoint that forwards to Komodo, and
 `entrypoint`, an HTTP endpoint that forwards to Traefik.
 
-For Komodo, sync the full `komodo/` directory, including `repos.toml` and
-`stacks.toml`. It creates the `home-server` Repo and Stacks named `entrypoint`,
-`observability`, `media`, and `public-access` on the `home-server` server.
+For Komodo, sync the full `komodo/` directory, including `repos.toml`,
+`stacks.toml`, and `procedures.toml`. It creates the `home-server` Repo, Stacks
+named `entrypoint`, `observability`, `media`, and `public-access` on the
+`home-server` server, and the `home-server-deploy` Procedure.
 Every Stack uses `linked_repo = "home-server"` to source its Compose files
 through that Repo:
 
@@ -503,16 +504,17 @@ Public access run directory: stacks/public-access
 Compose file: docker-compose.yml
 ```
 
-The `observability`, `media`, and `public-access` Stacks declare
-`after = ["entrypoint"]`, so Resource Sync deploys the reverse proxy and landing
-page before deploying Grafana, Loki, Alloy, Plex, Transmission, or the public
-ngrok endpoints.
+Resource Sync updates definitions only (`deploy = false` on every Stack).
+The `home-server-deploy` Procedure owns deployment ordering: it syncs the
+definitions, then checks and deploys `entrypoint`, `observability`, `media`, and
+`public-access`, one at a time. This creates the `transmission_ui` network before
+media needs it and keeps the public tunnel available until the final stage.
 
 The Repo resource in `komodo/repos.toml` is required for Stack deployments.
 Manage the repository, branch, and Git account on `home-server` under
 **Repos**; the Stacks inherit those Git settings. Their run directories,
-Compose project names, environments, and deployment ordering remain configured
-per Stack.
+Compose project names and environments remain configured per Stack; deployment
+ordering is configured in `komodo/procedures.toml`.
 
 Komodo clones over HTTPS. If the repository is private, add a GitHub token
 account in Komodo and select it on the `home-server` Repo and the
@@ -531,21 +533,64 @@ resources and non-secret variables. Deletion is disabled so resources not yet
 represented in TOML, such as the connected server and local secrets, are left
 alone.
 
-To deploy from GitHub pushes, set `KOMODO_WEBHOOK_BASE_URL` to a public HTTPS
-URL that can reach Komodo, then add GitHub push webhooks using these payload
-URLs:
+### Coordinated deployments
+
+Use the `home-server-deploy` Procedure for routine deployments, including
+manual runs from Komodo's **Procedures** page. Its stages run sequentially and
+stop if any execution fails, so a failed sync or entrypoint deployment prevents
+later Stacks from being deployed. Each Stack stage uses `DeployStackIfChanged`,
+which refreshes the tracked files before checking for changes. A new Stack is
+deployed on its first run.
+
+The tracked files include each Stack's Compose and service configuration files,
+plus `komodo/stacks.toml`, `komodo/variables.toml`, and `komodo/repos.toml`.
+Those shared TOML files require a redeploy because Komodo's file comparison
+does not detect changes to Stack environment settings or global variables by
+themselves. Consequently, editing any of those shared files deploys all four
+Stacks in order; an ordinary service-file edit affects only its Stack, and a
+README-only edit does not deploy anything. Existing service restart requirements
+still apply to tracked service configuration files.
+
+For first setup or migration from the individual webhooks:
+
+1. Disable the old Resource Sync, Stack, and any Repo push webhooks in GitHub
+   before pushing this configuration to `main`, and let active deployments finish.
+2. In Komodo, disable **Webhooks** on `home-server-resources` itself before
+   manually syncing. For a fresh installation, create the Resource Sync using
+   `komodo/syncs.toml`, with webhooks disabled. Komodo cannot update a busy
+   resource, including the Sync that is currently running.
+3. Refresh and manually run `home-server-resources` for the full `komodo/`
+   directory. Confirm that `home-server-deploy` exists and that the Repo and all
+   four Stacks have webhooks disabled. This sync does not deploy the Stacks.
+4. Run `home-server-deploy` once from Komodo and verify all five stages succeed.
+   This also starts `public-access` on a fresh installation. Complete credential
+   setup and create the required media directories/networks before this run.
+5. Set `KOMODO_WEBHOOK_BASE_URL` to the public HTTPS endpoint, then configure
+   exactly one GitHub webhook for **Push events** with this payload URL:
 
 ```text
-https://<komodo-public-host>/listener/github/sync/home-server-resources/sync
-https://<komodo-public-host>/listener/github/stack/entrypoint/deploy
-https://<komodo-public-host>/listener/github/stack/observability/deploy
-https://<komodo-public-host>/listener/github/stack/media/deploy
-https://<komodo-public-host>/listener/github/stack/public-access/deploy
+https://<komodo-public-host>/listener/github/procedure/home-server-deploy/main
 ```
 
 Use content type `application/json` and set the GitHub webhook secret to the
-same value as `KOMODO_WEBHOOK_SECRET`. The Stacks use
-`webhook_force_deploy = true`, so their Stack webhooks deploy on every push.
+same value as `KOMODO_WEBHOOK_SECRET`. The `/main` suffix filters pushes to
+`main`. Delete the old individual webhooks after validating the new one.
+Direct Repo, Resource Sync, and Stack webhook execution is disabled in TOML;
+the Procedure can still execute those resources internally.
+
+Komodo prevents overlapping runs of the same Procedure; it does not queue a
+second run. If another push arrives during deployment, run the Procedure again
+after it finishes to reconcile the latest `main`. Retry a failed run from the
+Procedure after fixing its cause. If changing `komodo/procedures.toml`, manually
+sync while the Procedure is idle before running it, because it cannot update
+its own definition while executing. Changes to `komodo/syncs.toml` likewise need
+to be applied to the Sync's own configuration while it is idle.
+
+After changing private Core secrets, restart the root stack and manually deploy
+the affected application Stack, as described in [Credential setup](#credential-setup).
+File change detection does not see secrets changed outside Git. Manually deploy
+an unchanged Stack when recovering stopped services or intentionally pulling
+updated images.
 
 Keep `stacks/entrypoint/.env`, `stacks/observability/.env`,
 `stacks/media/.env`, and `stacks/public-access/.env` out of Git. The non-secret
@@ -565,8 +610,8 @@ NGROK_INSPECT_PORT
 NGROK_DOCKER_NETWORK
 ```
 
-Complete [Credential setup](#credential-setup) before syncing: the Stacks deploy
-automatically and require the Core secrets loaded from the private bootstrap file.
+Complete [Credential setup](#credential-setup) before running the deployment
+Procedure: the Stacks require Core secrets loaded from the private bootstrap file.
 
 Create the directories referenced by those variables before deploying media.
 Install and test the [MikroTik Transmission-only VPN policy](router/README.md),
@@ -602,7 +647,7 @@ docker compose --env-file /srv/komodo/bootstrap.env down
 
 Use the `public-access` stack for inbound webhooks and the entrypoint. See
 [public access configuration](stacks/public-access/README.md) for endpoint
-configuration and the individual Resource Sync and Stack webhook URLs.
+configuration and the single deployment Procedure webhook URL.
 
 ```text
 webhooks HTTPS URL -> management-control-plane:9120

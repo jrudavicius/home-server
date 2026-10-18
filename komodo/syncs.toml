@@ -1,6 +1,6 @@
 [[resource_sync]]
 name = "home-server-resources"
-description = "Sync Komodo resources from this repository."
+description = "Sync resource definitions; home-server-deploy coordinates deployments."
 tags = ["home"]
 
 [resource_sync.config]
@@ -16,4 +16,4 @@ include_resources = true
 include_variables = true
 include_user_groups = false
 pending_alert = true
-webhook_enabled = true
+webhook_enabled = false

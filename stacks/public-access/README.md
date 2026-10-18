@@ -142,18 +142,20 @@ Then restart Komodo from the repository root:
 docker compose --env-file /srv/komodo/bootstrap.env up -d
 ```
 
-Use these webhook payload URLs in GitHub:
+Follow the [coordinated deployment setup](../../README.md#coordinated-deployments)
+to sync `komodo/procedures.toml`, run `home-server-deploy` once, and replace the
+old individual webhooks. Configure exactly one GitHub webhook for **Push events**:
 
 ```text
-https://your-webhooks-ngrok-url/listener/github/sync/home-server-resources/sync
-https://your-webhooks-ngrok-url/listener/github/stack/entrypoint/deploy
-https://your-webhooks-ngrok-url/listener/github/stack/observability/deploy
-https://your-webhooks-ngrok-url/listener/github/stack/media/deploy
-https://your-webhooks-ngrok-url/listener/github/stack/public-access/deploy
+https://your-webhooks-ngrok-url/listener/github/procedure/home-server-deploy/main
 ```
 
 Use `application/json` as the content type and use the value of
 `KOMODO_WEBHOOK_SECRET` from `/srv/komodo/bootstrap.env` as the webhook secret.
+The `/main` suffix selects pushes to `main`. The Procedure syncs configuration
+first, then checks and deploys changed Stacks sequentially, with `entrypoint`
+first and `public-access` last. A failed stage stops the remaining stages.
+Direct Resource Sync, Repo, and Stack webhook execution is disabled.
 
 ## Security note
 

@@ -10,4 +10,4 @@ git_https = true
 repo = "jrudavicius/home-server"
 branch = "main"
 path = "home-server"
-webhook_enabled = true
+webhook_enabled = false
