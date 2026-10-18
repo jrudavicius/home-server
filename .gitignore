@@ -1,1 +1,11 @@
 .env
+
+# WireGuard client configs contain private keys.
+wg0.conf
+home-server-*.conf
+
+# Keep filled-in router scripts, exports and provider keys local.
+router/*.rsc
+router/*.backup
+router/*.conf
+router/*.key

@@ -85,8 +85,8 @@ DOCKER_SOCKET_PATH=/var/run/docker.sock
 
 [[stack]]
 name = "media"
-description = "Plex Media Server and Transmission torrent client."
-tags = ["media-services", "home"]
+description = "Plex and Transmission on the Pi protected by the MikroTik Proton VPN policy."
+tags = ["media-services", "vpn", "home"]
 deploy = true
 after = ["entrypoint"]
 

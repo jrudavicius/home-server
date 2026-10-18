@@ -25,22 +25,23 @@ services:
     container_name: torrent-client
     image: lscr.io/linuxserver/transmission:4.0.6
     restart: unless-stopped
+    # The MikroTik routes this Pi through Proton and blocks direct WAN/IPv6.
+    # Verify that router policy before deploying on a new host.
+    ports:
+      - "${TRANSMISSION_WEB_PORT:-9091}:9091"
     labels:
       traefik.enable: "true"
       traefik.http.routers.transmission.rule: "Host(`${TRANSMISSION_TRAEFIK_HOST:-transmission.home.arpa}`)"
       traefik.http.routers.transmission.entrypoints: web
       traefik.http.routers.transmission.priority: "20"
       traefik.http.services.transmission.loadbalancer.server.port: "9091"
-    ports:
-      - "${TRANSMISSION_WEB_PORT:-9091}:9091"
-      - "${TRANSMISSION_PEER_PORT:-51413}:51413"
-      - "${TRANSMISSION_PEER_PORT:-51413}:51413/udp"
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Vilnius
       - USER=${TRANSMISSION_USERNAME:?Set TRANSMISSION_USERNAME}
       - FILE__PASS=/run/secrets/transmission_user_password
+      - PEERPORT=${TRANSMISSION_PEER_PORT:-51413}
     volumes:
       - "${TRANSMISSION_CONFIG_PATH:?Set TRANSMISSION_CONFIG_PATH}:/config"
       - "${MEDIA_PATH:?Set MEDIA_PATH}:/media"
