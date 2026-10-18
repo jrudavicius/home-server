@@ -63,9 +63,10 @@ http://localhost:4040/api/tunnels
 
 ## Komodo deployment
 
-Komodo deploys the Git-based stack from its own checkout and writes the Stack
-environment to `.env` before deploying. It does not read the `.env` in your local
-Server checkout.
+Komodo sources this Stack through the linked `home-server` Repo declared in
+`komodo/repos.toml` and writes the Stack environment to its deployment `.env`
+before deploying. Sync the Repo together with `komodo/stacks.toml`. Komodo does
+not read the `.env` in your local Server checkout.
 
 Set `NGROK_AUTHTOKEN` to your ngrok auth token in the Pi's private
 `/srv/komodo/bootstrap.env`, then run this from the repository root:

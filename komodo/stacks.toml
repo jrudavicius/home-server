@@ -7,10 +7,7 @@ deploy = true
 [stack.config]
 server = "home-server"
 files_on_host = false
-git_provider = "github.com"
-git_https = true
-repo = "jrudavicius/home-server"
-branch = "main"
+linked_repo = "home-server"
 run_directory = "stacks/entrypoint"
 file_paths = ["docker-compose.yml"]
 config_files = [
@@ -56,10 +53,7 @@ after = ["entrypoint"]
 [stack.config]
 server = "home-server"
 files_on_host = false
-git_provider = "github.com"
-git_https = true
-repo = "jrudavicius/home-server"
-branch = "main"
+linked_repo = "home-server"
 run_directory = "stacks/observability"
 file_paths = ["docker-compose.yml"]
 config_files = [
@@ -104,10 +98,7 @@ after = ["entrypoint"]
 [stack.config]
 server = "home-server"
 files_on_host = false
-git_provider = "github.com"
-git_https = true
-repo = "jrudavicius/home-server"
-branch = "main"
+linked_repo = "home-server"
 run_directory = "stacks/media"
 file_paths = ["docker-compose.yml"]
 project_name = "media"
@@ -143,10 +134,7 @@ after = ["entrypoint"]
 [stack.config]
 server = "home-server"
 files_on_host = false
-git_provider = "github.com"
-git_https = true
-repo = "jrudavicius/home-server"
-branch = "main"
+linked_repo = "home-server"
 run_directory = "stacks/public-access"
 file_paths = ["docker-compose.yml"]
 config_files = [

@@ -486,13 +486,16 @@ The stack starts the endpoints declared in `stacks/public-access/ngrok.yml`.
 By default those are `webhooks`, an HTTPS endpoint that forwards to Komodo, and
 `entrypoint`, an HTTP endpoint that forwards to Traefik.
 
-For Komodo, sync the declarative Stack resources from `komodo/stacks.toml`.
-It creates Git-based Stacks named `entrypoint`, `observability`, `media`, and
-`public-access` on the `home-server` server:
+For Komodo, sync the full `komodo/` directory, including `repos.toml` and
+`stacks.toml`. It creates the `home-server` Repo and Stacks named `entrypoint`,
+`observability`, `media`, and `public-access` on the `home-server` server.
+Every Stack uses `linked_repo = "home-server"` to source its Compose files
+through that Repo:
 
 ```text
-Repo: github.com/jrudavicius/home-server
-Branch: main
+Linked Repo: home-server
+Git repository (configured on the Repo): github.com/jrudavicius/home-server
+Branch (configured on the Repo): main
 Entrypoint run directory: stacks/entrypoint
 Observability run directory: stacks/observability
 Media run directory: stacks/media
@@ -505,15 +508,22 @@ The `observability`, `media`, and `public-access` Stacks declare
 page before deploying Grafana, Loki, Alloy, Plex, Transmission, or the public
 ngrok endpoints.
 
-Komodo clones over HTTPS, not SSH. If the repository is private, add a GitHub
-token account in Komodo and select that account on the Stacks after syncing.
-Do this after committing and pushing this repository, otherwise Komodo will
-clone the old `main` branch and miss the stack files.
+The Repo resource in `komodo/repos.toml` is required for Stack deployments.
+Manage the repository, branch, and Git account on `home-server` under
+**Repos**; the Stacks inherit those Git settings. Their run directories,
+Compose project names, environments, and deployment ordering remain configured
+per Stack.
 
-The optional Repo resource in `komodo/repos.toml` creates a visible Komodo
-Repo named `home-server` for this Git repository. It is separate from the
-Git-backed Stacks and is useful when you want the repository to appear under
-Komodo's Repos page.
+Komodo clones over HTTPS. If the repository is private, add a GitHub token
+account in Komodo and select it on the `home-server` Repo and the
+`home-server-resources` Resource Sync. Configure the Repo account before
+deploying its linked Stacks. Commit and push these files before syncing so
+Komodo can read the updated configuration from `main`.
+
+For existing installations, sync `komodo/repos.toml` together with
+`komodo/stacks.toml` to switch all four Stacks to the linked Repo, then verify
+their source shows `home-server`. If importing the Stack definitions separately,
+create or sync the Repo first.
 
 The Resource Sync in `komodo/syncs.toml` reads the `komodo/` directory directly
 from `github.com/jrudavicius/home-server` on `main` and reconciles the declared
