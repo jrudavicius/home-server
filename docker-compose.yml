@@ -32,6 +32,27 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${KOMODO_DATABASE_USERNAME:?Set KOMODO_DATABASE_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${KOMODO_DATABASE_PASSWORD:?Set KOMODO_DATABASE_PASSWORD}
+    # The entrypoint's temporary initialization server listens on loopback only.
+    # Probe the service address so Core waits for the final authenticated server.
+    healthcheck:
+      test:
+        - CMD
+        - mongosh
+        - --quiet
+        - mongodb://database:27017/admin?serverSelectionTimeoutMS=2000&connectTimeoutMS=2000
+        - --eval
+        - >-
+          try {
+            const admin = db.getSiblingDB('admin');
+            const auth = admin.auth(process.env.MONGO_INITDB_ROOT_USERNAME, process.env.MONGO_INITDB_ROOT_PASSWORD);
+            quit(auth.ok === 1 && admin.runCommand({ ping: 1 }).ok === 1 ? 0 : 1);
+          } catch (error) { quit(1); }
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 12
+    networks:
+      - backend
     volumes:
       - komodo-mongo-data:/data/db
       - komodo-mongo-config:/data/configdb
@@ -43,10 +64,14 @@ services:
     restart: unless-stopped
     depends_on:
       database:
-        condition: service_started
+        condition: service_healthy
       secret-bootstrap:
         condition: service_completed_successfully
         restart: true
+    networks:
+      default:
+        gw_priority: 1
+      backend: {}
     labels:
       traefik.enable: "true"
       traefik.http.routers.control-plane.rule: "Host(`${KOMODO_TRAEFIK_HOST:-komodo.home.arpa}`)"
@@ -97,6 +122,8 @@ services:
     restart: unless-stopped
     depends_on:
       - control-plane
+    networks:
+      - default
     environment:
       TZ: Europe/Vilnius
       PERIPHERY_CORE_ADDRESS: ws://control-plane:9120
@@ -116,6 +143,8 @@ services:
 networks:
   default:
     name: portainer_network
+  backend:
+    internal: true
 
 volumes:
   # Keep the existing physical volumes when the Compose project becomes management.

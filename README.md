@@ -419,8 +419,10 @@ To update deliberately:
    architecture's child digest.
 2. Edit the relevant `image:` references, updating both tag and digest. Validate
    Compose using the deployment's environment file and `config --quiet`. Run
-   the observability smoke test when updating Grafana or Loki. Confirm a usable
-   backup before upgrades that can change persistent data.
+   the observability smoke test when updating Grafana or Loki, and the
+   [management smoke test](#management-readiness-and-network-isolation) when
+   updating MongoDB, Core, or Periphery. Confirm a usable backup before upgrades
+   that can change persistent data.
 3. Commit the reviewed pins. Application Compose changes are deployed through
    `home-server-deploy` after they reach `main`. For the management stack, run
    these commands from a host terminal in the updated repository checkout:
@@ -436,6 +438,48 @@ To update deliberately:
    If the upgrade migrated stored data, follow the application's supported
    restore procedure using the pre-upgrade backup; reverting an image alone
    may not support downgrading that data.
+
+## Management readiness and network isolation
+
+MongoDB joins only the internal `management_backend` network and publishes no
+host port. Core joins both that backend and `portainer_network`; the host agent
+and application stacks use `portainer_network`. Application containers can reach
+Core as before, but cannot connect directly to MongoDB. Core uses the shared
+network as its default gateway for outbound connections.
+
+Core starts only after MongoDB passes an authenticated `ping` health check and
+`secret-bootstrap` completes. The check connects to `database:27017`, avoiding
+MongoDB's temporary loopback-only initialization server. Credentials are read
+inside `mongosh` from its environment, so special characters do not need URI or
+shell escaping in the health check. A later unhealthy status is diagnostic;
+Compose does not automatically restart MongoDB or Core in response to it.
+
+For an existing deployment already using the `management` project, apply this
+change from a host terminal in the updated repository checkout:
+
+```sh
+docker compose --env-file /srv/komodo/bootstrap.env up -d
+docker compose --env-file /srv/komodo/bootstrap.env ps
+```
+
+Expect a brief Komodo outage while Compose recreates MongoDB and Core with their
+new network memberships. Existing named volumes and credentials are reused;
+keep `MANAGEMENT_VOLUME_PREFIX` unchanged. Verify that `database` is healthy,
+then check Komodo login and the `home-server` connection. Deployments still using
+the old service/project names must first follow the migration section below.
+
+With Docker running, exercise readiness and isolation using disposable state:
+
+```sh
+python3 tests/smoke_management.py
+```
+
+The test holds MongoDB initialization open to verify Core waits, checks valid
+and invalid credentials, verifies Core is reachable from the application
+network while MongoDB is blocked by both name and IP, and restarts MongoDB with
+its existing test volume. It uses fixture credentials, temporary networks and
+volumes, no host Docker socket or production data, and removes its containers,
+networks, and volumes on exit.
 
 ## Migrating existing deployments
 
@@ -712,7 +756,8 @@ no host VPN installer or deployment hook is required.
 
 ## Notes
 
-- The root Komodo bootstrap network is named `portainer_network`.
+- The root Komodo stack creates the shared `portainer_network` and the internal
+  `management_backend` network used only by MongoDB and Core.
 - The `entrypoint`, `observability`, `media`, and `public-access` Stacks attach to
   `portainer_network` as an external Docker network so Traefik can route across
   Compose projects.
