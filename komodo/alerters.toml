@@ -1,0 +1,17 @@
+[[alerter]]
+name = "home-server-discord"
+description = "Operational failures and host health. Opt in after configuring a private Discord webhook."
+tags = ["home", "operations"]
+
+[alerter.config]
+# Set true after adding KOMODO_DISCORD_WEBHOOK_URL to the private bootstrap.env.
+enabled = false
+alert_types = [
+  "ProcedureFailed", "ActionFailed", "BuildFailed", "RepoBuildFailed",
+  "StackStateChange", "ContainerStateChange", "ServerUnreachable",
+  "ServerDisk", "ServerCpu", "ServerMem", "ServerVersionMismatch",
+]
+
+[alerter.config.endpoint]
+type = "Discord"
+params.url = "[[KOMODO_DISCORD_WEBHOOK_URL]]"

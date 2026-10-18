@@ -14,7 +14,9 @@ REQUIRED = (
     "TRANSMISSION_USERNAME",
     "NGROK_AUTHTOKEN",
 )
-OPTIONAL = ("PLEX_CLAIM",)
+OPTIONAL = ("PLEX_CLAIM", "GRAFANA_DISCORD_WEBHOOK_URL")
+# Native Alerter URLs are interpolated directly, not written to a Stack .env.
+RAW_OPTIONAL = ("KOMODO_DISCORD_WEBHOOK_URL",)
 
 
 def core_config(environment):
@@ -23,10 +25,13 @@ def core_config(environment):
         raise ValueError("Set nonempty bootstrap values for: " + ", ".join(missing))
 
     secrets = {}
-    for name in REQUIRED + OPTIONAL:
+    for name in REQUIRED + OPTIONAL + RAW_OPTIONAL:
         value = environment.get(name, "")
         if any(ord(character) < 32 for character in value):
             raise ValueError(name + " must be a single-line value without control characters")
+        if name in RAW_OPTIONAL:
+            secrets[name] = value
+            continue
         # Komodo preserves this quoting when writing its Stack .env file.
         # Double quotes escape quotes/backslashes; $$ prevents Compose from
         # treating a literal dollar in a credential as variable interpolation.

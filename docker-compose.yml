@@ -18,6 +18,8 @@ services:
       TRANSMISSION_USERNAME: ${TRANSMISSION_USERNAME:?Set TRANSMISSION_USERNAME in bootstrap.env}
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:?Set NGROK_AUTHTOKEN in bootstrap.env}
       PLEX_CLAIM: ${PLEX_CLAIM:-}
+      KOMODO_DISCORD_WEBHOOK_URL: ${KOMODO_DISCORD_WEBHOOK_URL:-}
+      GRAFANA_DISCORD_WEBHOOK_URL: ${GRAFANA_DISCORD_WEBHOOK_URL:-}
     volumes:
       - ./scripts/render_komodo_secrets.py:/scripts/render_komodo_secrets.py:ro
       - komodo-bootstrap-config:/bootstrap

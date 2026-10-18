@@ -11,6 +11,7 @@ import time
 import uuid
 
 from management_backup_checks import check_backups, check_restored_login
+from management_alert_checks import check_alerts
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,6 +41,7 @@ def main():
         'GRAFANA_ADMIN_PASSWORD': 'test-only-password',
         'TRANSMISSION_USERNAME': 'test-only-user',
         'NGROK_AUTHTOKEN': 'test-only-token',
+        'KOMODO_DISCORD_WEBHOOK_URL': 'http://app-probe:8080/api/webhooks/fixture/fixture',
     })
     production = json.loads(subprocess.check_output([
         'docker', 'compose', '--env-file', str(ROOT / 'bootstrap.env.example'),
@@ -88,6 +90,9 @@ def main():
                 'command': ['python', '-c', 'import time; time.sleep(1200)'],
                 'networks': [network],
             }
+        config['services']['app-probe']['command'] = [
+            'python', '-c', (ROOT / 'tests/notification_sink.py').read_text(),
+        ]
         compose = folder / 'compose.json'
         # Compose will parse this rendered configuration again; preserve dollars.
         compose.write_text(json.dumps(config).replace('$', '$$'))
@@ -165,6 +170,7 @@ def main():
             eventually(core_responds)
             print('Existing database volume restarts successfully.', flush=True)
 
+            check_alerts(run, ROOT, env)
             restored_database = check_backups(run, ROOT, folder, env)
             core['environment']['KOMODO_DATABASE_DB_NAME'] = restored_database
             compose.write_text(json.dumps(config).replace('$', '$$'))

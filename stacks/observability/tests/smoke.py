@@ -45,22 +45,30 @@ def eventually(check, timeout=90):
     raise AssertionError('Timed out waiting for readiness or alert state: ' + str(last_error))
 
 
-def deployment_images():
+def deployment_services(discord):
     # Read the same pins used in production without loading private .env files
     # or requiring production credentials. This command does not start services.
-    config = json.loads(subprocess.check_output([
+    command = [
         'docker', 'compose', '--env-file', os.devnull,
         '-f', str(ROOT / 'docker-compose.yml'),
-        'config', '--no-interpolate', '--format', 'json',
-    ], text=True))
-    return {name: service['image'] for name, service in config['services'].items()}
+    ]
+    if discord:
+        command.extend(['-f', str(ROOT / 'docker-compose.discord.yml')])
+    env = {key: value for key, value in os.environ.items()
+           if key in ('PATH', 'HOME', 'TMPDIR', 'DOCKER_HOST', 'DOCKER_CONTEXT')}
+    env.update(GRAFANA_ADMIN_USER='admin', GRAFANA_ADMIN_PASSWORD=PASSWORD,
+               GRAFANA_DISCORD_WEBHOOK_URL='http://notification-sink:8080/api/webhooks/fixture/fixture')
+    config = json.loads(subprocess.check_output(command + ['config', '--format', 'json'],
+                                               env=env, text=True))
+    return config['services']
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--keep', action='store_true', help='Keep the isolated stack for visual inspection')
+    parser.add_argument('--discord', action='store_true', help='Verify delivery to a local Discord-compatible receiver')
     args = parser.parse_args()
-    images = deployment_images()
+    services = deployment_services(args.discord)
     project = 'observability-smoke-' + uuid.uuid4().hex[:8]
     temp = Path(tempfile.mkdtemp(prefix=project + '-'))
     compose_path = temp / 'compose.json'
@@ -68,15 +76,16 @@ def main():
     compose = {
         'services': {
             'log-store': {
-                'image': images['log-store'],
+                'image': services['log-store']['image'],
                 'command': ['-config.file=/etc/loki/loki.yml', '-config.expand-env=true'],
                 'ports': ['127.0.0.1::3100'],
                 'volumes': [str(ROOT / 'loki/loki.yml') + ':/etc/loki/loki.yml:ro', 'loki-data:/loki'],
             },
             'log-dashboard': {
-                'image': images['log-dashboard'],
+                'image': services['log-dashboard']['image'],
                 'ports': ['127.0.0.1::3000'],
                 'environment': {
+                    **services['log-dashboard']['environment'],
                     'GF_SECURITY_ADMIN_PASSWORD': PASSWORD,
                     'GF_PLUGINS_PREINSTALL_DISABLED': 'true',
                     'GF_ANALYTICS_CHECK_FOR_UPDATES': 'false',
@@ -85,13 +94,22 @@ def main():
                     'GF_UNIFIED_ALERTING_ENABLED': 'true',
                     'GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH': '/var/lib/grafana/dashboards/home-server-overview.json',
                 },
-                'volumes': [str(ROOT / 'grafana/provisioning') + ':/etc/grafana/provisioning:ro',
-                            str(ROOT / 'grafana/dashboards') + ':/var/lib/grafana/dashboards:ro',
-                            'grafana-data:/var/lib/grafana'],
+                'volumes': services['log-dashboard']['volumes'],
             },
         },
         'volumes': {'grafana-data': {}, 'loki-data': {}},
     }
+    if args.discord:
+        root = ROOT.parents[1]
+        management = json.loads(subprocess.check_output([
+            'docker', 'compose', '--env-file', os.devnull,
+            '-f', str(root / 'docker-compose.yml'),
+            'config', '--no-interpolate', '--format', 'json',
+        ], text=True))
+        compose['services']['notification-sink'] = {
+            'image': management['services']['secret-bootstrap']['image'],
+            'command': ['python', '-c', (root / 'tests/notification_sink.py').read_text()],
+        }
     compose_path.write_text(json.dumps(compose))
     command = ['docker', 'compose', '-p', project, '-f', str(compose_path)]
 
@@ -118,14 +136,18 @@ def main():
         rules = source['groups'][0]['rules']
         provisioned = request(grafana, '/api/v1/provisioning/alert-rules', auth=True)
         assert {r['uid'] for r in rules} == {r['uid'] for r in provisioned}
+        expected_receiver = 'home-server-discord' if args.discord else 'empty'
         for rule in provisioned:
-            assert rule['notification_settings']['receiver'] == 'empty'
+            assert rule['notification_settings']['receiver'] == expected_receiver
         config = request(grafana, '/api/alertmanager/grafana/config/api/v1/alerts', auth=True)['alertmanager_config']
         receiver = next(r for r in config['receivers'] if r['name'] == 'empty')
         assert not receiver.get('grafana_managed_receiver_configs')
+        if args.discord:
+            receiver = next(r for r in config['receivers'] if r['name'] == expected_receiver)
+            assert receiver['grafana_managed_receiver_configs'][0]['type'] == 'discord'
         for rule in rules[:2]:
             assert query(rule['data'][0]['model']['expr']) == []
-        print('Three alert rules provisioned; no-data behavior and empty contact point verified.', flush=True)
+        print('Three alert rules provisioned; no-data behavior and receiver ' + expected_receiver + ' verified.', flush=True)
 
         stamp = time.time_ns() - 30 * 10**9
         fixtures = {
@@ -188,7 +210,16 @@ def main():
             return actual and actual[0]['state'] == 'firing' and actual[0]['health'] == 'ok'
 
         eventually(error_burst_fired, timeout=150)
-        print('Error-burst alert fired after the two-minute pending period. All smoke checks passed.', flush=True)
+        print('Error-burst alert fired after the two-minute pending period.', flush=True)
+        if args.discord:
+            def notification_received():
+                payloads = docker('exec', '-T', 'notification-sink', 'python', '-c',
+                                  'from pathlib import Path; p=Path("/tmp/notifications.jsonl"); '
+                                  'print(p.read_text() if p.exists() else "")')
+                return 'Docker container fatal or panic' in payloads and 'fixture-fatal' in payloads
+            eventually(notification_received, timeout=60)
+            print('Grafana delivered the firing alert to the local Discord receiver.', flush=True)
+        print('All observability smoke checks passed.', flush=True)
         if args.keep:
             print('Grafana: ' + grafana + ' (admin / ' + PASSWORD + ')')
             print('Cleanup: ' + ' '.join(command + ['down', '-v', '--remove-orphans']))

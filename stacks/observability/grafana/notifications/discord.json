@@ -1,0 +1,19 @@
+{
+  "apiVersion": 1,
+  "contactPoints": [
+    {
+      "orgId": 1,
+      "name": "home-server-discord",
+      "receivers": [
+        {
+          "uid": "home-server-discord",
+          "type": "discord",
+          "disableResolveMessage": false,
+          "settings": {
+            "url": "$GRAFANA_DISCORD_WEBHOOK_URL"
+          }
+        }
+      ]
+    }
+  ]
+}

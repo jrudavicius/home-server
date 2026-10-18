@@ -1,0 +1,28 @@
+name: Public availability
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-availability
+  cancel-in-progress: true
+
+jobs:
+  check:
+    if: github.event_name == 'workflow_dispatch' || vars.AVAILABILITY_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check the public entrypoint
+        env:
+          AVAILABILITY_URL: ${{ secrets.AVAILABILITY_URL }}
+          AVAILABILITY_EXPECTED_TEXT: ${{ vars.AVAILABILITY_EXPECTED_TEXT }}
+        run: python3 scripts/check_availability.py

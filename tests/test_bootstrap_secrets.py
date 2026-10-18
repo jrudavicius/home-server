@@ -66,7 +66,7 @@ class BootstrapSecretsTests(unittest.TestCase):
                     self.assertEqual(self.output.read_bytes(), previous)
 
     def test_rejects_multiline_credentials_without_creating_output(self):
-        for name in bootstrap.REQUIRED + bootstrap.OPTIONAL:
+        for name in bootstrap.REQUIRED + bootstrap.OPTIONAL + bootstrap.RAW_OPTIONAL:
             with self.subTest(name=name):
                 values = dict(self.values, **{name: "private-value\nINJECTED=yes"})
                 code, stdout, stderr = self.run_bootstrap(values)
@@ -75,13 +75,26 @@ class BootstrapSecretsTests(unittest.TestCase):
                 self.assertNotIn("private-value", stdout + stderr)
                 self.assertFalse(self.output.exists())
 
-    def test_only_application_secrets_are_exported_and_plex_can_be_empty(self):
+    def test_only_declared_secrets_are_exported_and_optional_values_can_be_empty(self):
         values = dict(self.values, KOMODO_DATABASE_PASSWORD="do-not-export")
         config = bootstrap.core_config(values)
         self.assertEqual(set(config), {"secrets"})
-        self.assertEqual(set(config["secrets"]), set(bootstrap.REQUIRED + bootstrap.OPTIONAL))
+        self.assertEqual(set(config["secrets"]),
+                         set(bootstrap.REQUIRED + bootstrap.OPTIONAL + bootstrap.RAW_OPTIONAL))
         self.assertEqual(config["secrets"]["PLEX_CLAIM"], '""')
+        self.assertEqual(config["secrets"]["GRAFANA_DISCORD_WEBHOOK_URL"], '""')
+        self.assertEqual(config["secrets"]["KOMODO_DISCORD_WEBHOOK_URL"], '')
         self.assertNotIn("do-not-export", json.dumps(config))
+
+    def test_native_alerter_url_is_preserved_without_stack_env_quoting(self):
+        url = "https://example.invalid/api/webhooks/fixture/literal$token?wait=true"
+        values = dict(self.values, KOMODO_DISCORD_WEBHOOK_URL=url)
+        code, stdout, stderr = self.run_bootstrap(values)
+        self.assertEqual(code, 0, stderr)
+        self.assertNotIn(url, stdout + stderr)
+        self.assertEqual(json.loads(self.output.read_text())["secrets"]["KOMODO_DISCORD_WEBHOOK_URL"], url)
+        self.assertEqual(self.run_bootstrap(self.values)[0], 0)
+        self.assertEqual(json.loads(self.output.read_text())["secrets"]["KOMODO_DISCORD_WEBHOOK_URL"], '')
 
     def test_failed_atomic_replace_preserves_previous_config_and_cleans_up(self):
         bootstrap.write_config(bootstrap.core_config(self.values), self.output)
@@ -101,6 +114,7 @@ class BootstrapSecretsTests(unittest.TestCase):
             GRAFANA_ADMIN_USER="space # quote' double\" slash\\ ž🔑",
             GRAFANA_ADMIN_PASSWORD="literal${UNSET}$$\\'\"#=ends\\",
             PLEX_CLAIM="claim-test-only",
+            GRAFANA_DISCORD_WEBHOOK_URL="https://example.invalid/literal$token",
         )
         compose = self.folder / "compose.yml"
         compose.write_text("services:\n  check:\n    image: busybox\n")
@@ -127,7 +141,8 @@ class BootstrapSecretsTests(unittest.TestCase):
         # Komodo preserves the generated quotes when substituting [[NAME]].
         config = bootstrap.core_config(resolved)
         interpolated = "\n".join(name + "=" + value
-                                 for name, value in config["secrets"].items())
+                                 for name, value in config["secrets"].items()
+                                 if name not in bootstrap.RAW_OPTIONAL)
         # Its key/value parser removes inline comments even inside quotes.
         written = "\n".join(line.split(" #", 1)[0].strip()
                             for line in interpolated.splitlines())

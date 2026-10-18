@@ -119,6 +119,9 @@ before starting the root stack. Every value must be nonempty and single-line.
 | `TRANSMISSION_USERNAME` | Transmission web UI username. | `media` |
 | `NGROK_AUTHTOKEN` | Your authentication token from the ngrok dashboard. | `public-access` |
 
+Optional `KOMODO_DISCORD_WEBHOOK_URL` and `GRAFANA_DISCORD_WEBHOOK_URL` values can
+stay empty. See [operational alerts](docs/operations.md) for opt-in delivery.
+
 On `docker compose --env-file /srv/komodo/bootstrap.env up -d`, the
 `secret-bootstrap` service validates the values and writes a private JSON
 configuration into the `komodo-bootstrap-config` Docker volume. The directory
@@ -132,6 +135,8 @@ them using `[[VARIABLE_NAME]]`, and `komodo/variables.toml` deliberately omits
 them. Keep these references unquoted: the initializer supplies the quoting and
 escaping needed for Compose environment files. See
 [Variables and Secrets](https://komo.do/docs/configuration/variables).
+The optional native Komodo Alerter URL is stored directly as a Core secret,
+without Stack environment-file quoting.
 
 Komodo writes the resolved Stack environment to a deployment `.env` file. The
 values remain on the server, so restrict access to the periphery working
@@ -345,14 +350,14 @@ of being hidden. The silence rule can also fire on a genuinely quiet server.
 These rules do not monitor CPU, memory, disk space, container uptime, or a failure
 of Grafana/the Raspberry Pi itself.
 
-Alerts stay in Grafana: each rule explicitly selects Grafana 13.1's built-in
-`empty` contact point, which has no notification integrations. No email, webhook,
-or other external destination is configured, and the existing notification policy
-tree is preserved. Keep `empty` without integrations. If upgrading a Grafana data
+By default, alerts stay in Grafana: `GRAFANA_ALERT_RECEIVER=empty` selects Grafana
+13.1's built-in contact point without notification integrations. Keep `empty`
+without integrations. If upgrading a Grafana data
 volume from a version predating that default, create an empty contact point named
-`empty` under **Alerting → Contact points** before deploying. To enable delivery
-later, create a real contact point and replace `notification_settings.receiver`
-in `stacks/observability/grafana/provisioning/alerting/docker-alerts.json`.
+`empty` under **Alerting → Contact points** before deploying. The optional
+`docker-compose.discord.yml` overlay provisions Discord delivery while preserving
+the existing notification policy tree. Follow [operational alerts](docs/operations.md)
+to enable it using a private webhook URL.
 
 Rules link back to their overview panels. Open **Alerting → Alert rules** to
 inspect healthy rules, pending/firing instances, and evaluation errors. Rule
@@ -381,6 +386,16 @@ the empty notification route, and waits for both immediate critical and delayed
 error-burst alerts to fire. Allow about three minutes. It removes its test
 containers, network, and volumes when it exits. It reads the image pins directly
 from the observability Compose file, so it exercises the deployed versions.
+Add `--discord` to verify optional delivery against a local fake Discord receiver.
+
+## Operational alerts and CI
+
+[Operational alerts and validation](docs/operations.md) covers Komodo host-health
+and deployment-failure alerts, optional Discord delivery for both Komodo and
+Grafana, the external availability check, and CI setup. Disk alerts warn at 80%
+and become critical at 90%. External delivery and scheduled availability checks
+remain disabled until configured. CI validates configuration and runs the unit
+and isolated Docker smoke tests on pull requests and pushes to `main`.
 
 ## Image versions and updates
 
@@ -477,8 +492,9 @@ python3 tests/smoke_management.py
 The test holds MongoDB initialization open to verify Core waits, checks valid
 and invalid credentials, verifies Core is reachable from the application
 network while MongoDB is blocked by both name and IP, and restarts MongoDB with
-its existing test volume. It also exercises the backup Procedure, retention,
-and recovery into a fresh database. It uses fixture credentials, temporary
+its existing test volume. It also verifies host-health configuration and native
+alert delivery to a local receiver, then exercises the backup Procedure,
+retention, and recovery into a fresh database. It uses fixture credentials, temporary
 networks and volumes, no host Docker socket or production data, and removes its
 containers, networks, and volumes on exit.
 
@@ -597,10 +613,13 @@ By default those are `webhooks`, an HTTPS endpoint that forwards to Komodo, and
 `entrypoint`, an HTTP endpoint that forwards to Traefik.
 
 For Komodo, sync the full `komodo/` directory, including `repos.toml`,
-`stacks.toml`, and `procedures.toml`. It creates the `home-server` Repo, Stacks
+`stacks.toml`, `procedures.toml`, `servers.toml`, and `alerters.toml`.
+First run root `up -d` from the updated Pi checkout so the new optional Core
+secrets exist, even when empty. The sync creates the `home-server` Repo, Stacks
 named `entrypoint`, `observability`, `media`, and `public-access` on the
 `home-server` server, the `home-server-deploy` Procedure, and the scheduled
-`Backup Core Database` Procedure.
+`Backup Core Database` Procedure. It also reconciles health settings on the
+existing `home-server` Server and creates the disabled `home-server-discord` Alerter.
 Every Stack uses `linked_repo = "home-server"` to source its Compose files
 through that Repo:
 
@@ -641,7 +660,7 @@ create or sync the Repo first.
 The Resource Sync in `komodo/syncs.toml` reads the `komodo/` directory directly
 from `github.com/jrudavicius/home-server` on `main` and reconciles the declared
 resources and non-secret variables. Deletion is disabled so resources not yet
-represented in TOML, such as the connected server and local secrets, are left
+represented in TOML, such as other servers and local secrets, are left
 alone.
 
 ### Coordinated deployments

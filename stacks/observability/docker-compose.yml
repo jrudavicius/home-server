@@ -48,13 +48,14 @@ services:
       GF_DATE_FORMATS_DEFAULT_TIMEZONE: Europe/Vilnius
       GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/home-server-overview.json
       GF_UNIFIED_ALERTING_ENABLED: "true"
+      GRAFANA_ALERT_RECEIVER: empty
       GF_PLUGINS_PREINSTALL_DISABLED: ${GRAFANA_PLUGINS_PREINSTALL_DISABLED:-true}
       GF_PLUGINS_PREINSTALL_AUTO_UPDATE: ${GRAFANA_PLUGINS_PREINSTALL_AUTO_UPDATE:-false}
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ./grafana/provisioning/alerting:/etc/grafana/provisioning/alerting:ro
+      - ./grafana/provisioning/alerting/docker-alerts.json:/etc/grafana/provisioning/alerting/docker-alerts.json:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
 
 networks:

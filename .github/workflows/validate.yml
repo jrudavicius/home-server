@@ -1,0 +1,51 @@
+name: Validate configuration
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Configuration validation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate TOML, JSON, Compose, and references
+        run: python3 scripts/validate_config.py
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests -v
+
+  smoke:
+    name: "Smoke: ${{ matrix.suite }}"
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [management, observability, discord]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Management readiness and recovery
+        if: matrix.suite == 'management'
+        run: python3 tests/smoke_management.py
+      - name: Grafana rules with delivery disabled
+        if: matrix.suite == 'observability'
+        run: python3 stacks/observability/tests/smoke.py
+      - name: Discord delivery to a local test receiver
+        if: matrix.suite == 'discord'
+        run: python3 stacks/observability/tests/smoke.py --discord

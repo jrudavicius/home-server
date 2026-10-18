@@ -82,7 +82,7 @@
           "for": "2m",
           "isPaused": false,
           "notification_settings": {
-            "receiver": "empty"
+            "receiver": "$GRAFANA_ALERT_RECEIVER"
           },
           "annotations": {
             "summary": "Repeated errors in {{ $labels.container }}",
@@ -168,7 +168,7 @@
           "for": "0s",
           "isPaused": false,
           "notification_settings": {
-            "receiver": "empty"
+            "receiver": "$GRAFANA_ALERT_RECEIVER"
           },
           "annotations": {
             "summary": "Fatal or panic log in {{ $labels.container }}",
@@ -254,7 +254,7 @@
           "for": "5m",
           "isPaused": false,
           "notification_settings": {
-            "receiver": "empty"
+            "receiver": "$GRAFANA_ALERT_RECEIVER"
           },
           "annotations": {
             "summary": "No Docker logs received for at least 20 minutes",

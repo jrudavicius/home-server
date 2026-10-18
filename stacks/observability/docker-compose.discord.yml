@@ -1,0 +1,8 @@
+# Optional notification delivery. See docs/operations.md before enabling.
+services:
+  log-dashboard:
+    environment:
+      GRAFANA_ALERT_RECEIVER: home-server-discord
+      GRAFANA_DISCORD_WEBHOOK_URL: ${GRAFANA_DISCORD_WEBHOOK_URL:?Set GRAFANA_DISCORD_WEBHOOK_URL before enabling Discord delivery}
+    volumes:
+      - ./grafana/notifications/discord.json:/etc/grafana/provisioning/alerting/discord.json:ro

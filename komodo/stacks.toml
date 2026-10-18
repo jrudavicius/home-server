@@ -22,6 +22,7 @@ config_files = [
   { path = "entrypoint/index.html.template", services = ["landing-page"], requires = "Restart" },
 ]
 project_name = "entrypoint"
+send_alerts = true
 auto_pull = true
 webhook_enabled = false
 webhook_force_deploy = false
@@ -71,10 +72,13 @@ config_files = [
   { path = "grafana/provisioning/datasources/loki.yml", services = ["log-dashboard"], requires = "Restart" },
   { path = "grafana/provisioning/dashboards/docker-logs.yml", services = ["log-dashboard"], requires = "Restart" },
   { path = "grafana/provisioning/alerting/docker-alerts.json", services = ["log-dashboard"], requires = "Restart" },
+  { path = "docker-compose.discord.yml", requires = "Redeploy" },
+  { path = "grafana/notifications/discord.json", services = ["log-dashboard"], requires = "Restart" },
   { path = "grafana/dashboards/home-server-overview.json", services = ["log-dashboard"], requires = "Restart" },
   { path = "grafana/dashboards/docker-logs.json", services = ["log-dashboard"], requires = "Restart" },
 ]
 project_name = "observability"
+send_alerts = true
 auto_pull = true
 webhook_enabled = false
 webhook_force_deploy = false
@@ -84,6 +88,7 @@ GRAFANA_TRAEFIK_HOST=grafana.home.arpa
 GRAFANA_ROOT_URL=http://grafana.home.arpa/
 GRAFANA_ADMIN_USER=[[GRAFANA_ADMIN_USER]]
 GRAFANA_ADMIN_PASSWORD=[[GRAFANA_ADMIN_PASSWORD]]
+GRAFANA_DISCORD_WEBHOOK_URL=[[GRAFANA_DISCORD_WEBHOOK_URL]]
 GRAFANA_PLUGINS_PREINSTALL_DISABLED=true
 GRAFANA_PLUGINS_PREINSTALL_AUTO_UPDATE=false
 
@@ -111,6 +116,7 @@ config_files = [
   { path = "../../komodo/repos.toml", requires = "Redeploy" },
 ]
 project_name = "media"
+send_alerts = true
 auto_pull = true
 webhook_enabled = false
 webhook_force_deploy = false
@@ -152,6 +158,7 @@ config_files = [
   { path = "ngrok.yml", services = ["tunnel"], requires = "Restart" },
 ]
 project_name = "public-access"
+send_alerts = true
 auto_pull = true
 webhook_enabled = false
 webhook_force_deploy = false

@@ -12,6 +12,9 @@ secrets/
 transmission_user_password.txt
 core.config.json
 
+# Python validation and test bytecode.
+__pycache__/
+
 # WireGuard client configs contain private keys.
 wg0.conf
 home-server-*.conf
