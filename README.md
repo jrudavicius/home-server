@@ -321,6 +321,12 @@ The media Stack starts `media-vpn` with Gluetun and mounts
 container's network namespace. Plex stays on the normal Docker network so local
 and remote Plex access are not tied to the VPN.
 
+Compose waits for Gluetun's health check to pass before starting Transmission.
+The dependency also restarts Transmission when an explicit Compose operation
+updates or restarts the VPN. Later VPN health failures are handled by Gluetun's
+own reconnect logic and firewall; the Compose dependency does not continuously
+monitor health or stop an already running Transmission container.
+
 `VPN_OUTBOUND_SUBNETS` keeps the local LAN and Docker bridge networks reachable
 from the VPN namespace. Do not add a broad `10.0.0.0/8` subnet when using the
 generated Proton config, because its tunnel address is in `10.2.0.0/16`.
