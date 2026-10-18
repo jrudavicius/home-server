@@ -49,6 +49,26 @@ http://localhost:4040
 http://localhost:4040/api/tunnels
 ```
 
+## Komodo deployment
+
+Komodo deploys the Git-based stack from its own checkout and writes the Stack
+environment to `.env` before deploying. It does not read the `.env` in your local
+Server checkout.
+
+In Komodo, open **Settings → Variables** and set `NGROK_AUTHTOKEN` to your ngrok
+auth token with **Secret** enabled. The variable must have a nonempty value;
+creating the variable without a value is not enough. The Stack environment in
+`komodo/stacks.toml` references it as:
+
+```env
+NGROK_AUTHTOKEN=[[NGROK_AUTHTOKEN]]
+```
+
+Save the variable and deploy the `ngrok` Stack. If Compose reports that
+`NGROK_AUTHTOKEN` is missing even though your local `.env` contains it, check the
+Komodo variable's value. Editing the generated `.env` in Komodo's checkout is
+temporary: the next deployment rewrites it from the Stack environment.
+
 ## Endpoint configuration
 
 Edit `ngrok.yml` to change the public endpoints. Each endpoint needs a unique
