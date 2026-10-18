@@ -1,6 +1,8 @@
+name: public-access
+
 services:
-  ngrok:
-    container_name: home-server-ngrok
+  tunnel:
+    container_name: public-access-tunnel
     image: ngrok/ngrok:3
     restart: unless-stopped
     command:

@@ -1,6 +1,8 @@
+name: observability
+
 services:
-  loki:
-    container_name: observability-loki
+  log-store:
+    container_name: observability-log-store
     image: grafana/loki:${LOKI_IMAGE_TAG:-3.7.0}
     restart: unless-stopped
     command:
@@ -13,12 +15,12 @@ services:
       - ./loki/loki.yml:/etc/loki/loki.yml:ro
       - loki-data:/loki
 
-  alloy:
-    container_name: observability-alloy
+  log-collector:
+    container_name: observability-log-collector
     image: grafana/alloy:${ALLOY_IMAGE_TAG:-v1.17.0}
     restart: unless-stopped
     depends_on:
-      - loki
+      - log-store
     command:
       - run
       - --disable-reporting
@@ -30,12 +32,12 @@ services:
       - alloy-data:/var/lib/alloy
       - "${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock:ro"
 
-  grafana:
-    container_name: observability-grafana
+  log-dashboard:
+    container_name: observability-log-dashboard
     image: grafana/grafana:${GRAFANA_IMAGE_TAG:-13.1.0}
     restart: unless-stopped
     depends_on:
-      - loki
+      - log-store
     ports:
       - "${GRAFANA_PORT:-3000}:3000"
     environment:

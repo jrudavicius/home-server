@@ -1,12 +1,14 @@
+name: entrypoint
+
 services:
-  traefik:
-    container_name: home-server-proxy
+  reverse-proxy:
+    container_name: entrypoint-reverse-proxy
     image: traefik:v3.1
     restart: unless-stopped
     command:
       - --api.dashboard=true
       - --entrypoints.web.address=:80
-      - --entrypoints.transmission.address=:9091
+      - --entrypoints.torrent-client.address=:9091
       - --providers.file.filename=/etc/traefik/dynamic/dynamic.yml
       - --providers.file.watch=true
       - --log.level=${TRAEFIK_LOG_LEVEL:-INFO}
@@ -25,12 +27,12 @@ services:
     volumes:
       - ./traefik/dynamic.yml:/etc/traefik/dynamic/dynamic.yml:ro
 
-  entrypoint:
-    container_name: home-server-entrypoint
+  landing-page:
+    container_name: entrypoint-landing-page
     image: nginx:1.27-alpine
     restart: unless-stopped
     depends_on:
-      - traefik
+      - reverse-proxy
     environment:
       NGINX_ENVSUBST_OUTPUT_DIR: /usr/share/nginx/html
       ENTRYPOINT_TITLE: ${ENTRYPOINT_TITLE:-Home Server}

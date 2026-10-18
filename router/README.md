@@ -37,7 +37,7 @@ The router policy must retain these protections:
 
 Transmission joins only `transmission_lan` and the internal `transmission_ui`
 bridge. It must never join `portainer_network`. Traefik shares the internal
-bridge and proxies HTTP to `torrent-client:9091`; it owns Pi port 9091.
+bridge and proxies HTTP to `media-torrent-client:9091`; it owns Pi port 9091.
 Explicit container DNS sends Docker resolver queries to Proton.
 
 Same-subnet LAN traffic remains local. A trusted LAN proxy or administrator
@@ -66,11 +66,11 @@ bridge, then `media`. Compose 2.33.1+ is required for gateway priority.
 Run on the Pi after network or router changes:
 
 ```sh
-docker exec torrent-client ip route
-docker exec torrent-client curl -4 --noproxy '*' --fail --max-time 15 https://ip.me
+docker exec media-torrent-client ip route
+docker exec media-torrent-client curl -4 --noproxy '*' --fail --max-time 15 https://ip.me
 curl -4 --noproxy '*' --fail --max-time 15 https://ip.me
-docker exec torrent-client nslookup example.org
-docker exec torrent-client curl -6 --noproxy '*' --fail --max-time 15 'https://[2606:4700:4700::1111]/cdn-cgi/trace'
+docker exec media-torrent-client nslookup example.org
+docker exec media-torrent-client curl -6 --noproxy '*' --fail --max-time 15 'https://[2606:4700:4700::1111]/cdn-cgi/trace'
 ```
 
 Transmission's default gateway must be `192.168.88.1`, its public IPv4 must

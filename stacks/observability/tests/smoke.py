@@ -55,13 +55,13 @@ def main():
     # No Alloy or Docker socket: only synthetic logs enter this test stack.
     compose = {
         'services': {
-            'loki': {
+            'log-store': {
                 'image': 'grafana/loki:' + os.getenv('LOKI_IMAGE_TAG', '3.7.0'),
                 'command': ['-config.file=/etc/loki/loki.yml', '-config.expand-env=true'],
                 'ports': ['127.0.0.1::3100'],
                 'volumes': [str(ROOT / 'loki/loki.yml') + ':/etc/loki/loki.yml:ro', 'loki-data:/loki'],
             },
-            'grafana': {
+            'log-dashboard': {
                 'image': 'grafana/grafana:' + os.getenv('GRAFANA_IMAGE_TAG', '13.1.0'),
                 'ports': ['127.0.0.1::3000'],
                 'environment': {
@@ -88,8 +88,8 @@ def main():
 
     try:
         docker('up', '-d', '--wait', '--wait-timeout', '90')
-        loki = 'http://' + docker('port', 'loki', '3100')
-        grafana = 'http://' + docker('port', 'grafana', '3000')
+        loki = 'http://' + docker('port', 'log-store', '3100')
+        grafana = 'http://' + docker('port', 'log-dashboard', '3000')
         eventually(lambda: request(grafana, '/api/health')['database'] == 'ok')
         # Loki's /ready response is plaintext; querying also verifies the query path.
         def query(expr, instant=True):
@@ -181,7 +181,7 @@ def main():
             print('Grafana: ' + grafana + ' (admin / ' + PASSWORD + ')')
             print('Cleanup: ' + ' '.join(command + ['down', '-v', '--remove-orphans']))
     except Exception:
-        print(docker('logs', '--tail', '20', 'grafana', 'loki'), flush=True)
+        print(docker('logs', '--tail', '20', 'log-dashboard', 'log-store'), flush=True)
         raise
     finally:
         if not args.keep:

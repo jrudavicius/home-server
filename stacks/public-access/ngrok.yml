@@ -7,13 +7,13 @@ agent:
 
 endpoints:
   - name: webhooks
-    url: https://your-webhooks-domain.ngrok.app
+    url: https://
     description: Direct Komodo endpoint for GitHub webhook delivery.
     upstream:
-      url: http://komodo-core:9120
+      url: http://management-control-plane:9120
 
   - name: entrypoint
-    url: https://your-entrypoint-domain.ngrok.app
+    url: http://
     description: Traefik entrypoint for the public landing page and routed services.
     upstream:
-      url: http://home-server-proxy:80
+      url: http://entrypoint-reverse-proxy:80

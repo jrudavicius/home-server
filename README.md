@@ -20,19 +20,28 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 
 ## Services
 
-| Service | Container | Purpose |
-| --- | --- | --- |
-| `komodo-mongo` | `komodo-database` | MongoDB database used by Komodo. |
-| `komodo-core` | `komodo-core` | Main Komodo control plane and web UI. |
-| `komodo-periphery` | `komodo-agent` | Local Komodo agent connected to Docker on the Raspberry Pi. |
-| `traefik` | `home-server-proxy` | Reverse proxy, defined in `stacks/entrypoint/docker-compose.yml`. |
-| `entrypoint` | `home-server-entrypoint` | Landing page, defined in `stacks/entrypoint/docker-compose.yml`. |
-| `grafana` | `observability-grafana` | Log search and dashboards, defined in `stacks/observability/docker-compose.yml`. |
-| `loki` | `observability-loki` | Log storage and query API, defined in `stacks/observability/docker-compose.yml`. |
-| `alloy` | `observability-alloy` | Docker log collector, defined in `stacks/observability/docker-compose.yml`. |
-| `plex` | `media-server` | Plex Media Server, defined in `stacks/media/docker-compose.yml`. |
-| `transmission` | `torrent-client` | Transmission torrent client, defined in `stacks/media/docker-compose.yml`. |
-| `ngrok` | `home-server-ngrok` | Public tunnel, defined in `stacks/ngrok/docker-compose.yml`. |
+Service names describe their role, and every container uses `<stack>-<service>`.
+The Compose project name matches the stack name, including `management` for the
+root bootstrap stack.
+
+| Stack | Service | Container | Implementation / purpose |
+| --- | --- | --- | --- |
+| `management` | `database` | `management-database` | MongoDB database used by Komodo. |
+| `management` | `control-plane` | `management-control-plane` | Komodo control plane and web UI. |
+| `management` | `host-agent` | `management-host-agent` | Komodo agent managing Docker and host resources. |
+| `entrypoint` | `reverse-proxy` | `entrypoint-reverse-proxy` | Traefik reverse proxy. |
+| `entrypoint` | `landing-page` | `entrypoint-landing-page` | Home server landing page served by nginx. |
+| `observability` | `log-dashboard` | `observability-log-dashboard` | Grafana log search and dashboards. |
+| `observability` | `log-store` | `observability-log-store` | Loki log storage and query API. |
+| `observability` | `log-collector` | `observability-log-collector` | Alloy Docker log collector. |
+| `media` | `streaming-server` | `media-streaming-server` | Plex Media Server. |
+| `media` | `torrent-client` | `media-torrent-client` | Transmission torrent client. |
+| `public-access` | `tunnel` | `public-access-tunnel` | ngrok public access and webhook forwarding. |
+
+Use service names for Compose commands, dependencies, and addresses within a
+stack. Use the full container name for addresses between stacks on the shared
+Docker network. Tool-specific image names, configuration paths, environment
+variables, and public hostnames keep their existing names.
 
 ## Requirements
 
@@ -49,10 +58,11 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 ## Configuration
 
 Create a `.env` file next to the root `docker-compose.yml` for the Komodo
-bootstrap stack:
+`management` bootstrap stack:
 
 ```env
 HOST_BIND_ADDRESS=0.0.0.0
+MANAGEMENT_VOLUME_PREFIX=server
 
 KOMODO_DATABASE_USERNAME=
 KOMODO_DATABASE_PASSWORD=
@@ -147,8 +157,8 @@ LOKI_MAX_QUERY_LOOKBACK=168h
 DOCKER_SOCKET_PATH=/var/run/docker.sock
 ```
 
-Create a `.env` file next to `stacks/ngrok/docker-compose.yml` for local manual
-testing of the public tunnel stack:
+Create a `.env` file next to `stacks/public-access/docker-compose.yml` for local
+manual testing of the public tunnel stack:
 
 ```env
 NGROK_AUTHTOKEN=your-ngrok-authtoken
@@ -174,10 +184,10 @@ Set `ENTRYPOINT_KOMODO_URL`, `ENTRYPOINT_PLEX_URL`, `ENTRYPOINT_GRAFANA_URL`,
 `ENTRYPOINT_TRAEFIK_URL`, `ENTRYPOINT_NGROK_URL`, and
 `ENTRYPOINT_TRANSMISSION_URL` only when you want fully custom URLs.
 
-The ngrok card opens the server's local inspection UI on `NGROK_INSPECT_PORT`
+The Tunnel card opens the server's local inspection UI on `NGROK_INSPECT_PORT`
 (4040 by default). For manual deployments, set this port to the same value in
-the entrypoint and ngrok stacks. Komodo uses the shared `NGROK_INSPECT_PORT`
-variable for both stacks.
+the `entrypoint` and `public-access` stacks. Komodo uses the shared
+`NGROK_INSPECT_PORT` variable for both stacks.
 
 The observability stack stores Loki, Grafana, and Alloy data in Docker-managed
 volumes. Loki keeps container logs for 168 hours by default. Increase
@@ -238,7 +248,7 @@ restart Grafana too. For a manual deployment:
 
 ```sh
 docker compose --env-file stacks/observability/.env -f stacks/observability/docker-compose.yml up -d
-docker compose --env-file stacks/observability/.env -f stacks/observability/docker-compose.yml restart grafana
+docker compose --env-file stacks/observability/.env -f stacks/observability/docker-compose.yml restart log-dashboard
 ```
 
 With Docker running, validate the dashboards and alerts in an isolated temporary
@@ -257,9 +267,54 @@ containers, network, and volumes when it exits.
 Transmission password. Docker Compose mounts it as a secret. Keep this file to
 the password value only, without a trailing newline.
 
+## Migrating existing deployments
+
+Renaming Compose services creates new containers. The root project also changes
+from its directory-derived name (normally `server`) to `management`, and the
+`ngrok` project becomes `public-access`. Plan a short outage and perform this
+migration from a host terminal, because the control plane, agent, and public
+tunnel will be stopped.
+
+1. Pause automatic GitHub/Komodo deployments during the migration. Before
+   updating the checkout, record the old root project name and volume mounts:
+
+   ```sh
+   docker inspect komodo-database --format '{{ index .Config.Labels "com.docker.compose.project" }}'
+   docker inspect komodo-database komodo-core --format '{{.Name}}{{range .Mounts}}{{if eq .Type "volume"}} {{.Name}}:{{.Destination}}{{end}}{{end}}'
+   ```
+
+   Set `MANAGEMENT_VOLUME_PREFIX` in the root `.env` to that old project name
+   (`server` by default). The root Compose file explicitly reuses
+   `<prefix>_komodo-mongo-data`, `<prefix>_komodo-mongo-config`, and
+   `<prefix>_komodo-keys`. Verify those match the recorded volumes and take your
+   usual database backup before proceeding.
+2. While the old Compose files are still checked out, run
+   `docker compose down --remove-orphans` in each existing stack's working
+   directory, using its existing environment and project name. Stop `ngrok`,
+   `media`, `observability`, and `entrypoint`, then the root bootstrap stack.
+   For Komodo-managed stacks, use their deployed checkout and generated `.env`.
+   Do not add `--volumes` or `-v`; the persistent volumes must be retained.
+3. Update the checkout. For manual deployments, move the old
+   `stacks/ngrok/.env` to `stacks/public-access/.env`. Remove any old
+   `COMPOSE_PROJECT_NAME` override or update it to the corresponding stack name.
+   Confirm `MANAGEMENT_VOLUME_PREFIX` still matches the old root volumes, then
+   run `docker compose up -d` from the repository root to start `management`.
+4. In Komodo, rename the existing `ngrok` Stack resource to `public-access`
+   before syncing `komodo/stacks.toml`. Sync updates its project name, run
+   directory, and config-file service references. Resource Sync has deletion
+   disabled, so simply syncing without renaming would leave the old `ngrok`
+   resource alongside the new one. Deploy `entrypoint` before `observability`,
+   `media`, and `public-access`. For manual deployments, start those stacks
+   from their updated directories in the same order.
+5. Update the former ngrok Stack webhook to
+   `/listener/github/stack/public-access/deploy`, verify the renamed containers
+   and service URLs, then resume automatic deployments. Update any external
+   scripts that use the old container names. Historical logs retain their old
+   container/service labels; new logs use the names in the table above.
+
 ## Running
 
-Start the Komodo bootstrap stack from the repository root:
+Start the Komodo `management` bootstrap stack from the repository root:
 
 ```sh
 docker compose up -d
@@ -299,21 +354,21 @@ cd stacks/observability
 docker compose up -d
 ```
 
-Start the ngrok stack manually for local testing:
+Start the `public-access` stack manually for local testing:
 
 ```sh
-cd stacks/ngrok
+cd stacks/public-access
 docker compose up -d
 ```
 
 The ngrok inspection UI/API is published at `http://localhost:4040` by default.
-The stack starts the endpoints declared in `stacks/ngrok/ngrok.yml`; by default
-those are `webhooks`, an HTTPS endpoint that forwards directly to Komodo, and
+The stack starts the endpoints declared in `stacks/public-access/ngrok.yml`.
+By default those are `webhooks`, an HTTPS endpoint that forwards to Komodo, and
 `entrypoint`, an HTTP endpoint that forwards to Traefik.
 
 For Komodo, sync the declarative Stack resources from `komodo/stacks.toml`.
 It creates Git-based Stacks named `entrypoint`, `observability`, `media`, and
-`ngrok` on the `home-server` server:
+`public-access` on the `home-server` server:
 
 ```text
 Repo: github.com/jrudavicius/home-server
@@ -321,11 +376,11 @@ Branch: main
 Entrypoint run directory: stacks/entrypoint
 Observability run directory: stacks/observability
 Media run directory: stacks/media
-Ngrok run directory: stacks/ngrok
+Public access run directory: stacks/public-access
 Compose file: docker-compose.yml
 ```
 
-The `observability`, `media`, and `ngrok` Stacks declare
+The `observability`, `media`, and `public-access` Stacks declare
 `after = ["entrypoint"]`, so Resource Sync deploys the reverse proxy and landing
 page before deploying Grafana, Loki, Alloy, Plex, Transmission, or the public
 ngrok endpoints.
@@ -355,7 +410,7 @@ https://<komodo-public-host>/listener/github/sync/home-server-resources/sync
 https://<komodo-public-host>/listener/github/stack/entrypoint/deploy
 https://<komodo-public-host>/listener/github/stack/observability/deploy
 https://<komodo-public-host>/listener/github/stack/media/deploy
-https://<komodo-public-host>/listener/github/stack/ngrok/deploy
+https://<komodo-public-host>/listener/github/stack/public-access/deploy
 ```
 
 Use content type `application/json` and set the GitHub webhook secret to the
@@ -363,9 +418,9 @@ same value as `KOMODO_WEBHOOK_SECRET`. The Stacks use
 `webhook_force_deploy = true`, so their Stack webhooks deploy on every push.
 
 Keep `stacks/entrypoint/.env`, `stacks/observability/.env`,
-`stacks/media/.env`, and `stacks/ngrok/.env` out of Git. The non-secret media
-and ngrok variables are declared in `komodo/variables.toml` and are synced from
-Git:
+`stacks/media/.env`, and `stacks/public-access/.env` out of Git. The non-secret
+media and ngrok variables are declared in `komodo/variables.toml` and are synced
+from Git:
 
 ```text
 PLEX_CONFIG_PATH
@@ -389,7 +444,8 @@ reserve Transmission's LAN identity, and create the external `transmission_lan`
 macvlan network on the Pi. The entrypoint stack creates the internal
 `transmission_ui` bridge, so it must be deployed before media.
 
-Set the secret `NGROK_AUTHTOKEN` variable in Komodo before deploying ngrok.
+Set the secret `NGROK_AUTHTOKEN` variable in Komodo before deploying the
+`public-access` stack.
 `PLEX_CLAIM` is optional; leave it empty for an unclaimed server, or set a real
 `claim-...` token before the first Plex setup. Komodo writes the resolved stack
 environment to `.env` when deploying.
@@ -400,7 +456,7 @@ including WAN fallback when the tunnel fails. IPv6 is disabled in the container
 and blocked by MAC on the router; DNS uses Proton's tunnel resolver.
 
 Transmission also joins the internal `transmission_ui` bridge, where Traefik
-connects to `torrent-client:9091`. Traefik publishes `TRANSMISSION_WEB_PORT`
+connects to `media-torrent-client:9091`. Traefik publishes `TRANSMISSION_WEB_PORT`
 (default 9091), preserving direct Pi URLs and hostname routes. Transmission
 never joins the ordinary `portainer_network`. Plex, ngrok, Komodo and other
 services use ordinary WAN routing. VPN keys stay on the router; Docker does not
@@ -410,7 +466,7 @@ Proton inbound port allocation and NAT-PMP renewal are not configured here.
 Transmission can initiate outgoing connections. Do not forward its peer port
 from the home WAN; see the router guide for details.
 
-Stop the Komodo bootstrap stack:
+Stop the Komodo `management` bootstrap stack:
 
 ```sh
 docker compose down
@@ -418,13 +474,13 @@ docker compose down
 
 ## External access and webhooks
 
-Use the existing ngrok stack for inbound webhooks and the entrypoint. See
-[ngrok configuration](stacks/ngrok/README.md) for endpoint configuration and the
-individual Resource Sync and Stack webhook URLs.
+Use the `public-access` stack for inbound webhooks and the entrypoint. See
+[public access configuration](stacks/public-access/README.md) for endpoint
+configuration and the individual Resource Sync and Stack webhook URLs.
 
 ```text
-webhooks HTTPS URL -> komodo-core:9120
-entrypoint URL     -> home-server-proxy:80
+webhooks HTTPS URL -> management-control-plane:9120
+entrypoint URL     -> entrypoint-reverse-proxy:80
 ```
 
 Set `KOMODO_WEBHOOK_BASE_URL` to the public HTTPS webhook URL. ngrok uses the
@@ -434,7 +490,7 @@ no host VPN installer or deployment hook is required.
 ## Notes
 
 - The root Komodo bootstrap network is named `portainer_network`.
-- The `entrypoint`, `observability`, and `media` Stacks attach to
+- The `entrypoint`, `observability`, `media`, and `public-access` Stacks attach to
   `portainer_network` as an external Docker network so Traefik can route across
   Compose projects.
 - Komodo keys and MongoDB data are stored in Docker-managed volumes.

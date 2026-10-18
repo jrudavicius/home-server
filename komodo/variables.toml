@@ -47,7 +47,7 @@ value = "/srv/server/config/transmission/transmission_user_password.txt"
 is_secret = false
 
 # NGROK_AUTHTOKEN is intentionally not Git-managed. Create it as a secret
-# Komodo variable before deploying the ngrok Stack.
+# Komodo variable before deploying the public-access Stack.
 
 [[variable]]
 name = "NGROK_INSPECT_PORT"

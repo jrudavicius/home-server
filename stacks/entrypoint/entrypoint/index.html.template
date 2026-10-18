@@ -193,10 +193,10 @@
           href="#"
         >
           <div class="service-top">
-            <span class="mark">K</span>
-            <span class="badge">Control plane</span>
+            <span class="mark">CP</span>
+            <span class="badge">management</span>
           </div>
-          <h2>Komodo</h2>
+          <h2>Control plane</h2>
           <p class="description">Manage deployments, containers, and server resources.</p>
           <p class="url"></p>
         </a>
@@ -210,11 +210,11 @@
           href="#"
         >
           <div class="service-top">
-            <span class="mark">P</span>
-            <span class="badge">Media</span>
+            <span class="mark">SS</span>
+            <span class="badge">media</span>
           </div>
-          <h2>Plex</h2>
-          <p class="description">Open the local Plex Media Server dashboard.</p>
+          <h2>Streaming server</h2>
+          <p class="description">Browse and stream your media library.</p>
           <p class="url"></p>
         </a>
 
@@ -227,10 +227,10 @@
           href="#"
         >
           <div class="service-top">
-            <span class="mark">Tf</span>
-            <span class="badge">Proxy</span>
+            <span class="mark">RP</span>
+            <span class="badge">entrypoint</span>
           </div>
-          <h2>Traefik</h2>
+          <h2>Reverse proxy</h2>
           <p class="description">Inspect routers, services, and proxy health.</p>
           <p class="url"></p>
         </a>
@@ -244,10 +244,10 @@
           href="#"
         >
           <div class="service-top">
-            <span class="mark">N</span>
-            <span class="badge">Tunnels</span>
+            <span class="mark">T</span>
+            <span class="badge">public-access</span>
           </div>
-          <h2>ngrok</h2>
+          <h2>Tunnel</h2>
           <p class="description">Inspect public tunnels and incoming webhook requests.</p>
           <p class="url"></p>
         </a>
@@ -261,10 +261,10 @@
           href="#"
         >
           <div class="service-top">
-            <span class="mark">G</span>
-            <span class="badge">Logs</span>
+            <span class="mark">LD</span>
+            <span class="badge">observability</span>
           </div>
-          <h2>Grafana</h2>
+          <h2>Log dashboard</h2>
           <p class="description">Search container logs and inspect observability dashboards.</p>
           <p class="url"></p>
         </a>
@@ -278,19 +278,17 @@
           href="#"
         >
           <div class="service-top">
-            <span class="mark">T</span>
-            <span class="badge">Transfers</span>
+            <span class="mark">TC</span>
+            <span class="badge">media</span>
           </div>
-          <h2>Transmission</h2>
+          <h2>Torrent client</h2>
           <p class="description">Manage torrent activity from the web interface.</p>
           <p class="url"></p>
         </a>
       </section>
 
       <footer>
-        Configure custom links with ENTRYPOINT_KOMODO_URL, ENTRYPOINT_PLEX_URL,
-        ENTRYPOINT_GRAFANA_URL, ENTRYPOINT_TRAEFIK_URL, ENTRYPOINT_NGROK_URL, and
-        ENTRYPOINT_TRANSMISSION_URL.
+        Open a service to manage deployments, media, networking, or logs.
       </footer>
     </main>
 

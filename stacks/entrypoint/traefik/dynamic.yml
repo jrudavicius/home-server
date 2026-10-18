@@ -1,75 +1,75 @@
 http:
   routers:
-    traefik:
+    reverse-proxy:
       rule: 'Host(`{{ env "TRAEFIK_DASHBOARD_HOST" | default "traefik.home.arpa" }}`) || PathPrefix(`/api`) || PathPrefix(`/dashboard`)'
       entryPoints:
         - web
       priority: 20
       service: api@internal
 
-    komodo:
+    control-plane:
       rule: 'Host(`{{ env "KOMODO_TRAEFIK_HOST" | default "komodo.home.arpa" }}`) || PathPrefix(`/listener`)'
       entryPoints:
         - web
       priority: 30
-      service: komodo
+      service: control-plane
 
-    plex:
+    streaming-server:
       rule: 'Host(`{{ env "PLEX_TRAEFIK_HOST" | default "plex.home.arpa" }}`)'
       entryPoints:
         - web
       priority: 20
-      service: plex
+      service: streaming-server
 
-    grafana:
+    log-dashboard:
       rule: 'Host(`{{ env "GRAFANA_TRAEFIK_HOST" | default "grafana.home.arpa" }}`)'
       entryPoints:
         - web
       priority: 20
-      service: grafana
+      service: log-dashboard
 
-    transmission:
+    torrent-client:
       rule: 'Host(`{{ env "TRANSMISSION_TRAEFIK_HOST" | default "transmission.home.arpa" }}`)'
       entryPoints:
         - web
       priority: 20
-      service: transmission
+      service: torrent-client
 
-    transmission-direct:
+    torrent-client-direct:
       rule: 'PathPrefix(`/`)'
       entryPoints:
-        - transmission
-      service: transmission
+        - torrent-client
+      service: torrent-client
 
-    entrypoint:
+    landing-page:
       rule: 'PathPrefix(`/`)'
       entryPoints:
         - web
       priority: 1
-      service: entrypoint
+      service: landing-page
 
   services:
-    komodo:
+    control-plane:
       loadBalancer:
         servers:
-          - url: "http://komodo-core:9120"
+          - url: "http://management-control-plane:9120"
 
-    plex:
+    streaming-server:
       loadBalancer:
         servers:
-          - url: "http://media-server:32400"
+          - url: "http://media-streaming-server:32400"
 
-    grafana:
+    log-dashboard:
       loadBalancer:
         servers:
-          - url: "http://observability-grafana:3000"
+          - url: "http://observability-log-dashboard:3000"
 
-    transmission:
+    torrent-client:
       loadBalancer:
         servers:
-          - url: "http://torrent-client:9091"
+          - url: "http://media-torrent-client:9091"
 
-    entrypoint:
+    landing-page:
       loadBalancer:
         servers:
-          - url: "http://home-server-entrypoint:80"
+          - url: "http://entrypoint-landing-page:80"

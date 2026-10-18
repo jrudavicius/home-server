@@ -28,13 +28,13 @@ class TransmissionNetworking(unittest.TestCase):
     def setUpClass(cls):
         cls.media = compose_config("media")
         cls.entrypoint = compose_config("entrypoint")
-        cls.tx = cls.media["services"]["transmission"]
-        cls.proxy = cls.entrypoint["services"]["traefik"]
+        cls.tx = cls.media["services"]["torrent-client"]
+        cls.proxy = cls.entrypoint["services"]["reverse-proxy"]
 
     def test_no_vpn_container_or_shared_namespace(self):
-        self.assertNotIn("vpn", self.media["services"])
+        self.assertEqual(set(self.media["services"]), {"streaming-server", "torrent-client"})
         self.assertNotIn("network_mode", self.tx)
-        self.assertNotIn("vpn", self.tx.get("depends_on", {}))
+        self.assertFalse(self.tx.get("depends_on"))
         self.assertNotIn("wireguard_config", self.media.get("secrets", {}))
 
     def test_transmission_has_only_protected_egress_and_internal_ui(self):
@@ -70,15 +70,15 @@ class TransmissionNetworking(unittest.TestCase):
                 for port in settings.get("ports", []):
                     if str(port.get("published")) == "9091":
                         owners.append(service)
-        self.assertEqual(owners, ["traefik"])
-        self.assertIn("--entrypoints.transmission.address=:9091", self.proxy["command"])
+        self.assertEqual(owners, ["reverse-proxy"])
+        self.assertIn("--entrypoints.torrent-client.address=:9091", self.proxy["command"])
         routes = (ROOT / "stacks/entrypoint/traefik/dynamic.yml").read_text()
-        self.assertIn('url: "http://torrent-client:9091"', routes)
-        self.assertIn("transmission-direct:", routes)
+        self.assertIn('url: "http://media-torrent-client:9091"', routes)
+        self.assertIn("torrent-client-direct:", routes)
         self.assertNotIn("media-vpn", routes)
 
     def test_plex_remains_on_ordinary_network(self):
-        plex = self.media["services"]["plex"]
+        plex = self.media["services"]["streaming-server"]
         self.assertEqual(set(plex["networks"]), {"default"})
         self.assertEqual(self.media["networks"]["default"]["name"], "portainer_network")
 

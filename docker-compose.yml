@@ -1,6 +1,8 @@
+name: management
+
 services:
-  komodo-mongo:
-    container_name: komodo-database
+  database:
+    container_name: management-database
     image: mongo:8.0
     restart: unless-stopped
     command: ["--quiet", "--wiredTigerCacheSizeGB", "0.25"]
@@ -13,24 +15,24 @@ services:
       - komodo-mongo-data:/data/db
       - komodo-mongo-config:/data/configdb
 
-  komodo-core:
-    container_name: komodo-core
+  control-plane:
+    container_name: management-control-plane
     image: ghcr.io/moghtech/komodo-core:${KOMODO_IMAGE_TAG:-2}
     init: true
     restart: unless-stopped
     depends_on:
-      - komodo-mongo
+      - database
     labels:
       traefik.enable: "true"
-      traefik.http.routers.komodo.rule: "Host(`${KOMODO_TRAEFIK_HOST:-komodo.home.arpa}`)"
-      traefik.http.routers.komodo.entrypoints: web
-      traefik.http.routers.komodo.priority: "20"
-      traefik.http.services.komodo.loadbalancer.server.port: "9120"
+      traefik.http.routers.control-plane.rule: "Host(`${KOMODO_TRAEFIK_HOST:-komodo.home.arpa}`)"
+      traefik.http.routers.control-plane.entrypoints: web
+      traefik.http.routers.control-plane.priority: "20"
+      traefik.http.services.control-plane.loadbalancer.server.port: "9120"
     ports:
       - "${HOST_BIND_ADDRESS:-0.0.0.0}:${KOMODO_PORT:?Set KOMODO_PORT}:9120"
     environment:
       TZ: Europe/Vilnius
-      KOMODO_DATABASE_ADDRESS: komodo-mongo:27017
+      KOMODO_DATABASE_ADDRESS: database:27017
       KOMODO_DATABASE_USERNAME: ${KOMODO_DATABASE_USERNAME:?Set KOMODO_DATABASE_USERNAME}
       KOMODO_DATABASE_PASSWORD: ${KOMODO_DATABASE_PASSWORD:?Set KOMODO_DATABASE_PASSWORD}
       KOMODO_HOST: ${KOMODO_HOST:?Set KOMODO_HOST}
@@ -61,16 +63,16 @@ services:
       - komodo-keys:/config/keys
       - "${KOMODO_BACKUPS_PATH:?Set KOMODO_BACKUPS_PATH}:/backups"
 
-  komodo-periphery:
-    container_name: komodo-agent
+  host-agent:
+    container_name: management-host-agent
     image: ghcr.io/moghtech/komodo-periphery:${KOMODO_IMAGE_TAG:-2}
     init: true
     restart: unless-stopped
     depends_on:
-      - komodo-core
+      - control-plane
     environment:
       TZ: Europe/Vilnius
-      PERIPHERY_CORE_ADDRESS: ws://komodo-core:9120
+      PERIPHERY_CORE_ADDRESS: ws://control-plane:9120
       PERIPHERY_CONNECT_AS: ${KOMODO_FIRST_SERVER_NAME:?Set KOMODO_FIRST_SERVER_NAME}
       PERIPHERY_CORE_PUBLIC_KEYS: file:/config/keys/core.pub
       PERIPHERY_ROOT_DIRECTORY: ${PERIPHERY_ROOT_DIRECTORY:?Set PERIPHERY_ROOT_DIRECTORY}
@@ -89,6 +91,11 @@ networks:
     name: portainer_network
 
 volumes:
+  # Keep the existing physical volumes when the Compose project becomes management.
+  # Set MANAGEMENT_VOLUME_PREFIX to the old project name if it was not server.
   komodo-mongo-data:
+    name: ${MANAGEMENT_VOLUME_PREFIX:-server}_komodo-mongo-data
   komodo-mongo-config:
+    name: ${MANAGEMENT_VOLUME_PREFIX:-server}_komodo-mongo-config
   komodo-keys:
+    name: ${MANAGEMENT_VOLUME_PREFIX:-server}_komodo-keys

@@ -1,14 +1,16 @@
+name: media
+
 services:
-  plex:
-    container_name: media-server
+  streaming-server:
+    container_name: media-streaming-server
     image: plexinc/pms-docker:1.42.2.10156-f737b826c
     restart: unless-stopped
     labels:
       traefik.enable: "true"
-      traefik.http.routers.plex.rule: "Host(`${PLEX_TRAEFIK_HOST:-plex.home.arpa}`)"
-      traefik.http.routers.plex.entrypoints: web
-      traefik.http.routers.plex.priority: "20"
-      traefik.http.services.plex.loadbalancer.server.port: "32400"
+      traefik.http.routers.streaming-server.rule: "Host(`${PLEX_TRAEFIK_HOST:-plex.home.arpa}`)"
+      traefik.http.routers.streaming-server.entrypoints: web
+      traefik.http.routers.streaming-server.priority: "20"
+      traefik.http.services.streaming-server.loadbalancer.server.port: "32400"
     ports:
       - "${PLEX_PORT:?Set PLEX_PORT}:32400"
     environment:
@@ -21,8 +23,8 @@ services:
       - "${TRANSCODE_PATH:?Set TRANSCODE_PATH}:/transcode"
       - "${MEDIA_PATH:?Set MEDIA_PATH}:/data"
 
-  transmission:
-    container_name: torrent-client
+  torrent-client:
+    container_name: media-torrent-client
     image: lscr.io/linuxserver/transmission:4.0.6
     restart: unless-stopped
     # Only this LAN identity is routed through Proton by MikroTik.
@@ -40,10 +42,10 @@ services:
       net.ipv6.conf.default.disable_ipv6: "1"
     labels:
       traefik.enable: "true"
-      traefik.http.routers.transmission.rule: "Host(`${TRANSMISSION_TRAEFIK_HOST:-transmission.home.arpa}`)"
-      traefik.http.routers.transmission.entrypoints: web
-      traefik.http.routers.transmission.priority: "20"
-      traefik.http.services.transmission.loadbalancer.server.port: "9091"
+      traefik.http.routers.torrent-client.rule: "Host(`${TRANSMISSION_TRAEFIK_HOST:-transmission.home.arpa}`)"
+      traefik.http.routers.torrent-client.entrypoints: web
+      traefik.http.routers.torrent-client.priority: "20"
+      traefik.http.services.torrent-client.loadbalancer.server.port: "9091"
     environment:
       - PUID=1000
       - PGID=1000
