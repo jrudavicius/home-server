@@ -132,8 +132,10 @@ ip -4 route show proto 242
 cat /etc/resolv.conf
 ```
 
-The current ngrok configuration exposes only the exact coordinated GitHub
-deployment POST path through Traefik's internal port 9121. The former public
+The [gateway HTTPS receiver](../netcup-webhook/README.md) now delivers GitHub
+webhooks over WireGuard. The retained ngrok rollback configuration exposes only
+the exact coordinated GitHub deployment POST path through Traefik's internal
+port 9121. The former public
 application endpoint is retained in the pre-portability source tag for rollback.
 On the original MikroTik network, its whole-home Proton policy still
 controls the underlying transport. Surviving that router's own Proton outage

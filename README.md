@@ -14,13 +14,15 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 - Opening a local home server landing page through the `entrypoint` stack.
 - Collecting and searching Docker container logs through the `observability`
   stack.
-- Receiving GitHub webhooks through ngrok while keeping application access private.
+- Receiving GitHub webhooks through the Netcup HTTPS gateway while keeping application access private.
 - Hosting Plex Media Server through the `media` stack.
 - Routing the portable Pi and its containers through Proton, with a host kill switch and separate private Netcup management tunnel.
 
 The portable-Pi setup is described in [Host networking](host/portable/README.md).
 [Preservation and rollback](docs/portable-pi-migration.md) records the saved
 baseline, backup scope, migration checks, and restore order.
+The [gateway webhook guide](host/netcup-webhook/README.md) covers HTTPS on the
+dedicated public IP and rollback to the retained ngrok configuration.
 
 ## Services
 
@@ -41,7 +43,7 @@ root bootstrap stack.
 | `observability` | `log-collector` | `observability-log-collector` | Alloy Docker log collector. |
 | `media` | `streaming-server` | `media-streaming-server` | Plex Media Server. |
 | `media` | `torrent-client` | `media-torrent-client` | Transmission torrent client. |
-| `public-access` | `tunnel` | `public-access-tunnel` | Restricted GitHub webhook forwarding. |
+| `public-access` | `tunnel` | `public-access-tunnel` | Stopped ngrok rollback option; excluded from routine deployments. |
 
 Use service names for Compose commands, dependencies, and addresses within a
 stack. Use the full container name for addresses between stacks on the shared
@@ -102,7 +104,7 @@ values containing special characters according to the
 The example supplies the non-secret ports and paths. Keep
 `MANAGEMENT_VOLUME_PREFIX` equal to the existing Docker volume prefix (`server`
 by default) so Komodo keeps its database and keys. Adjust `KOMODO_HOST` to
-your server URL; leave `KOMODO_WEBHOOK_BASE_URL` empty until ngrok is running.
+your server URL; set `KOMODO_WEBHOOK_BASE_URL` after gateway HTTPS is verified.
 Keep `KOMODO_FIRST_SERVER_NAME=home-server` to match the managed Stack resources.
 Use `--env-file /srv/komodo/bootstrap.env` for every root Compose command, as
 shown under [Running](#running).
@@ -113,7 +115,7 @@ working state.
 
 #### Managed application credentials
 
-Set these four values in the same private `/srv/komodo/bootstrap.env` file
+Set these three values in the same private `/srv/komodo/bootstrap.env` file
 before starting the root stack. Every value must be nonempty and single-line.
 
 | Bootstrap variable | Value to set | Used by |
@@ -121,7 +123,9 @@ before starting the root stack. Every value must be nonempty and single-line.
 | `GRAFANA_ADMIN_USER` | Grafana administrator username. | `observability` |
 | `GRAFANA_ADMIN_PASSWORD` | Grafana administrator password. | `observability` |
 | `TRANSMISSION_USERNAME` | Transmission web UI username. | `media` |
-| `NGROK_AUTHTOKEN` | Your authentication token from the ngrok dashboard. | `public-access` |
+
+Keep `NGROK_AUTHTOKEN` if retaining the ngrok rollback option. It is optional for
+the root stack and required only when starting `public-access`.
 
 Optional `KOMODO_DISCORD_WEBHOOK_URL` and `GRAFANA_DISCORD_WEBHOOK_URL` values can
 stay empty. See [operational alerts](docs/operations.md) for opt-in delivery.
@@ -180,9 +184,10 @@ already uses a `.env`, copy its full contents to `/srv/komodo/bootstrap.env`,
 make that file readable only by the deployment account (`chmod 600`), and
 switch root Compose commands to the explicit `--env-file` path.
 
-Add the four application values above using your existing usernames, Grafana
-password, and ngrok token. Add `PLEX_CLAIM=` unless you need a current claim
-token. Preserve existing non-secret settings and `MANAGEMENT_VOLUME_PREFIX`.
+Add the three application values above using your existing usernames and Grafana
+password. Preserve any ngrok token for rollback. Add `PLEX_CLAIM=` unless you
+need a current claim token. Preserve existing non-secret settings and
+`MANAGEMENT_VOLUME_PREFIX`.
 Run the root `up -d` command to prepare and load the Core secrets before syncing
 the updated application Stacks.
 
@@ -602,7 +607,7 @@ cd stacks/observability
 docker compose up -d
 ```
 
-Start the `public-access` stack manually for local testing:
+The `public-access` stack is retained for deliberate ngrok rollback only:
 
 ```sh
 cd stacks/public-access
@@ -640,9 +645,9 @@ Compose file: docker-compose.yml
 
 Resource Sync updates definitions only (`deploy = false` on every Stack).
 The `home-server-deploy` Procedure owns deployment ordering: it syncs the
-definitions, then checks and deploys `entrypoint`, `observability`, `media`, and
-`public-access`, one at a time. This creates the `transmission_ui` network before
-media needs it and keeps the public tunnel available until the final stage.
+definitions, then checks and deploys `entrypoint`, `observability` and `media`,
+one at a time. This creates the `transmission_ui` network before media needs it.
+Gateway HTTPS runs separately; the retained `public-access` Stack stays stopped.
 
 The Repo resource in `komodo/repos.toml` is required for Stack deployments.
 Manage the repository, branch, and Git account on `home-server` under
@@ -680,9 +685,9 @@ The tracked files include each Stack's Compose and service configuration files,
 plus `komodo/stacks.toml`, `komodo/variables.toml`, and `komodo/repos.toml`.
 Those shared TOML files require a redeploy because Komodo's file comparison
 does not detect changes to Stack environment settings or global variables by
-themselves. Consequently, editing any of those shared files deploys all four
-Stacks in order; an ordinary service-file edit affects only its Stack, and a
-README-only edit does not deploy anything. Existing service restart requirements
+themselves. Consequently, editing any of those shared files deploys the three
+active application Stacks in order; an ordinary service-file edit affects only
+its Stack, and a README-only edit does not deploy anything. Existing service restart requirements
 still apply to tracked service configuration files.
 
 For first setup or migration from the individual webhooks:
@@ -696,9 +701,10 @@ For first setup or migration from the individual webhooks:
 3. Refresh and manually run `home-server-resources` for the full `komodo/`
    directory. Confirm that `home-server-deploy` exists and that the Repo and all
    four Stacks have webhooks disabled. This sync does not deploy the Stacks.
-4. Run `home-server-deploy` once from Komodo and verify all five stages succeed.
-   This also starts `public-access` on a fresh installation. Complete credential
-   setup and create the required media directories/networks before this run.
+4. Run `home-server-deploy` once from Komodo and verify all four stages succeed.
+   Complete credential setup and create the required media directories/networks
+   before this run. Set up the [gateway receiver](host/netcup-webhook/README.md)
+   separately; this Procedure does not start ngrok.
 5. Set `KOMODO_WEBHOOK_BASE_URL` to the public HTTPS endpoint, then configure
    exactly one GitHub webhook for **Push events** with this payload URL:
 
@@ -708,7 +714,7 @@ https://<komodo-public-host>/listener/github/procedure/home-server-deploy/main
 
 Use content type `application/json` and set the GitHub webhook secret to the
 same value as `KOMODO_WEBHOOK_SECRET`. The `/main` suffix filters pushes to
-`main`. Delete the old individual webhooks after validating the new one.
+`main`. Retain old individual webhooks disabled for rollback.
 Direct Repo, Resource Sync, and Stack webhook execution is disabled in TOML;
 the Procedure can still execute those resources internally.
 
@@ -780,20 +786,20 @@ docker compose --env-file /srv/komodo/bootstrap.env down
 
 ## External access and webhooks
 
-Use the `public-access` stack for inbound GitHub webhooks. See
-[public access configuration](stacks/public-access/README.md) for endpoint
-configuration and the single deployment Procedure webhook URL.
+Use the [Netcup HTTPS receiver](host/netcup-webhook/README.md) for inbound
+GitHub webhooks. The [ngrok configuration](stacks/public-access/README.md) is
+preserved as a stopped rollback option, including its restricted Traefik listener.
 
 ```text
-webhooks HTTPS URL -> entrypoint-reverse-proxy:9121 -> Komodo GitHub listeners
+GitHub HTTPS      -> Netcup public IP:443 -> WireGuard -> Pi:9120 -> Komodo
 Netcup VPN        -> 10.77.77.2 -> private landing page and applications
 ```
 
-Set `KOMODO_WEBHOOK_BASE_URL` to the public HTTPS webhook URL. ngrok uses the
-normal Docker network and the Pi's host Proton policy. Its webhook endpoint
-depends on Proton being connected. Private access through Netcup uses the Pi's
-stable VPN address `10.77.77.2`. GitHub webhooks still require their public
-endpoint; the private VPN does not replace webhook delivery.
+Set `KOMODO_WEBHOOK_BASE_URL` to the gateway's public HTTPS base URL. Caddy
+renews its trusted IP certificate and forwards only the exact Procedure POST;
+Komodo validates the GitHub signature. Delivery uses WireGuard independently
+of Proton, although deployment Git fetches still require working Proton egress.
+Private application access continues through the stable VPN address `10.77.77.2`.
 
 ## Notes
 

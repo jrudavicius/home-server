@@ -57,6 +57,9 @@ def main():
         'KOMODO_WEBHOOK_SECRET', 'KOMODO_JWT_SECRET',
     )})
     env['GRAFANA_DISCORD_WEBHOOK_URL'] = 'https://example.invalid/validation-only'
+    # The retained ngrok rollback stack still needs a token to render; the
+    # active root management stack no longer requires an ngrok account.
+    env['NGROK_AUTHTOKEN'] = 'validation-only-ngrok-token'
     configs = {}
     files = [ROOT / 'docker-compose.yml', *sorted((ROOT / 'stacks').glob('*/docker-compose.yml'))]
     for path in files:

@@ -1,0 +1,44 @@
+{
+	# IP clients may omit TLS SNI. Select the managed IP certificate explicitly.
+	default_sni {$WEBHOOK_PUBLIC_IP}
+	auto_https disable_redirects
+	servers {
+		protocols h1 h2
+	}
+}
+
+https://{$WEBHOOK_PUBLIC_IP} {
+	tls {
+		issuer acme {
+			dir https://acme-v02.api.letsencrypt.org/directory
+			profile shortlived
+		}
+	}
+
+	# Compare the complete original URI. Encoded paths, traversal, suffixes and
+	# query strings must never broaden access to Komodo's administrative API.
+	@github {
+		method POST
+		expression {http.request.orig_uri} == "/listener/github/procedure/home-server-deploy/main"
+	}
+	handle @github {
+		request_body {
+			max_size 25MB
+		}
+		reverse_proxy {$WEBHOOK_UPSTREAM} {
+			transport http {
+				dial_timeout 5s
+				response_header_timeout 10s
+			}
+		}
+	}
+	handle {
+		respond 404
+	}
+}
+
+# Caddy handles ACME HTTP-01 before these routes. All other plaintext requests
+# are rejected; GitHub must use the HTTPS URL with certificate checks enabled.
+http://{$WEBHOOK_PUBLIC_IP} {
+	respond 404
+}

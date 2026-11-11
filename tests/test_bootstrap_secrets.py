@@ -82,6 +82,7 @@ class BootstrapSecretsTests(unittest.TestCase):
         self.assertEqual(set(config["secrets"]),
                          set(bootstrap.REQUIRED + bootstrap.OPTIONAL + bootstrap.RAW_OPTIONAL))
         self.assertEqual(config["secrets"]["PLEX_CLAIM"], '""')
+        self.assertEqual(config["secrets"]["NGROK_AUTHTOKEN"], '""')
         self.assertEqual(config["secrets"]["GRAFANA_DISCORD_WEBHOOK_URL"], '""')
         self.assertEqual(config["secrets"]["KOMODO_DISCORD_WEBHOOK_URL"], '')
         self.assertNotIn("do-not-export", json.dumps(config))

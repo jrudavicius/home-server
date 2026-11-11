@@ -40,7 +40,6 @@ def main():
         'GRAFANA_ADMIN_USER': 'test-only-admin',
         'GRAFANA_ADMIN_PASSWORD': 'test-only-password',
         'TRANSMISSION_USERNAME': 'test-only-user',
-        'NGROK_AUTHTOKEN': 'test-only-token',
         'KOMODO_DISCORD_WEBHOOK_URL': 'http://app-probe:8080/api/webhooks/fixture/fixture',
     })
     production = json.loads(subprocess.check_output([
