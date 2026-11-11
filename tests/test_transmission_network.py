@@ -87,6 +87,7 @@ class TransmissionNetworking(unittest.TestCase):
     def test_missing_proton_dns_fails_configuration(self):
         directory = ROOT / "stacks/media"
         env = os.environ.copy()
+        env["TRANSMISSION_USERNAME"] = "test-only-user"
         env["TRANSMISSION_DNS"] = ""
         result = subprocess.run(
             ["docker", "compose", "--env-file", str(directory / ".env.example"),
