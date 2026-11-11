@@ -1,4 +1,4 @@
-"""Deployment invariants; these do not replace the live router acceptance tests."""
+"""Deployment invariants; run host/portable/test_network.py for kernel checks."""
 
 import json
 import os
@@ -40,15 +40,15 @@ class TransmissionNetworking(unittest.TestCase):
         self.assertNotIn("wireguard_config", self.media.get("secrets", {}))
 
     def test_transmission_has_only_protected_egress_and_internal_ui(self):
-        self.assertEqual(set(self.tx["networks"]), {"transmission_lan", "transmission_ui"})
-        lan = self.tx["networks"]["transmission_lan"]
-        self.assertEqual(lan["ipv4_address"], "192.168.88.9")
-        self.assertEqual(lan["mac_address"], "02:54:52:00:00:01")
-        self.assertGreater(lan["gw_priority"], self.tx["networks"]["transmission_ui"].get("gw_priority", 0))
+        self.assertEqual(set(self.tx["networks"]), {"transmission_vpn", "transmission_ui"})
+        egress = self.tx["networks"]["transmission_vpn"]
+        self.assertNotIn("ipv4_address", egress)
+        self.assertNotIn("mac_address", egress)
+        self.assertGreater(egress["gw_priority"], self.tx["networks"]["transmission_ui"].get("gw_priority", 0))
         self.assertFalse(self.tx.get("ports"))
 
     def test_networks_must_exist_before_transmission_starts(self):
-        for name in ("transmission_lan", "transmission_ui"):
+        for name in ("transmission_vpn", "transmission_ui"):
             network = self.media["networks"][name]
             self.assertTrue(network["external"])
             self.assertEqual(network["name"], name)
@@ -84,17 +84,17 @@ class TransmissionNetworking(unittest.TestCase):
         self.assertEqual(set(plex["networks"]), {"default"})
         self.assertEqual(self.media["networks"]["default"]["name"], "portainer_network")
 
-    def test_missing_identity_fails_configuration(self):
+    def test_missing_proton_dns_fails_configuration(self):
         directory = ROOT / "stacks/media"
         env = os.environ.copy()
-        env["TRANSMISSION_LAN_IP"] = ""
+        env["TRANSMISSION_DNS"] = ""
         result = subprocess.run(
             ["docker", "compose", "--env-file", str(directory / ".env.example"),
              "-f", str(directory / "docker-compose.yml"), "config", "--quiet"],
             capture_output=True, text=True, env=env,
         )
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("TRANSMISSION_LAN_IP", result.stderr)
+        self.assertIn("TRANSMISSION_DNS", result.stderr)
 
 
 if __name__ == "__main__":

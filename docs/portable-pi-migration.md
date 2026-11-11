@@ -4,10 +4,13 @@ Recorded on 2026-11-11. The owner chose private access through the existing Netc
 WireGuard gateway, with the Pi connecting from either home, and required the
 current setup to be documented and preserved before replacement.
 
-**Status: preparation only.** No Pi or router networking has been changed by this
-task. Fresh Pi and MikroTik backups are still required: neither device was
-reachable from the Mac during preparation. Do not treat the source snapshot or
-the Netcup backup as a complete home-server backup.
+**Status: migration in progress.** Fresh Pi, application-volume, and native
+Komodo backups were completed before changes; an encrypted off-Pi copy was
+decrypted and checksum-verified. Private SSH and Komodo now work through the
+Netcup gateway. The host guard is active; the saved Proton profile handshakes
+but fails DNS/internet checks, so Transmission remains stopped. Mac route
+activation and live acceptance checks are pending. The MikroTik is unchanged;
+a fresh router backup is required before any future router edit.
 
 ## Preserved baseline
 
@@ -15,16 +18,19 @@ The tracked configuration is pinned by Git tag
 [`pre-portable-pi-2026-11-11`](https://github.com/jrudavicius/home-server/tree/pre-portable-pi-2026-11-11),
 which resolves to commit `080038dbc53faa44b4422e1a65a7295fe3f05e83`.
 The tag was pushed and its remote commit verified. This is the inspected local
-and published source revision; the Pi's actual deployed revision has not yet been
-checked. Capture any deployed differences before migration.
+and published source revision. The root Pi checkout is actually at `0d5e981`,
+with local `.gitignore` changes and untracked infrastructure-check code. Media,
+entrypoint, and observability checkouts are at `080038d`; public-access is at
+`0d5e981`. Complete checkouts and local changes were captured in the Pi archive.
+The root checkout has not been replaced.
 
 | Component | Baseline | Evidence and preservation status |
 | --- | --- | --- |
 | Source | Root Komodo Compose, four application stacks, resource definitions, pinned images, router documentation | Git tag, source tarball, and self-contained Git bundle saved; bundle verified |
-| Pi | Documented `192.168.88.250`, wired `eth0` | Repository evidence only; live host configuration and deployed revision pending |
+| Pi | Previously documented `192.168.88.250`; now on another home's Wi-Fi with DHCP and NetworkManager | Live host configuration, all of `/etc`, network state, and deployed revisions captured |
 | MikroTik | LAN `192.168.88.0/24`, gateway `192.168.88.1`, whole-home Proton policy and kill switch | Repository evidence only; fresh sensitive export, encrypted binary backup, and off-router copies pending |
-| Transmission | LAN IP `192.168.88.9`, MAC `02:54:52:00:00:01`, external `transmission_lan` macvlan and internal `transmission_ui` bridge | Compose preserved; live Docker configuration, application state, and credentials pending |
-| Public access | ngrok HTTPS webhook endpoint and HTTP Traefik endpoint | Source preserved; live URLs, auth token, and webhook configuration pending |
+| Transmission | LAN IP `192.168.88.9`, MAC `02:54:52:00:00:01`, external `transmission_lan` macvlan and internal `transmission_ui` bridge | Live Docker configuration, application state, secrets and Compose preserved; stopped before cutover |
+| Public access | ngrok HTTPS webhook endpoint and HTTP Traefik endpoint | Source and private runtime configuration preserved |
 | Netcup | Debian 13, `wg0` at `10.77.77.1/24`, UDP 51820, Mac peer `10.77.77.3/32`, IPv4 forwarding off, forwarding firewall drops all | Read live; private configuration archive created, checksum verified, and encrypted off-server copy decrypted successfully |
 | Mac | WireGuard address `10.77.77.3/32`, routes only `10.77.77.1/32`, keepalive 25 seconds | Live VPS handshake observed; client configuration and keys archived, encrypted, and decrypted successfully |
 
@@ -43,6 +49,15 @@ Keep a recoverable copy of an identity separately from the ciphertext. Transfer
 to the preferred Proton Drive has not been performed; no Proton Drive connection
 was available in this session.
 
+The fresh Pi archive contains 6,511 members and 272,319,223 bytes. It includes
+all Docker volume data copied while applications were stopped, the supported
+Komodo database snapshot, SSH access files, private environments, application
+configuration, and deployment inventories. Bulk media, transcode caches and
+Docker image layers are excluded. This is not a full bootable disk image.
+An independently running OS upgrade completed after the snapshot; rolling back
+networking does not downgrade those packages. Exact paths and checksums are in
+the private Notion record and local recovery manifests.
+
 ## Existing behavior to retain
 
 The [router policy](../router/README.md) sends the whole LAN and router-originated
@@ -60,7 +75,7 @@ Other identities and access paths that must be recorded include local
 `*.home.arpa` DNS, the actual ngrok endpoints and GitHub webhook URL, Komodo
 credentials/keys, Docker network identities, and storage mount paths.
 
-## Finish the home baseline before cutover
+## Baseline capture procedure
 
 Use local access to the MikroTik network and a console recovery path for the Pi.
 Keep archive directories private (directory mode 0700, files 0600) and outside
@@ -150,9 +165,12 @@ and [persistent keepalives](https://www.wireguard.com/quickstart/).
    replacement before disabling that endpoint. Do not remove the MikroTik's
    protections for unrelated home devices.
 
-This document is a migration specification, not an executable installer. The
-live Pi inventory must settle interface/network-manager details before writing
-the cutover commands. Historical `codex/host-wide-vpn` and
+The [portable host implementation](../host/portable/README.md) now uses the
+Pi's existing NetworkManager service. Its firewall passed 20 isolated kernel
+checks for host/container egress, DNS, IPv6, marked transports, and management
+access during simulated tunnel failure. The network and Compose checks passed
+15 tests. Live tunnel health, reboot and a real change of home still need their
+own acceptance checks. Historical `codex/host-wide-vpn` and
 `codex/harden-host-wide-vpn` branches are unmerged alternatives, not a known-good
 rollback. Their installer applies lockdown early and is incompatible with the
 current macvlan/deployment layout; do not run it unchanged.
@@ -237,5 +255,5 @@ For encrypted files, verify `SHA256SUMS` in the private recovery directory, then
 decrypt into a new private staging directory using `age --decrypt --identity`.
 Use the identity and exact artifact filenames recorded in `manifest.json`.
 Inspect staged files before applying any of them to a live system. Archive
-verification and successful decryption have been tested; live restoration and
-the portable Pi setup have not.
+verification and successful decryption have been tested. Live restoration has
+not been tested; consult the status above for portable-network acceptance.

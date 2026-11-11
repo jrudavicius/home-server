@@ -100,7 +100,7 @@ DOCKER_SOCKET_PATH=/var/run/docker.sock
 
 [[stack]]
 name = "media"
-description = "Plex on normal internet; Transmission routed through MikroTik's Proton VPN."
+description = "Plex and Transmission with Proton egress enforced by the portable Pi's host firewall."
 tags = ["media-services", "vpn", "home"]
 deploy = false
 
@@ -128,8 +128,6 @@ PLEX_CONFIG_PATH=[[PLEX_CONFIG_PATH]]
 TRANSCODE_PATH=[[TRANSCODE_PATH]]
 MEDIA_PATH=[[MEDIA_PATH]]
 
-TRANSMISSION_LAN_IP=[[TRANSMISSION_LAN_IP]]
-TRANSMISSION_LAN_MAC=[[TRANSMISSION_LAN_MAC]]
 TRANSMISSION_DNS=[[TRANSMISSION_DNS]]
 
 TRANSMISSION_PEER_PORT=51413

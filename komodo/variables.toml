@@ -29,20 +29,8 @@ value = "/srv/server/config/transmission"
 is_secret = false
 
 [[variable]]
-name = "TRANSMISSION_LAN_IP"
-description = "Reserved macvlan IPv4 address protected by the MikroTik Transmission VPN policy."
-value = "192.168.88.9"
-is_secret = false
-
-[[variable]]
-name = "TRANSMISSION_LAN_MAC"
-description = "Fixed macvlan MAC matched by MikroTik's Transmission IPv4/IPv6 guard."
-value = "02:54:52:00:00:01"
-is_secret = false
-
-[[variable]]
 name = "TRANSMISSION_DNS"
-description = "Proton tunnel DNS server, reached through the router VPN."
+description = "Proton tunnel DNS server, reached through the Pi's host VPN."
 value = "10.2.0.1"
 is_secret = false
 

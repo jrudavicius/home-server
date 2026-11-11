@@ -18,6 +18,8 @@ __pycache__/
 # WireGuard client configs contain private keys.
 wg0.conf
 home-server-*.conf
+*.nmconnection
+portable-network.json
 
 # Keep filled-in router scripts, exports and provider keys local.
 router/*.rsc
