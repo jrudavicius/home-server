@@ -4,14 +4,17 @@ Recorded on 2026-11-11. The owner chose private access through the existing Netc
 WireGuard gateway, with the Pi connecting from either home, and required the
 current setup to be documented and preserved before replacement.
 
-**Status: migration in progress.** Fresh Pi, application-volume, and native
+**Status: portable networking deployed and reboot-tested.** Fresh Pi, application-volume, and native
 Komodo backups were completed before changes; an encrypted off-Pi copy was
 decrypted and checksum-verified. Private SSH and Komodo now work through the
 Netcup gateway. A new Pi-specific Proton profile passes DNS and HTTPS checks;
 the host and a representative container share its VPN exit IP. The host guard
 and both tunnels are configured for startup. The Mac route is active; direct
-private SSH and Komodo access passed. Protected Transmission deployment,
-public-access retirement and reboot acceptance are pending. The MikroTik is unchanged;
+private SSH and Komodo access passed. Transmission now uses the protected bridge;
+its existing login and storage mounts were verified. The former public application
+endpoint and empty macvlan were retired after successful outage and reboot tests.
+The only public route is the signed coordinated GitHub deployment webhook.
+The MikroTik is unchanged;
 a fresh router backup is required before any future router edit.
 
 ## Preserved baseline
@@ -170,15 +173,36 @@ and [persistent keepalives](https://www.wireguard.com/quickstart/).
 The [portable host implementation](../host/portable/README.md) now uses the
 Pi's existing NetworkManager service. Its firewall passed 20 isolated kernel
 checks for host/container egress, DNS, IPv6, marked transports, and management
-access during simulated tunnel failure. The network and Compose checks passed
-15 tests. Live tunnel health, reboot and a real change of home still need their
-own acceptance checks. A live Proton-disconnect test also blocked host and
+access during simulated tunnel failure. The full unit suite passed 28 tests.
+A live Proton-disconnect test also blocked host and
 representative container internet/DNS fallback while a fresh Netcup SSH session
 and Komodo request succeeded. An automatic timer reactivated Proton after 35
 seconds. The replacement Proton profile subsequently passed real host/container
 DNS and HTTPS checks. The restricted webhook listener passed an isolated
 Traefik/nginx test: only the exact deployment POST path reaches the backend;
 administrative paths, other methods and traversal requests are rejected.
+The final live test used the actual Transmission container: direct internet and
+physical DNS were blocked during Proton failure, fresh Netcup SSH and Komodo
+remained available, and Proton/Transmission recovered automatically. After reboot
+to kernel `6.18.60+rpt-rpi-2712`, both tunnels, the guard and all application
+containers returned with no failed systemd units. Landing page, Komodo, Grafana
+and Plex pages were reachable from the Mac; Transmission required authentication
+and its authenticated RPC succeeded. A real move between homes, Plex media
+playback, full archive restoration and independent off-Mac storage remain untested.
+
+Core and Periphery needed explicit Proton DNS because Docker retained the old
+router resolver. Only those services were recreated from the existing root
+checkout, preserving their current images/environment; its earlier local work
+was retained. Application services use the corresponding explicit DNS settings
+in Compose. Docker's daemon-wide configuration was not changed.
+
+The old GitHub hook settings and macvlan definition were saved privately. The
+five obsolete direct hooks are consolidated into the existing coordinated
+Procedure route. Rollback must restore webhook settings together with matching
+source and network configuration, rather than re-enabling stale deployment hooks
+against the new source. GitHub does not return webhook secret values; use the
+preserved Komodo webhook secret when recreating a matched hook.
+
 Historical `codex/host-wide-vpn` and
 `codex/harden-host-wide-vpn` branches are unmerged alternatives, not a known-good
 rollback. Their installer applies lockdown early and is incompatible with the
