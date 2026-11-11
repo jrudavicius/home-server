@@ -8,8 +8,9 @@ current setup to be documented and preserved before replacement.
 Komodo backups were completed before changes; an encrypted off-Pi copy was
 decrypted and checksum-verified. Private SSH and Komodo now work through the
 Netcup gateway. The host guard is active; the saved Proton profile handshakes
-but fails DNS/internet checks, so Transmission remains stopped. Mac route
-activation and live acceptance checks are pending. The MikroTik is unchanged;
+but fails DNS/internet checks, so Transmission remains stopped. The Mac route
+is active; direct private SSH and Komodo access passed. A replacement Proton
+profile and the remaining live acceptance checks are pending. The MikroTik is unchanged;
 a fresh router backup is required before any future router edit.
 
 ## Preserved baseline

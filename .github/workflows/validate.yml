@@ -30,7 +30,9 @@ jobs:
   smoke:
     name: "Smoke: ${{ matrix.suite }}"
     needs: validate
-    runs-on: ubuntu-24.04
+    # MongoDB 8.0 rejects the 6.19+ kernel on the current 24.04 runner.
+    # Keep its smoke test on 22.04's 6.8 kernel (SERVER-121912).
+    runs-on: ${{ matrix.suite == 'management' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
     timeout-minutes: 15
     strategy:
       fail-fast: false
