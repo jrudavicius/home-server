@@ -33,6 +33,7 @@ services:
       - "${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock:ro"
 
   log-dashboard:
+    dns: [10.2.0.1]
     container_name: observability-log-dashboard
     image: grafana/grafana:13.1.0@sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63
     restart: unless-stopped

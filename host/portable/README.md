@@ -32,6 +32,11 @@ uplink to the private JSON before using it.
 Local access is allowed only to the currently connected RFC1918 subnet(s).
 Normal DNS on the physical uplinks is blocked even within those subnets.
 NetworkManager gives Proton's DNS a negative priority so uplink DNS is excluded.
+Services that need external names explicitly use `10.2.0.1` in Compose.
+Docker's embedded resolver otherwise retains the router DNS from container
+creation; changing the host resolver does not update existing containers.
+Apply the DNS setting to Core and Periphery before expecting Git fetches to
+work, preserving their current images and environment during the migration.
 Docker bridges are protected by the forwarding chain; macvlan and other traffic
 that bypasses host forwarding are unsupported. This policy assumes trusted
 root access and Docker administrators.
@@ -127,9 +132,10 @@ ip -4 route show proto 242
 cat /etc/resolv.conf
 ```
 
-Keep ngrok's webhook delivery until a deliberate replacement exists. The public
-ngrok entrypoint is an independent exposure; adding private access does not
-remove it. On the original MikroTik network, its whole-home Proton policy still
+The current ngrok configuration exposes only the exact coordinated GitHub
+deployment POST path through Traefik's internal port 9121. The former public
+application endpoint is retained in the pre-portability source tag for rollback.
+On the original MikroTik network, its whole-home Proton policy still
 controls the underlying transport. Surviving that router's own Proton outage
 requires a narrow Pi-to-Netcup UDP exception, backed up and tested separately.
 
