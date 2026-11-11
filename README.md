@@ -18,6 +18,10 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 - Hosting Plex Media Server through the `media` stack.
 - Routing the home LAN and server through Proton on MikroTik, with internet blocked if the VPN disconnects.
 
+The proposed portable-Pi migration is tracked in
+[Preservation and rollback](docs/portable-pi-migration.md). That record identifies
+the saved baseline and the live backups still required before changing networking.
+
 ## Services
 
 Service names describe their role, and every container uses `<stack>-<service>`.
