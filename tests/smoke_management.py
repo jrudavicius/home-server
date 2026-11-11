@@ -114,7 +114,8 @@ def main():
                 ['docker', 'inspect', container], env=env, text=True))[0]
 
         def initializing():
-            return 'READINESS_TEST_INITIALIZING' in run('logs', 'database').stdout
+            logs = run('logs', 'database')
+            return 'READINESS_TEST_INITIALIZING' in logs.stdout + logs.stderr
 
         def core_created():
             return inspect('control-plane') is not None
@@ -178,6 +179,14 @@ def main():
             eventually(core_responds)
             check_restored_login(run, env)
             print('Core starts against the restored database and accepts login. All management smoke checks passed.', flush=True)
+        except Exception:
+            # This stack contains fixture credentials only. Capture evidence
+            # before disposable containers are removed, including stderr logs.
+            for arguments in [('ps', '--all'), ('logs', '--tail', '80', 'database',
+                                               'secret-bootstrap', 'control-plane')]:
+                result = run(*arguments, check=False)
+                print(result.stdout + result.stderr, flush=True)
+            raise
         finally:
             (folder / 'release').touch()
             if pending is not None and pending.poll() is None:

@@ -104,7 +104,7 @@ def main():
         management = json.loads(subprocess.check_output([
             'docker', 'compose', '--env-file', os.devnull,
             '-f', str(root / 'docker-compose.yml'),
-            'config', '--no-interpolate', '--format', 'json',
+            'config', '--no-interpolate', '--no-normalize', '--format', 'json',
         ], text=True))
         compose['services']['notification-sink'] = {
             'image': management['services']['secret-bootstrap']['image'],
