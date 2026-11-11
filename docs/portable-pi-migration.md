@@ -170,7 +170,11 @@ Pi's existing NetworkManager service. Its firewall passed 20 isolated kernel
 checks for host/container egress, DNS, IPv6, marked transports, and management
 access during simulated tunnel failure. The network and Compose checks passed
 15 tests. Live tunnel health, reboot and a real change of home still need their
-own acceptance checks. Historical `codex/host-wide-vpn` and
+own acceptance checks. A live Proton-disconnect test also blocked host and
+representative container internet/DNS fallback while a fresh Netcup SSH session
+and Komodo request succeeded. An automatic timer reactivated Proton after 35
+seconds. Healthy Proton data service remains unresolved; these outage checks
+do not establish normal VPN internet access. Historical `codex/host-wide-vpn` and
 `codex/harden-host-wide-vpn` branches are unmerged alternatives, not a known-good
 rollback. Their installer applies lockdown early and is incompatible with the
 current macvlan/deployment layout; do not run it unchanged.
