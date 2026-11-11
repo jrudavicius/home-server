@@ -237,23 +237,6 @@
 
         <a
           class="service"
-          data-url="${ENTRYPOINT_NGROK_URL}"
-          data-host=""
-          data-port="${NGROK_INSPECT_PORT}"
-          data-path="/"
-          href="#"
-        >
-          <div class="service-top">
-            <span class="mark">T</span>
-            <span class="badge">public-access</span>
-          </div>
-          <h2>Tunnel</h2>
-          <p class="description">Inspect public tunnels and incoming webhook requests.</p>
-          <p class="url"></p>
-        </a>
-
-        <a
-          class="service"
           data-url="${ENTRYPOINT_GRAFANA_URL}"
           data-host="${GRAFANA_TRAEFIK_HOST}"
           data-port="${GRAFANA_PORT}"

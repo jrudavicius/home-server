@@ -1,7 +1,10 @@
 # Public Access
 
-Dockerized ngrok agent for GitHub webhook delivery. Applications are accessed
-privately through the Netcup VPN.
+This ngrok stack is retained for rollback and stays stopped in the current
+deployment. GitHub delivery now uses the
+[gateway HTTPS receiver](../../host/netcup-webhook/README.md). Routine
+deployments do not include this Stack. Its configuration, token and exact image
+are retained; the instructions below apply when deliberately restoring ngrok.
 
 The `public-access` stack uses the `tunnel` service (`public-access-tunnel`
 container), powered by ngrok, with endpoints declared in `ngrok.yml`.
@@ -142,8 +145,9 @@ https://your-webhooks-ngrok-url/listener/github/procedure/home-server-deploy/mai
 Use `application/json` as the content type and use the value of
 `KOMODO_WEBHOOK_SECRET` from `/srv/komodo/bootstrap.env` as the webhook secret.
 The `/main` suffix selects pushes to `main`. The Procedure syncs configuration
-first, then checks and deploys changed Stacks sequentially, with `entrypoint`
-first and `public-access` last. A failed stage stops the remaining stages.
+first, then checks and deploys entrypoint, observability and media sequentially.
+Start this rollback Stack manually; routine deployments leave it untouched.
+A failed stage stops the remaining stages.
 Direct Resource Sync, Repo, and Stack webhook execution is disabled.
 
 ## Security note

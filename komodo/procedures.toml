@@ -34,12 +34,8 @@ executions = [
   { execution.type = "DeployStackIfChanged", execution.params.stack = "media" },
 ]
 
-# Keep the webhook tunnel available until the other deployments finish.
-[[procedure.config.stage]]
-name = "Deploy public access"
-executions = [
-  { execution.type = "DeployStackIfChanged", execution.params.stack = "public-access" },
-]
+# HTTPS webhook ingress runs on the gateway. The retained public-access Stack
+# is an ngrok rollback option and must not start during routine deployments.
 
 # Reconcile Komodo's built-in procedure by name instead of scheduling a duplicate.
 [[procedure]]
