@@ -2,6 +2,7 @@ name: media
 
 services:
   streaming-server:
+    dns: [10.2.0.1]
     container_name: media-streaming-server
     image: plexinc/pms-docker:1.42.2.10156-f737b826c@sha256:9c03c26b9479ba9a09935f3367459bfdc8d21545f42ed2a13258983c5be1b252
     restart: unless-stopped
@@ -27,12 +28,10 @@ services:
     container_name: media-torrent-client
     image: lscr.io/linuxserver/transmission:4.0.6@sha256:452310cb020c036d293e879698097acb6cc653db2676610bf8e3b58a3f4d2af5
     restart: unless-stopped
-    # Dedicated IP/MAC guards supplement MikroTik's whole-home Proton policy.
-    # Never attach Transmission to the ordinary portainer_network.
+    # Provision only after the Pi's host VPN guard passes its acceptance checks.
+    # A bridge keeps egress inside the host firewall on either home's subnet.
     networks:
-      transmission_lan:
-        ipv4_address: ${TRANSMISSION_LAN_IP:?Set the router-protected TRANSMISSION_LAN_IP}
-        mac_address: ${TRANSMISSION_LAN_MAC:?Set the router-protected TRANSMISSION_LAN_MAC}
+      transmission_vpn:
         gw_priority: 1
       transmission_ui: {}
     dns:
@@ -68,10 +67,10 @@ networks:
   default:
     external: true
     name: portainer_network
-  # Provisioned on the Pi after its router policy; see router/README.md.
-  transmission_lan:
+  # Provisioned on the Pi after its VPN guard; see host/portable/README.md.
+  transmission_vpn:
     external: true
-    name: transmission_lan
+    name: transmission_vpn
   # Internal bridge owned by the entrypoint stack, with no internet gateway.
   transmission_ui:
     external: true

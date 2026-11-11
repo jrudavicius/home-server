@@ -1,0 +1,7 @@
+#!/bin/sh
+# Read current state, because queued dispatcher events can already be stale.
+case "$2" in
+    up|down|dhcp4-change|reapply|connectivity-change)
+        exec /usr/local/sbin/home-server-network refresh
+        ;;
+esac

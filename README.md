@@ -14,9 +14,13 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 - Opening a local home server landing page through the `entrypoint` stack.
 - Collecting and searching Docker container logs through the `observability`
   stack.
-- Exposing Home Server through ngrok for outside access and GitHub webhooks.
+- Receiving GitHub webhooks through ngrok while keeping application access private.
 - Hosting Plex Media Server through the `media` stack.
-- Routing the home LAN and server through Proton on MikroTik, with internet blocked if the VPN disconnects.
+- Routing the portable Pi and its containers through Proton, with a host kill switch and separate private Netcup management tunnel.
+
+The portable-Pi setup is described in [Host networking](host/portable/README.md).
+[Preservation and rollback](docs/portable-pi-migration.md) records the saved
+baseline, backup scope, migration checks, and restore order.
 
 ## Services
 
@@ -37,7 +41,7 @@ root bootstrap stack.
 | `observability` | `log-collector` | `observability-log-collector` | Alloy Docker log collector. |
 | `media` | `streaming-server` | `media-streaming-server` | Plex Media Server. |
 | `media` | `torrent-client` | `media-torrent-client` | Transmission torrent client. |
-| `public-access` | `tunnel` | `public-access-tunnel` | ngrok public access and webhook forwarding. |
+| `public-access` | `tunnel` | `public-access-tunnel` | Restricted GitHub webhook forwarding. |
 
 Use service names for Compose commands, dependencies, and addresses within a
 stack. Use the full container name for addresses between stacks on the shared
@@ -49,8 +53,8 @@ variables, and public hostnames keep their existing names.
 - Raspberry Pi running a 64-bit Linux distribution.
 - Docker Engine.
 - Docker Compose 2.33.1 or newer.
-- A wired Linux host for Transmission macvlan networking; Docker Desktop on macOS can validate configuration but cannot run this network.
-- The [MikroTik whole-home VPN policy](router/README.md), including Transmission's dedicated protections, installed and tested before deploying media.
+- A Linux host with NetworkManager, WireGuard tools, nftables, and Python 3.
+- The [portable host VPN guard](host/portable/README.md), installed and tested before deploying media. Docker Desktop can validate Compose but cannot exercise this Linux host firewall.
 - Persistent directories for configuration, media, backups, and transcode data.
 - A private bootstrap environment file, for example `/srv/komodo/bootstrap.env`.
 - Komodo variables and server-side secret files described below.
@@ -159,8 +163,8 @@ Create the Transmission password file on the Docker host before deploying
 Keep this file outside the checkout. Restrict it to the deployment account
 and the container user/root that reads it; use mode `600` where that ownership
 allows it. Compose mounts it as a secret. The Transmission password belongs
-in its file, not in a Komodo password variable. WireGuard credentials stay on
-the MikroTik router; the media stack does not need a VPN key file.
+in its file, not in a Komodo password variable. WireGuard credentials stay in
+root-only NetworkManager profiles on the Pi; the media stack does not need a VPN key file.
 
 `PLEX_CLAIM` is optional. For first-time setup, set it in
 `/srv/komodo/bootstrap.env`, rerun the root `up -d` command, and deploy `media`.
@@ -252,8 +256,6 @@ PLEX_CONFIG_PATH=/srv/server/config/plex
 TRANSCODE_PATH=/srv/server/cache/plex-transcode
 MEDIA_PATH=/srv/server/media
 
-TRANSMISSION_LAN_IP=192.168.88.9
-TRANSMISSION_LAN_MAC=02:54:52:00:00:01
 TRANSMISSION_DNS=10.2.0.1
 TRANSMISSION_PEER_PORT=51413
 TRANSMISSION_TRAEFIK_HOST=transmission.home.arpa
@@ -299,7 +301,7 @@ Traefik also supports hostname routes. Point the hostnames in
 your router DNS, Pi-hole, AdGuard Home, or local hosts files when you want clean
 local domains.
 
-Set `KOMODO_HOST` to the public URL you use for Komodo. Before local DNS exists,
+Set `KOMODO_HOST` to the private URL you use for Komodo. Before local DNS exists,
 use the direct server address, such as `http://192.168.1.50:9120`. After DNS is
 configured, the default Traefik hostname would be `http://komodo.home.arpa`.
 
@@ -585,7 +587,7 @@ cd stacks/entrypoint
 docker compose up -d
 ```
 
-With the [router policy and Transmission networks](router/README.md) in place
+With the [portable host guard and Transmission networks](host/portable/README.md) in place
 and the entrypoint stack running, start media on the Linux server:
 
 ```sh
@@ -609,8 +611,10 @@ docker compose up -d
 
 The ngrok inspection UI/API is published at `http://localhost:4040` by default.
 The stack starts the endpoints declared in `stacks/public-access/ngrok.yml`.
-By default those are `webhooks`, an HTTPS endpoint that forwards to Komodo, and
-`entrypoint`, an HTTP endpoint that forwards to Traefik.
+The only default endpoint is `webhooks`, an HTTPS endpoint forwarding to
+Traefik's internal port 9121. That listener accepts only POST requests to
+`/listener/github/procedure/home-server-deploy/main`; Komodo still verifies
+the webhook signature.
 
 For Komodo, sync the full `komodo/` directory, including `repos.toml`,
 `stacks.toml`, `procedures.toml`, `servers.toml`, and `alerters.toml`.
@@ -731,8 +735,6 @@ from Git:
 PLEX_CONFIG_PATH
 TRANSCODE_PATH
 MEDIA_PATH
-TRANSMISSION_LAN_IP
-TRANSMISSION_LAN_MAC
 TRANSMISSION_DNS
 TRANSMISSION_CONFIG_PATH
 TRANSMISSION_USER_PASSWORD_FILE
@@ -744,25 +746,27 @@ Complete [Credential setup](#credential-setup) before running the deployment
 Procedure: the Stacks require Core secrets loaded from the private bootstrap file.
 
 Create the directories referenced by those variables before deploying media.
-Install and test the [MikroTik whole-home VPN policy](router/README.md),
-reserve Transmission's LAN identity, and create the external `transmission_lan`
-macvlan network on the Pi. The entrypoint stack creates the internal
+Install and test the [portable host VPN guard](host/portable/README.md),
+then create the external `transmission_vpn` Docker bridge on the Pi.
+The entrypoint stack creates the internal
 `transmission_ui` bridge, so it must be deployed before media.
 
 The optional `PLEX_CLAIM` setup is also described under Credential setup.
 
-Transmission has a fixed LAN IP/MAC that MikroTik routes through its existing
-Proton WireGuard tunnel. The router's firewall blocks other routed egress,
-including WAN fallback when the tunnel fails. IPv6 is disabled in the container
-and blocked by MAC on the router; DNS uses Proton's tunnel resolver.
+Transmission uses a normal Docker bridge, so its traffic traverses the Pi's
+forwarding firewall on either home's subnet. The firewall permits internet
+egress only through `wg-proton`, including when the tunnel's routes disappear.
+IPv6 is disabled in the container and external IPv6 is blocked by the host
+guard; DNS uses Proton's tunnel resolver.
 
 Transmission also joins the internal `transmission_ui` bridge, where Traefik
 connects to `media-torrent-client:9091`. Traefik publishes `TRANSMISSION_WEB_PORT`
 (default 9091), preserving direct Pi URLs and hostname routes. Transmission
-never joins the ordinary `portainer_network`. The Pi, Plex, ngrok, Komodo, other
-services and home devices also use Proton through the router. If the tunnel
-fails, internet access stops for the whole LAN while local access stays
-available. VPN keys stay on the router; Docker does not need them.
+never joins the ordinary `portainer_network`. The Pi, Plex, ngrok, Komodo, and
+other Pi services also use Proton. If Proton fails, their internet access stops
+while local access and the separate `wg-netcup` management tunnel remain
+available. The MikroTik's [whole-home policy](router/README.md) remains in place
+for other devices at that home.
 
 Proton inbound port allocation and NAT-PMP renewal are not configured here.
 Transmission can initiate outgoing connections. Do not forward its peer port
@@ -776,19 +780,20 @@ docker compose --env-file /srv/komodo/bootstrap.env down
 
 ## External access and webhooks
 
-Use the `public-access` stack for inbound webhooks and the entrypoint. See
+Use the `public-access` stack for inbound GitHub webhooks. See
 [public access configuration](stacks/public-access/README.md) for endpoint
 configuration and the single deployment Procedure webhook URL.
 
 ```text
-webhooks HTTPS URL -> management-control-plane:9120
-entrypoint URL     -> entrypoint-reverse-proxy:80
+webhooks HTTPS URL -> entrypoint-reverse-proxy:9121 -> Komodo GitHub listeners
+Netcup VPN        -> 10.77.77.2 -> private landing page and applications
 ```
 
 Set `KOMODO_WEBHOOK_BASE_URL` to the public HTTPS webhook URL. ngrok uses the
-normal Docker network and the router's whole-home Proton policy. Its public
-endpoints depend on the VPN being connected. Periphery remains in Docker;
-no host VPN installer or deployment hook is required.
+normal Docker network and the Pi's host Proton policy. Its webhook endpoint
+depends on Proton being connected. Private access through Netcup uses the Pi's
+stable VPN address `10.77.77.2`. GitHub webhooks still require their public
+endpoint; the private VPN does not replace webhook delivery.
 
 ## Notes
 
@@ -799,7 +804,7 @@ no host VPN installer or deployment hook is required.
   Compose projects.
 - Komodo keys and MongoDB data are stored in Docker-managed volumes.
 - Loki, Grafana, and Alloy data are stored in Docker-managed volumes.
-- Transmission uses its dedicated macvlan LAN identity for Proton routing and
+- Transmission uses a dedicated bridge covered by the host VPN guard and
   an internal bridge for Traefik; there is no VPN container.
 - Bootstrap settings come from `/srv/komodo/bootstrap.env`; managed application
   settings come from Komodo. Manual application deployments use stack `.env`

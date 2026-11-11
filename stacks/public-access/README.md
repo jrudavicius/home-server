@@ -1,24 +1,25 @@
 # Public Access
 
-Dockerized ngrok agent for external Home Server access and GitHub webhook
-delivery.
+Dockerized ngrok agent for GitHub webhook delivery. Applications are accessed
+privately through the Netcup VPN.
 
 The `public-access` stack uses the `tunnel` service (`public-access-tunnel`
 container), powered by ngrok, with endpoints declared in `ngrok.yml`.
 The agent image is pinned by exact version and digest in `docker-compose.yml`;
 follow [Image versions and updates](../../README.md#image-versions-and-updates)
 to upgrade it.
-The default config starts two public endpoints:
+The default config starts one HTTPS endpoint:
 
 ```text
-webhooks  -> http://management-control-plane:9120
-entrypoint -> http://entrypoint-reverse-proxy:80
+webhooks -> http://entrypoint-reverse-proxy:9121 -> Komodo GitHub listeners
 ```
 
-The `webhooks` endpoint is an HTTPS endpoint for Komodo listener URLs used by
-GitHub webhooks. The `entrypoint` endpoint is an HTTP endpoint that opens the
-Traefik landing page and routed services. Splitting the schemes keeps the two
-endpoints distinct on an ngrok account that only assigns one free hostname.
+Traefik's internal port 9121 accepts only POST requests to
+`/listener/github/procedure/home-server-deploy/main`; every other path or method receives 404. That port is not
+published on the Pi. Komodo still validates each webhook signature. The old
+public landing-page endpoint is preserved in the pre-portability Git tag and
+is no longer started. Use `http://10.77.77.2/` over the VPN for applications.
+Deploy `entrypoint` before this stack so the restricted listener exists.
 
 For an existing deployment, follow the
 [naming migration](../../README.md#migrating-existing-deployments) before
@@ -96,39 +97,24 @@ command above before redeploying `public-access`.
 
 ## Endpoint configuration
 
-Edit `ngrok.yml` to change the public endpoints. Each endpoint needs a unique
-`name` and an `upstream.url` that is reachable on the Docker network:
-
-```yaml
-endpoints:
-  - name: webhooks
-    url: https://
-    upstream:
-      url: http://management-control-plane:9120
-  - name: entrypoint
-    url: http://
-    upstream:
-      url: http://entrypoint-reverse-proxy:80
-```
-
-By default, `webhooks` uses an HTTPS public URL and `entrypoint` uses an HTTP
-public URL. To use stable reserved or custom domains, or to make both endpoints
-HTTPS, use `ngrok.multi-endpoint.example.yml` as the starting point:
+The webhook endpoint uses an automatically assigned HTTPS URL. To use a
+reserved domain, set its `url` in `ngrok.yml`; retain the restricted upstream:
 
 ```yaml
 endpoints:
   - name: webhooks
     url: https://your-webhooks-domain.ngrok.app
     upstream:
-      url: http://management-control-plane:9120
-  - name: entrypoint
-    url: https://your-entrypoint-domain.ngrok.app
-    upstream:
-      url: http://entrypoint-reverse-proxy:80
+      url: http://entrypoint-reverse-proxy:9121
 ```
 
-After startup, verify in the logs or inspector that `webhooks` and `entrypoint`
-have two different public URLs.
+`ngrok.multi-endpoint.example.yml` is a historical alternative that deliberately
+exposes applications publicly. It is not used by the portable private setup.
+
+After startup, verify the inspector lists only `webhooks`. Public requests to
+`/`, `/auth`, `/read`, `/write`, `/execute`, and `/dashboard/` must return 404;
+unsigned GitHub webhook requests must be rejected by Komodo. Keep the old
+GitHub URL if it is unchanged, and verify delivery before retiring old routes.
 
 ## Komodo webhook base URL
 
@@ -162,8 +148,7 @@ Direct Resource Sync, Repo, and Stack webhook execution is disabled.
 
 ## Security note
 
-The `entrypoint` endpoint exposes the Traefik landing page publicly over HTTP by
-default. The `webhooks` endpoint forwards directly to Komodo, so keep Komodo
-credentials strong, keep the webhook secret private, and stop the endpoint or the
-`public-access` stack when it is not needed. Use explicit reserved or custom
-HTTPS domains before exposing sensitive routed services through `entrypoint`.
+The ngrok URL is only for signed GitHub webhook delivery. Administrative
+interfaces and application pages are available through the private VPN or
+local LAN. Keep `KOMODO_WEBHOOK_SECRET` private and do not point the tunnel
+directly at Komodo or the ordinary Traefik web listener.

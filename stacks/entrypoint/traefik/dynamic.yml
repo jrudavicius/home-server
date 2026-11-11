@@ -1,5 +1,11 @@
 http:
   routers:
+    github-webhook:
+      rule: 'Method(`POST`) && Path(`/listener/github/procedure/home-server-deploy/main`)'
+      entryPoints:
+        - github-webhook
+      service: control-plane
+
     reverse-proxy:
       rule: 'Host(`{{ env "TRAEFIK_DASHBOARD_HOST" | default "traefik.home.arpa" }}`) || PathPrefix(`/api`) || PathPrefix(`/dashboard`)'
       entryPoints:

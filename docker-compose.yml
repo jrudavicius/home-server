@@ -60,6 +60,7 @@ services:
       - komodo-mongo-config:/data/configdb
 
   control-plane:
+    dns: [10.2.0.1]
     container_name: management-control-plane
     image: ghcr.io/moghtech/komodo-core:2.3.3@sha256:bca73d0eee143066228fb9b80c38a5a2726e573ad2758f7aa92b5c91a8aef1c7
     init: true
@@ -121,6 +122,7 @@ services:
       - "${KOMODO_BACKUPS_PATH:?Set KOMODO_BACKUPS_PATH}:/backups"
 
   host-agent:
+    dns: [10.2.0.1]
     container_name: management-host-agent
     image: ghcr.io/moghtech/komodo-periphery:2.3.3@sha256:fa3f1a641a265216066676950d5eecdf506955a7bafe2f01996135ae93115cd5
     init: true

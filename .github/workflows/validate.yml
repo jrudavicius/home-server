@@ -30,12 +30,14 @@ jobs:
   smoke:
     name: "Smoke: ${{ matrix.suite }}"
     needs: validate
-    runs-on: ubuntu-24.04
+    # MongoDB 8.0 rejects the 6.19+ kernel on the current 24.04 runner.
+    # Keep its smoke test on 22.04's 6.8 kernel (SERVER-121912).
+    runs-on: ${{ matrix.suite == 'management' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        suite: [management, observability, discord]
+        suite: [management, observability, discord, private-access]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -49,3 +51,6 @@ jobs:
       - name: Discord delivery to a local test receiver
         if: matrix.suite == 'discord'
         run: python3 stacks/observability/tests/smoke.py --discord
+      - name: Public webhook boundary
+        if: matrix.suite == 'private-access'
+        run: python3 tests/smoke_private_access.py

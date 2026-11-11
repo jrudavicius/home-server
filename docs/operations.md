@@ -109,7 +109,11 @@ After these workflows are on `main`, configure the repository under
 | `AVAILABILITY_EXPECTED_TEXT` | Repository variable | A stable phrase from the healthy landing page, for example `Raspberry Pi services` |
 | `AVAILABILITY_ENABLED` | Repository variable | `true` to enable scheduled checks; absent or `false` disables them |
 
-Use the public landing page that ngrok forwards to Traefik. This needs no new
+The portable private-access setup has no public landing page. Keep
+`AVAILABILITY_ENABLED` absent or `false` for that setup; this optional check
+applies only if you deliberately restore a public landing page.
+
+For such a public deployment, use the landing page that ngrok forwards to Traefik. This needs no new
 ingress route. The expected text must match your customized page and should
 not appear in a generic tunnel error or login page. The check skips ngrok's
 browser warning and follows redirects, but still requires the final page's
@@ -137,12 +141,13 @@ dedicated uptime service against the same URL and expected text.
 manual dispatch. It parses all Komodo TOML and stack JSON, checks resource/file/
 service/secret references, and renders all five Compose projects plus the
 optional Discord overlay with dummy credentials. It enforces image tags and
-SHA-256 digests, runs unit tests, and runs three isolated Docker smoke suites:
+SHA-256 digests, runs unit tests, and runs four isolated Docker smoke suites:
 
 - Management readiness, network isolation, native alert delivery, and backup/restore.
 - Grafana rules and dashboards with the default empty receiver.
 - The same Grafana rules with the Discord overlay, checking actual delivery to
   a local receiver after a synthetic fatal log.
+- Public webhook routing, rejecting application/API paths, other methods and traversal.
 
 CI uses no repository secrets, production volumes, or actual Discord webhooks.
 The action dependency is pinned to a commit. Local equivalents require
@@ -154,8 +159,14 @@ python3 -m unittest discover -s tests -v
 python3 tests/smoke_management.py
 python3 stacks/observability/tests/smoke.py
 python3 stacks/observability/tests/smoke.py --discord
+python3 tests/smoke_private_access.py
 ```
 
 CI does not delay the existing Komodo push webhook. To prevent invalid changes
 from reaching `main`, use pull requests and configure repository rules to
-require the configuration and all three smoke checks before merging.
+require the configuration and all four smoke checks before merging.
+
+The management smoke job currently uses Ubuntu 22.04's Linux 6.8 kernel because
+the pinned MongoDB version rejects newer kernels on the Ubuntu 24.04 runner.
+See [MongoDB's kernel compatibility issue](https://jira.mongodb.org/browse/SERVER-121912).
+Revisit that runner choice before Ubuntu 22.04's hosted-runner retirement.

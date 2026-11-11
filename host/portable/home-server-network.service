@@ -1,0 +1,16 @@
+[Unit]
+Description=Home server VPN egress guard
+DefaultDependencies=no
+After=local-fs.target systemd-modules-load.service
+Before=network-pre.target NetworkManager.service docker.service
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/home-server-network refresh
+ExecReload=/usr/local/sbin/home-server-network refresh
+RemainAfterExit=yes
+# No ExecStop: stopping this unit must not remove the guard.
+
+[Install]
+WantedBy=multi-user.target

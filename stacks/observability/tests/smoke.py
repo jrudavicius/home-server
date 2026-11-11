@@ -101,11 +101,22 @@ def main():
     }
     if args.discord:
         root = ROOT.parents[1]
+        # Older Compose versions normalize volume syntax even with
+        # --no-interpolate. Render using public defaults and fixture secrets.
+        fixture_env = {key: value for key, value in os.environ.items()
+                       if key in ('PATH', 'HOME', 'TMPDIR', 'DOCKER_HOST', 'DOCKER_CONTEXT')}
+        fixture_env.update({key: 'test-only-value' for key in (
+            'KOMODO_DATABASE_USERNAME', 'KOMODO_DATABASE_PASSWORD',
+            'KOMODO_INIT_ADMIN_USERNAME', 'KOMODO_INIT_ADMIN_PASSWORD',
+            'KOMODO_WEBHOOK_SECRET', 'KOMODO_JWT_SECRET',
+            'GRAFANA_ADMIN_USER', 'GRAFANA_ADMIN_PASSWORD',
+            'TRANSMISSION_USERNAME', 'NGROK_AUTHTOKEN',
+        )})
         management = json.loads(subprocess.check_output([
-            'docker', 'compose', '--env-file', os.devnull,
+            'docker', 'compose', '--env-file', str(root / 'bootstrap.env.example'),
             '-f', str(root / 'docker-compose.yml'),
-            'config', '--no-interpolate', '--format', 'json',
-        ], text=True))
+            'config', '--format', 'json',
+        ], env=fixture_env, text=True))
         compose['services']['notification-sink'] = {
             'image': management['services']['secret-bootstrap']['image'],
             'command': ['python', '-c', (root / 'tests/notification_sink.py').read_text()],

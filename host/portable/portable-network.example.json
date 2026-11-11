@@ -1,0 +1,16 @@
+{
+  "uplinks": ["eth0", "wlan0"],
+  "proton": {
+    "interface": "wg-proton",
+    "endpoint": "192.0.2.10",
+    "port": 51820,
+    "mark": 51821
+  },
+  "management": {
+    "interface": "wg-netcup",
+    "endpoint": "198.51.100.10",
+    "port": 51820,
+    "mark": 51822,
+    "clients": ["10.77.77.1", "10.77.77.3"]
+  }
+}
