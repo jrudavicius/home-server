@@ -7,10 +7,11 @@ current setup to be documented and preserved before replacement.
 **Status: migration in progress.** Fresh Pi, application-volume, and native
 Komodo backups were completed before changes; an encrypted off-Pi copy was
 decrypted and checksum-verified. Private SSH and Komodo now work through the
-Netcup gateway. The host guard is active; the saved Proton profile handshakes
-but fails DNS/internet checks, so Transmission remains stopped. The Mac route
-is active; direct private SSH and Komodo access passed. A replacement Proton
-profile and the remaining live acceptance checks are pending. The MikroTik is unchanged;
+Netcup gateway. A new Pi-specific Proton profile passes DNS and HTTPS checks;
+the host and a representative container share its VPN exit IP. The host guard
+and both tunnels are configured for startup. The Mac route is active; direct
+private SSH and Komodo access passed. Protected Transmission deployment,
+public-access retirement and reboot acceptance are pending. The MikroTik is unchanged;
 a fresh router backup is required before any future router edit.
 
 ## Preserved baseline
@@ -174,8 +175,11 @@ access during simulated tunnel failure. The network and Compose checks passed
 own acceptance checks. A live Proton-disconnect test also blocked host and
 representative container internet/DNS fallback while a fresh Netcup SSH session
 and Komodo request succeeded. An automatic timer reactivated Proton after 35
-seconds. Healthy Proton data service remains unresolved; these outage checks
-do not establish normal VPN internet access. Historical `codex/host-wide-vpn` and
+seconds. The replacement Proton profile subsequently passed real host/container
+DNS and HTTPS checks. The restricted webhook listener passed an isolated
+Traefik/nginx test: only the exact deployment POST path reaches the backend;
+administrative paths, other methods and traversal requests are rejected.
+Historical `codex/host-wide-vpn` and
 `codex/harden-host-wide-vpn` branches are unmerged alternatives, not a known-good
 rollback. Their installer applies lockdown early and is incompatible with the
 current macvlan/deployment layout; do not run it unchanged.

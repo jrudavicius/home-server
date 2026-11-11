@@ -8,12 +8,6 @@ agent:
 endpoints:
   - name: webhooks
     url: https://
-    description: Direct Komodo endpoint for GitHub webhook delivery.
+    description: GitHub webhook delivery through the restricted Traefik listener.
     upstream:
-      url: http://management-control-plane:9120
-
-  - name: entrypoint
-    url: http://
-    description: Traefik entrypoint for the public landing page and routed services.
-    upstream:
-      url: http://entrypoint-reverse-proxy:80
+      url: http://entrypoint-reverse-proxy:9121

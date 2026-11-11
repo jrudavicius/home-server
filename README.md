@@ -14,7 +14,7 @@ The Raspberry Pi is used as a lightweight home/server entry point for:
 - Opening a local home server landing page through the `entrypoint` stack.
 - Collecting and searching Docker container logs through the `observability`
   stack.
-- Exposing Home Server through ngrok for outside access and GitHub webhooks.
+- Receiving GitHub webhooks through ngrok while keeping application access private.
 - Hosting Plex Media Server through the `media` stack.
 - Routing the portable Pi and its containers through Proton, with a host kill switch and separate private Netcup management tunnel.
 
@@ -41,7 +41,7 @@ root bootstrap stack.
 | `observability` | `log-collector` | `observability-log-collector` | Alloy Docker log collector. |
 | `media` | `streaming-server` | `media-streaming-server` | Plex Media Server. |
 | `media` | `torrent-client` | `media-torrent-client` | Transmission torrent client. |
-| `public-access` | `tunnel` | `public-access-tunnel` | ngrok public access and webhook forwarding. |
+| `public-access` | `tunnel` | `public-access-tunnel` | Restricted GitHub webhook forwarding. |
 
 Use service names for Compose commands, dependencies, and addresses within a
 stack. Use the full container name for addresses between stacks on the shared
@@ -301,7 +301,7 @@ Traefik also supports hostname routes. Point the hostnames in
 your router DNS, Pi-hole, AdGuard Home, or local hosts files when you want clean
 local domains.
 
-Set `KOMODO_HOST` to the public URL you use for Komodo. Before local DNS exists,
+Set `KOMODO_HOST` to the private URL you use for Komodo. Before local DNS exists,
 use the direct server address, such as `http://192.168.1.50:9120`. After DNS is
 configured, the default Traefik hostname would be `http://komodo.home.arpa`.
 
@@ -587,7 +587,7 @@ cd stacks/entrypoint
 docker compose up -d
 ```
 
-With the [router policy and Transmission networks](router/README.md) in place
+With the [portable host guard and Transmission networks](host/portable/README.md) in place
 and the entrypoint stack running, start media on the Linux server:
 
 ```sh
@@ -611,8 +611,10 @@ docker compose up -d
 
 The ngrok inspection UI/API is published at `http://localhost:4040` by default.
 The stack starts the endpoints declared in `stacks/public-access/ngrok.yml`.
-By default those are `webhooks`, an HTTPS endpoint that forwards to Komodo, and
-`entrypoint`, an HTTP endpoint that forwards to Traefik.
+The only default endpoint is `webhooks`, an HTTPS endpoint forwarding to
+Traefik's internal port 9121. That listener accepts only POST requests to
+`/listener/github/procedure/home-server-deploy/main`; Komodo still verifies
+the webhook signature.
 
 For Komodo, sync the full `komodo/` directory, including `repos.toml`,
 `stacks.toml`, `procedures.toml`, `servers.toml`, and `alerters.toml`.
@@ -778,18 +780,18 @@ docker compose --env-file /srv/komodo/bootstrap.env down
 
 ## External access and webhooks
 
-Use the `public-access` stack for inbound webhooks and the entrypoint. See
+Use the `public-access` stack for inbound GitHub webhooks. See
 [public access configuration](stacks/public-access/README.md) for endpoint
 configuration and the single deployment Procedure webhook URL.
 
 ```text
-webhooks HTTPS URL -> management-control-plane:9120
-entrypoint URL     -> entrypoint-reverse-proxy:80
+webhooks HTTPS URL -> entrypoint-reverse-proxy:9121 -> Komodo GitHub listeners
+Netcup VPN        -> 10.77.77.2 -> private landing page and applications
 ```
 
 Set `KOMODO_WEBHOOK_BASE_URL` to the public HTTPS webhook URL. ngrok uses the
-normal Docker network and the Pi's host Proton policy. Its public endpoints
-depend on Proton being connected. Private access through Netcup uses the Pi's
+normal Docker network and the Pi's host Proton policy. Its webhook endpoint
+depends on Proton being connected. Private access through Netcup uses the Pi's
 stable VPN address `10.77.77.2`. GitHub webhooks still require their public
 endpoint; the private VPN does not replace webhook delivery.
 

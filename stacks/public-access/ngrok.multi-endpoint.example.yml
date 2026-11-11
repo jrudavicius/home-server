@@ -1,4 +1,6 @@
 version: 3
+# Historical public-access alternative; not used by the portable private setup.
+# Enabling entrypoint exposes the landing page and routed services publicly.
 
 agent:
   log: stdout
@@ -8,9 +10,9 @@ agent:
 endpoints:
   - name: webhooks
     url: https://your-webhooks-domain.ngrok.app
-    description: Direct Komodo endpoint for GitHub webhook delivery.
+    description: Restricted GitHub webhook delivery.
     upstream:
-      url: http://management-control-plane:9120
+      url: http://entrypoint-reverse-proxy:9121
 
   - name: entrypoint
     url: https://your-entrypoint-domain.ngrok.app

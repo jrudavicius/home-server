@@ -139,7 +139,7 @@ TRANSMISSION_USER_PASSWORD_FILE=[[TRANSMISSION_USER_PASSWORD_FILE]]
 
 [[stack]]
 name = "public-access"
-description = "Public tunnel for external entrypoint access and GitHub webhook delivery, provided by ngrok."
+description = "Restricted GitHub webhook tunnel; application access uses the private Netcup VPN."
 tags = ["network", "webhooks", "home"]
 deploy = false
 

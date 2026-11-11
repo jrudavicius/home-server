@@ -9,6 +9,7 @@ services:
       - --api.dashboard=true
       - --entrypoints.web.address=:80
       - --entrypoints.torrent-client.address=:9091
+      - --entrypoints.github-webhook.address=:9121
       - --providers.file.filename=/etc/traefik/dynamic/dynamic.yml
       - --providers.file.watch=true
       - --log.level=${TRAEFIK_LOG_LEVEL:-INFO}

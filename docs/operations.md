@@ -109,7 +109,11 @@ After these workflows are on `main`, configure the repository under
 | `AVAILABILITY_EXPECTED_TEXT` | Repository variable | A stable phrase from the healthy landing page, for example `Raspberry Pi services` |
 | `AVAILABILITY_ENABLED` | Repository variable | `true` to enable scheduled checks; absent or `false` disables them |
 
-Use the public landing page that ngrok forwards to Traefik. This needs no new
+The portable private-access setup has no public landing page. Keep
+`AVAILABILITY_ENABLED` absent or `false` for that setup; this optional check
+applies only if you deliberately restore a public landing page.
+
+For such a public deployment, use the landing page that ngrok forwards to Traefik. This needs no new
 ingress route. The expected text must match your customized page and should
 not appear in a generic tunnel error or login page. The check skips ngrok's
 browser warning and follows redirects, but still requires the final page's
