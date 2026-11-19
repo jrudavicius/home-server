@@ -113,7 +113,8 @@ class BootstrapSecretsTests(unittest.TestCase):
         env_file = self.folder / "bootstrap.env"
         settings = (root / "bootstrap.env.example").read_text()
         process = {k: v for k, v in os.environ.items() if k in ("PATH", "HOME", "TMPDIR")}
-        for name in ("KOMODO_DATABASE_USERNAME", "KOMODO_DATABASE_PASSWORD", "KOMODO_JWT_SECRET",
+        self.assertNotIn("KOMODO_JWT_SECRET", settings)
+        for name in ("KOMODO_DATABASE_USERNAME", "KOMODO_DATABASE_PASSWORD",
                      "KOMODO_INIT_ADMIN_USERNAME", "KOMODO_INIT_ADMIN_PASSWORD", *bootstrap.REQUIRED):
             process[name] = "fixture"
         def render(extra):
@@ -125,14 +126,17 @@ class BootstrapSecretsTests(unittest.TestCase):
         legacy = render("KOMODO_WEBHOOK_SECRET='special$ # fixture'")
         self.assertEqual(legacy.returncode, 0, legacy.stderr)
         direct = json.loads(legacy.stdout)["services"]["control-plane"]["environment"]
+        self.assertFalse(any(key.startswith("KOMODO_JWT_SECRET") for key in direct))
         self.assertEqual(direct["KOMODO_WEBHOOK_SECRET"].replace("$$", "$"), "special$ # fixture")
         for leftover in ("", "KOMODO_WEBHOOK_SECRET=must-never-reach-Core\n"):
             selected = render(leftover + "COMPOSE_FILE=docker-compose.yml:docker-compose.openbao.yml")
             self.assertEqual(selected.returncode, 0, selected.stderr)
             services = json.loads(selected.stdout)["services"]
             self.assertIn("webhook-agent", services)
+            self.assertIn("session-agent", services)
             self.assertNotIn("must-never-reach-Core", selected.stdout)
             core = services["control-plane"]["environment"]
+            self.assertFalse(any(key.startswith("KOMODO_JWT_SECRET") for key in core))
             self.assertNotIn("KOMODO_WEBHOOK_SECRET", core)
             self.assertEqual(core["KOMODO_WEBHOOK_SECRET_FILE"], "/run/komodo-webhook/signing-secret")
 

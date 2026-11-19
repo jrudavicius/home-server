@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import time
 import uuid
@@ -36,7 +37,6 @@ def main():
         'KOMODO_INIT_ADMIN_USERNAME': 'smoke-admin',
         'KOMODO_INIT_ADMIN_PASSWORD': 'test-only-admin-password',
         'KOMODO_WEBHOOK_SECRET': 'test-only-webhook-secret',
-        'KOMODO_JWT_SECRET': 'test-only-jwt-secret',
         'GRAFANA_ADMIN_USER': 'test-only-admin',
         'GRAFANA_ADMIN_PASSWORD': 'test-only-password',
         'TRANSMISSION_USERNAME': 'test-only-user',
@@ -75,6 +75,10 @@ def main():
              'target': '/test-control', 'read_only': True},
         ])
         core = config['services']['control-plane']
+        session = folder / 'session-signing'
+        subprocess.run([sys.executable, str(ROOT / 'scripts/prepare_komodo_identity.py'), '--init-new-session',
+                        '--session-dir', str(session), '--user', f'{os.geteuid()}:{os.getegid()}'], check=True)
+        next(m for m in core['volumes'] if m['target'] == '/run/komodo-session')['source'] = str(session)
         core['environment']['KOMODO_CLI_MAX_BACKUPS'] = '2'
         core['volumes'] = [mount for mount in core['volumes'] if mount['target'] != '/backups']
         core['volumes'].append({'type': 'volume', 'source': 'test-backups', 'target': '/backups'})

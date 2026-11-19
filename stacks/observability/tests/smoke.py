@@ -108,7 +108,7 @@ def main():
         fixture_env.update({key: 'test-only-value' for key in (
             'KOMODO_DATABASE_USERNAME', 'KOMODO_DATABASE_PASSWORD',
             'KOMODO_INIT_ADMIN_USERNAME', 'KOMODO_INIT_ADMIN_PASSWORD',
-            'KOMODO_WEBHOOK_SECRET', 'KOMODO_JWT_SECRET',
+            'KOMODO_WEBHOOK_SECRET',
             'GRAFANA_ADMIN_USER', 'GRAFANA_ADMIN_PASSWORD',
             'TRANSMISSION_USERNAME', 'NGROK_AUTHTOKEN',
         )})

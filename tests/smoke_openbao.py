@@ -83,15 +83,16 @@ def git_origin(folder, env, settings, projects):
     (origin / 'home-server').symlink_to('home-server.git', target_is_directory=True)
 
 
-def management(folder, project, env, webhook=False):
+def management(folder, project, env, *, legacy_signer=None):
+    integrated = legacy_signer is None
     cmd = ['docker', 'compose', '--env-file', str(ROOT / 'bootstrap.env.example'), '-f', str(ROOT / 'docker-compose.yml')]
-    if webhook:
+    if integrated:
         cmd.extend(['-f', str(ROOT / 'docker-compose.openbao.yml')])
     config = json.loads(run(cmd + ['config', '--format', 'json'], env).stdout)
     config['name'] = project
     for resource in [*config['networks'].values(), *config['volumes'].values()]:
         if resource.get('external'):
-            assert webhook and resource['name'] == env['OPENBAO_NETWORK']
+            assert integrated and resource['name'] == env['OPENBAO_NETWORK']
             continue
         resource.pop('name', None)
     config['networks']['default']['internal'] = True
@@ -103,7 +104,21 @@ def management(folder, project, env, webhook=False):
         service['restart'] = 'no'
 
     core, agent = services['control-plane'], services['host-agent']
-    core['volumes'] = [m for m in core['volumes'] if m['type'] == 'volume' or m['target'] == '/run/komodo-webhook']
+    core['volumes'] = [m for m in core['volumes'] if m['type'] == 'volume' or m['target'] in
+                       ('/run/komodo-webhook', '/run/komodo-session', '/config/start-core.sh')]
+    if integrated:
+        session = str(folder / 'session-signing')
+        next(m for m in core['volumes'] if m['target'] == '/run/komodo-session')['source'] = session
+        delivery = services['session-agent']
+        delivery['user'] = services['webhook-agent']['user']
+        next(m for m in delivery['volumes'] if m['target'] == '/session')['source'] = session
+    else:
+        # Model the pre-migration deployment, which already has signed-in users.
+        core.pop('command')
+        core['volumes'] = [m for m in core['volumes'] if m['target'] != '/run/komodo-session']
+        core['environment'].pop('KOMODO_CONFIG_PATHS')
+        core['environment'].update(KOMODO_CONFIG_PATH='/config/bootstrap/core.config.json',
+                                   KOMODO_JWT_SECRET=legacy_signer)
     core['volumes'].append('test-backups:/backups')
     # The Docker daemon and Periphery must resolve checked-out bind mounts at the same path.
     agent['environment'].update(PERIPHERY_DISABLE_TERMINALS='true', PERIPHERY_DISABLE_CONTAINER_TERMINALS='true')
@@ -120,9 +135,9 @@ def management(folder, project, env, webhook=False):
                           'volumes': [str(ROOT / 'tests/openbao_backup_checks.py') + ':/test/restore.py:ro',
                                       str(folder / 'state/trust') + ':/trust:ro',
                                       str(folder / 'state/snapshots') + ':/snapshots:ro']}
-    if webhook:
+    if integrated:
         assert 'KOMODO_WEBHOOK_SECRET' not in core['environment']
-    target = folder / ('management-openbao.json' if webhook else 'management.json')
+    target = folder / ('management-openbao.json' if integrated else 'management.json')
     target.write_text(json.dumps(config).replace('$', '$$'))
     target.chmod(0o600)
     return ['docker', 'compose', '--env-file', os.devnull, '-p', project, '-f', str(target)]
@@ -175,7 +190,8 @@ def exercise(folder, prefix, env):
     if not os.geteuid():
         os.chown(app / 'local/approle', uid, gid)
     git_origin(folder, env, settings, projects)
-    manager = management(folder, prefix, env)
+    original_jwt = ' "special$\\ž\n' + secrets.token_hex(24) + ' '
+    manager = management(folder, prefix, env, legacy_signer=original_jwt)
 
     def docker(*args, **kwargs):
         return run(['docker', *args], env, **kwargs)
@@ -313,8 +329,11 @@ def exercise(folder, prefix, env):
         webhook_env = {**env, 'OPENBAO_STATE_DIR': str(state), 'OPENBAO_NETWORK': net,
                        'KOMODO_WEBHOOK_UID': str(uid), 'KOMODO_WEBHOOK_GID': str(gid)}
         del webhook_env['KOMODO_WEBHOOK_SECRET']
-        integrated = management(folder, prefix, webhook_env, webhook=True)
-        exercise_webhook(folder, run, integrated, env, configure, source, root_token, key, uid, gid)
+        integrated = management(folder, prefix, webhook_env)
+        def session_works():
+            return (api('read/GetServerState', {'server': 'home-server'}, ready=False) or {}).get('status') == 'Ok'
+        exercise_webhook(folder, run, integrated, env, configure, source, root_token, key, uid, gid,
+                         original_jwt, session_works)
     finally:
         # Stop the scheduler and any in-flight Periphery deployments before removing their consumers.
         run(manager + ['exec', '-T', 'host-agent', 'chown', '-R', f'{os.geteuid()}:{os.getegid()}',
@@ -343,7 +362,7 @@ def main():
         raise SystemExit('Run this test with a local Unix-socket Docker engine.')
     env['DOCKER_SOCKET_PATH'] = '/var/run/docker.sock' if sys.platform == 'darwin' else endpoint[len('unix://'):]
     for key in ('KOMODO_DATABASE_USERNAME', 'KOMODO_DATABASE_PASSWORD', 'KOMODO_INIT_ADMIN_PASSWORD',
-                'KOMODO_WEBHOOK_SECRET', 'KOMODO_JWT_SECRET', 'GRAFANA_ADMIN_PASSWORD'):
+                'KOMODO_WEBHOOK_SECRET', 'GRAFANA_ADMIN_PASSWORD'):
         env[key] = secrets.token_hex(24)
     env.update(KOMODO_INIT_ADMIN_USERNAME='smoke-admin', GRAFANA_ADMIN_USER='smoke-admin',
                TRANSMISSION_USERNAME='smoke-user', KOMODO_HOST='http://control-plane:9120')

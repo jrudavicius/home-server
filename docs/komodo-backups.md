@@ -55,7 +55,9 @@ Use an encrypted backup destination on another machine or storage service for:
 | Source | Recovery purpose |
 | --- | --- |
 | `/srv/komodo/backups/` (or `KOMODO_BACKUPS_PATH`) | Successful dated snapshots and the top-level `Stats.gz`. |
-| `/srv/komodo/bootstrap.env` | Database credentials, admin bootstrap settings, JWT/webhook secrets, and application secrets. |
+| `/srv/komodo/bootstrap.env` | Database credentials, admin bootstrap settings, application secrets and the webhook secret on standalone installations. |
+| `/srv/komodo/session-signing/` | Private startup copy of the Core session signer. Restore with directory mode 0700, file mode 0400 and owner 10004:10004. The OpenBao Agent can also restore it from the original KV record. |
+| `/srv/server/openbao/komodo-webhook-cache/` | Private webhook startup copy on installations using the OpenBao overlay. |
 | The `komodo-keys` volume | Core and Periphery identities; its physical name is normally `server_komodo-keys`. |
 | The deployed Git revision and any local configuration | The exact Compose files and image versions used with the snapshot. |
 
@@ -86,7 +88,7 @@ storage. Komodo's gzip files are not encrypted, and contain sensitive data.
 
 Use a host terminal, since Core will be stopped. Start with the same pinned
 Komodo version that created the snapshot. For a replacement host, restore the
-private bootstrap file, backup directory, and saved keys first, retaining their
+private bootstrap file, private signing files, backup directory, and saved keys first, retaining their
 permissions and `MANAGEMENT_VOLUME_PREFIX`. On that replacement host, create
 Core and its dependencies without starting them, then copy the saved keys into
 its volume:

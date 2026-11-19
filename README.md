@@ -35,6 +35,7 @@ root bootstrap stack.
 | --- | --- | --- | --- |
 | `management` | `secret-bootstrap` | `management-secret-bootstrap` | Prepares private application secrets before Komodo starts. |
 | `management` (OpenBao option) | `webhook-agent` | `management-webhook-agent` | Delivers the GitHub webhook signing secret to a private file for Core. |
+| `management` (OpenBao option) | `session-agent` | `management-session-agent` | Delivers the existing session signing key to Core's private startup file. |
 | `management` | `database` | `management-database` | MongoDB database used by Komodo. |
 | `management` | `control-plane` | `management-control-plane` | Komodo control plane and web UI. |
 | `management` | `host-agent` | `management-host-agent` | Komodo agent managing Docker and host resources. |
@@ -89,7 +90,7 @@ sudo mkdir -p /srv/komodo
 test -e /srv/komodo/bootstrap.env || sudo install -o "$(id -u)" -g "$(id -g)" -m 600 bootstrap.env.example /srv/komodo/bootstrap.env
 ```
 
-Fill all six of these fields in `/srv/komodo/bootstrap.env`:
+Set the database and administrator credentials in `/srv/komodo/bootstrap.env`. The standalone configuration also uses the webhook field.
 
 | Variable | Value to set |
 | --- | --- |
@@ -98,10 +99,14 @@ Fill all six of these fields in `/srv/komodo/bootstrap.env`:
 | `KOMODO_INIT_ADMIN_USERNAME` | Initial Komodo administrator username. |
 | `KOMODO_INIT_ADMIN_PASSWORD` | Initial Komodo administrator password. |
 | `KOMODO_WEBHOOK_SECRET` | A separate random secret; also enter it in GitHub's webhook Secret field. |
-| `KOMODO_JWT_SECRET` | A separate random secret for signing authentication tokens. |
 
-On an existing Pi, you can [migrate the GitHub webhook signing secret to OpenBao](docs/komodo-webhook.md).
-Core then reads the last delivered value from a private file and can start while OpenBao is sealed.
+On an existing Pi, import the running session signing key before recreating Core so users stay signed in. The OpenBao Agent keeps the last delivered key in a private file across reboots. [Session signing migration and recovery](docs/komodo-sessions.md) · [GitHub webhook migration](docs/komodo-webhook.md)
+
+On a **fresh installation**, create the private session file once before the first Core start. Run this only when creating a new Komodo installation.
+
+```sh
+sudo python3 scripts/prepare_komodo_identity.py --init-new-session
+```
 
 For new installations, generate independent passwords and secrets with your
 password manager. Keep a recovery copy there. In environment files, quote

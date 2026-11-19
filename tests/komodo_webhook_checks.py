@@ -26,16 +26,41 @@ except urllib.error.HTTPError as error:
 """
 
 
-def exercise_webhook(folder, run, manager, env, configure, vault, operator, unseal_key, uid, gid):
+def exercise_webhook(folder, run, manager, env, configure, vault, operator, unseal_key, uid, gid,
+                     original_jwt, session_works):
     state = folder / 'state'
     identity = state / 'komodo-webhook-tls/current'
     run([sys.executable, str(ROOT / 'scripts/prepare_komodo_webhook.py'),
          '--state-dir', str(state), '--user', f'{uid}:{gid}'], env)
+    session_dir = folder / 'session-signing'
+    run([sys.executable, str(ROOT / 'scripts/prepare_komodo_identity.py'), '--jwt',
+         '--state-dir', str(state), '--session-dir', str(session_dir), '--user', f'{uid}:{gid}'], env)
 
     def compose(*args, **kwargs):
         return run(manager + list(args), env, **kwargs)
 
     core = compose('ps', '-q', 'control-plane').stdout.strip()
+    assert session_works()
+    enroll_jwt = configure + ['--komodo-jwt', '--seed-from-core', core]
+    run(enroll_jwt, env, data=operator + '\n')
+    run(enroll_jwt, env, data=operator + '\n')
+    jwt_path = 'kv/data/komodo/jwt'
+    stored = vault.request(jwt_path, token=operator)['data']
+    assert stored['metadata']['version'] == 1 and stored['data']['secret'] == original_jwt
+    session_client = Vault(vault.port, folder / 'ca.crt')
+    jwt_identity = state / 'komodo-jwt-tls/current'
+    session_client.tls.load_cert_chain(str(jwt_identity / 'cert.pem'), str(jwt_identity / 'key.pem'))
+    reader = session_client.request('auth/komodo-jwt/login', {'name': 'komodo-jwt'})['auth']['client_token']
+    session_client.expect_denied('kv/data/komodo/webhook', token=reader)
+    session_client.expect_denied(jwt_path, {'data': {'secret': 'must-be-denied'}}, token=reader)
+    empty = compose('run', '--rm', '--no-deps', 'control-plane', check=False)
+    assert empty.returncode and 'session signing file is missing or invalid' in empty.stderr
+    compose('up', '-d', '--no-deps', 'session-agent')
+    cache_jwt = session_dir / 'core.config.json'
+    until('Agent to deliver the original session signer', lambda:
+          cache_jwt.is_file() and json.loads(cache_jwt.read_bytes()) == {'jwt_secret': original_jwt})
+    modes = compose('exec', '-T', 'session-agent', 'stat', '-c', '%a', '/session/core.config.json', '/session').stdout.split()
+    assert modes == ['400', '700'], modes
     enroll = configure + ['--komodo-webhook', '--seed-from-core', core]
     run(enroll, env, data=operator + '\n')
     vault.request('sys/auth/home-admins', {'type': 'userpass'}, operator)
@@ -59,7 +84,7 @@ def exercise_webhook(folder, run, manager, env, configure, vault, operator, unse
     client.tls.load_cert_chain(str(identity / 'cert.pem'), str(identity / 'key.pem'))
     token = client.request('auth/komodo-webhook/login', {'name': 'komodo-webhook'})['auth']['client_token']
     assert client.request(path, token=token)['data']['data']['secret'] == original
-    for forbidden in ['sys/storage/raft/snapshot', 'kv/data/other', 'kv/metadata/komodo']:
+    for forbidden in ['sys/storage/raft/snapshot', 'kv/data/other', 'kv/metadata/komodo', jwt_path]:
         client.expect_denied(forbidden, token=token)
     client.expect_denied(path, {'data': {'secret': 'must-be-denied'}}, token=token)
 
@@ -82,6 +107,10 @@ def exercise_webhook(folder, run, manager, env, configure, vault, operator, unse
     vault.request(path, {'data': {'secret': original}}, operator)
     compose('restart', 'webhook-agent')
     compose('up', '-d', '--no-deps', 'control-plane')
+    migrated = compose('ps', '-q', 'control-plane').stdout.strip()
+    assert migrated != core
+    until('Migrated Core to accept the existing login session', session_works)
+    run(configure + ['--komodo-jwt', '--seed-from-core', migrated], env, data=operator + '\n')
 
     def status(secret):
         signature = hmac.new(secret.encode(), BRANCH_PROBE, hashlib.sha256).hexdigest()
@@ -100,11 +129,14 @@ def exercise_webhook(folder, run, manager, env, configure, vault, operator, unse
     vault.request('sys/seal', {}, operator)
     assert vault.request('sys/seal-status')['sealed']
     try:
-        compose('restart', 'webhook-agent')
+        compose('restart', 'webhook-agent', 'session-agent')
         compose('restart', 'control-plane')
         until('Core to use the new signing value while sealed', lambda: status(replacement) == '200')
         assert status(original) == '401'
         assert cache.read_bytes() == replacement.encode()
+        until('Sealed startup to preserve the existing Komodo session', session_works)
+        assert json.loads(cache_jwt.read_bytes()) == {'jwt_secret': original_jwt}
     finally:
         assert not vault.request('sys/unseal', {'key': unseal_key})['sealed']
     print('PASS: Komodo verified signed webhooks with the OpenBao value before and after a sealed restart.', flush=True)
+    print('PASS: the same Komodo session survived the environment migration and a sealed restart.', flush=True)

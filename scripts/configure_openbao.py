@@ -15,21 +15,32 @@ import urllib.request
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def seed_webhook(request, container):
-    result = subprocess.run(['docker', 'exec', container, 'sh', '-ec',
-                             'test -n "$KOMODO_WEBHOOK_SECRET" && printf %s "$KOMODO_WEBHOOK_SECRET"'],
-                            capture_output=True, check=False)
+def seed_signing_secret(request, container, workload):
+    # Only the fixed legacy environment variable or the current private Core fragment
+    # is read. The signing value stays on a pipe and in process memory.
+    if workload == 'jwt':
+        command = 'test -n "$KOMODO_JWT_SECRET" || exit 3; printf %s "$KOMODO_JWT_SECRET"'
+    else:
+        command = 'test -n "$KOMODO_WEBHOOK_SECRET" && printf %s "$KOMODO_WEBHOOK_SECRET"'
+    result = subprocess.run(['docker', 'exec', container, 'sh', '-ec', command], capture_output=True)
+    if workload == 'jwt' and result.returncode == 3:
+        result = subprocess.run(['docker', 'exec', container, 'cat', '/run/komodo-session/core.config.json'],
+                                capture_output=True)
+        value = json.loads(result.stdout).get('jwt_secret') if result.returncode == 0 else None
+    else:
+        value = result.stdout.decode('utf-8')
     if result.returncode:
-        raise SystemExit('The selected Core container has no active environment webhook secret to migrate.')
-    value = result.stdout.decode('utf-8')
-    if value != value.strip() or any(ord(c) < 32 or ord(c) == 127 for c in value):
+        raise SystemExit(f'Could not read the active {workload} signing value from Core.')
+    if not isinstance(value, str) or not value:
+        raise SystemExit(f'The {workload} signing value must be a nonempty string.')
+    if workload == 'webhook' and (value != value.strip() or any(ord(c) < 32 or ord(c) == 127 for c in value)):
         raise SystemExit('The active signing secret has control characters or surrounding whitespace. '
                          'Coordinate a replacement with GitHub before switching to file input.')
-    path = 'kv/data/komodo/webhook'
+    path = 'kv/data/komodo/' + workload
     existing = request(path, missing_ok=True).get('data')
     if existing is not None:
         if (existing.get('data') or {}).get('secret') != value:
-            raise SystemExit('The existing OpenBao webhook value differs from Core. Reconcile the two before cutover.')
+            raise SystemExit(f'The existing OpenBao {workload} value differs from Core. Reconcile the two before cutover.')
         return
     # Create-only also protects a soft-deleted version and concurrent operator writes.
     request(path, {'options': {'cas': 0}, 'data': {'secret': value}})
@@ -43,15 +54,21 @@ def main():
     parser.add_argument('--userpass-mount', default='userpass', help='mounted path of the username/password auth method')
     parser.add_argument('--rotate-backup-identity', action='store_true',
                         help='trust the installed backup certificate and revoke tokens issued by the dedicated backup auth method')
-    parser.add_argument('--komodo-webhook', action='store_true', help='configure the dedicated Komodo webhook role')
+    roles = parser.add_mutually_exclusive_group()
+    roles.add_argument('--komodo-webhook', action='store_true', help='configure the dedicated Komodo webhook role')
+    roles.add_argument('--komodo-jwt', action='store_true', help='configure the dedicated Komodo session signing role')
     parser.add_argument('--seed-from-core', metavar='CONTAINER',
-                        help='copy the running Core webhook secret into KV once, preserving any existing value')
+                        help='import the selected active signing value from Core using a create-only KV write')
     parser.add_argument('--rotate-komodo-webhook-identity', action='store_true',
                         help='pin the replacement Komodo certificate and revoke tokens from its auth method')
+    parser.add_argument('--rotate-komodo-jwt-identity', action='store_true', help='pin the replacement session signing certificate')
     args = parser.parse_args()
-    if (args.seed_from_core or args.rotate_komodo_webhook_identity) and not args.komodo_webhook:
-        parser.error('Use --komodo-webhook for webhook enrollment or certificate rotation')
-    if args.komodo_webhook and args.rotate_backup_identity:
+    if args.seed_from_core and not (args.komodo_jwt or args.komodo_webhook):
+        parser.error('Select a Komodo signing role for --seed-from-core')
+    if ((args.rotate_komodo_webhook_identity and not args.komodo_webhook)
+            or (args.rotate_komodo_jwt_identity and not args.komodo_jwt)):
+        parser.error('Select the corresponding Komodo role for certificate rotation')
+    if (args.komodo_webhook or args.komodo_jwt) and args.rotate_backup_identity:
         parser.error('Choose one workload identity per invocation')
     context = ssl.create_default_context(cafile=str(args.state_dir / 'trust/ca.crt'))
     prompt = f'OpenBao password for {args.userpass}: ' if args.userpass else 'OpenBao operator token: '
@@ -74,7 +91,7 @@ def main():
                 return {}
             if not token:
                 raise SystemExit(f'OpenBao login returned HTTP {exc.code}. Check the username, password and userpass mount.') from None
-            if path == 'kv/data/komodo/webhook':
+            if path.startswith('kv/data/komodo/'):
                 raise SystemExit(f'OpenBao returned HTTP {exc.code} at {path}. Check KV permissions and version.') from None
             errors = json.loads(exc.read() or b'{}').get('errors', [])
             detail = ' '.join(str(e) for e in errors).replace(token, '[redacted]')[:600]
@@ -93,9 +110,11 @@ def main():
 
 
 def configure_role(args, request):
-    if args.komodo_webhook:
-        name, identity, policy = 'komodo-webhook', 'komodo-webhook-tls', 'management/komodo-webhook/policy.hcl'
-        rotate = args.rotate_komodo_webhook_identity
+    if args.komodo_webhook or args.komodo_jwt:
+        workload = 'jwt' if args.komodo_jwt else 'webhook'
+        name = 'komodo-' + workload
+        identity, policy = name + '-tls', f'management/{name}/policy.hcl'
+        rotate = args.rotate_komodo_jwt_identity if args.komodo_jwt else args.rotate_komodo_webhook_identity
     else:
         name, identity, policy = 'openbao-backup', 'backup-tls', 'stacks/openbao-backup/snapshot.hcl'
         rotate = args.rotate_backup_identity
@@ -120,10 +139,10 @@ def configure_role(args, request):
     role = f'auth/{name}/certs/{name}'
     previous = request(role, missing_ok=True).get('data', {}).get('certificate', '')
     if previous and previous.strip() != leaf.strip() and not rotate:
-        flag = '--rotate-komodo-webhook-identity' if args.komodo_webhook else '--rotate-backup-identity'
+        flag = '--rotate-' + name.removeprefix('openbao-') + '-identity'
         raise SystemExit(f'Use {flag} to replace the {name} certificate and retire its existing tokens')
     if args.seed_from_core:
-        seed_webhook(request, args.seed_from_core)
+        seed_signing_secret(request, args.seed_from_core, workload)
     request('sys/policies/acl/' + name, {'policy': (ROOT / policy).read_text()})
     request(role, {
         'certificate': leaf, 'allowed_common_names': [name],

@@ -65,6 +65,7 @@ services:
     image: ghcr.io/moghtech/komodo-core:2.3.3@sha256:bca73d0eee143066228fb9b80c38a5a2726e573ad2758f7aa92b5c91a8aef1c7
     init: true
     restart: unless-stopped
+    command: ["sh", "/config/start-core.sh"]
     depends_on:
       database:
         condition: service_healthy
@@ -87,7 +88,7 @@ services:
     env_file: [./management/komodo-webhook/bootstrap.env.example]
     environment:
       TZ: Europe/Vilnius
-      KOMODO_CONFIG_PATH: /config/bootstrap/core.config.json
+      KOMODO_CONFIG_PATHS: /config/bootstrap/core.config.json,/run/komodo-session/core.config.json
       KOMODO_DATABASE_ADDRESS: database:27017
       KOMODO_DATABASE_DB_NAME: ${KOMODO_DATABASE_DB_NAME:-komodo}
       KOMODO_DATABASE_USERNAME: ${KOMODO_DATABASE_USERNAME:?Set KOMODO_DATABASE_USERNAME}
@@ -104,7 +105,6 @@ services:
       KOMODO_FIRST_SERVER_NAME: ${KOMODO_FIRST_SERVER_NAME:?Set KOMODO_FIRST_SERVER_NAME}
       KOMODO_DISABLE_CONFIRM_DIALOG: false
       KOMODO_DISABLE_INIT_RESOURCES: false
-      KOMODO_JWT_SECRET: ${KOMODO_JWT_SECRET:?Set KOMODO_JWT_SECRET}
       KOMODO_JWT_TTL: 1-day
       KOMODO_MONITORING_INTERVAL: 15-sec
       KOMODO_RESOURCE_POLL_INTERVAL: 1-hr
@@ -120,6 +120,12 @@ services:
     volumes:
       - komodo-keys:/config/keys
       - komodo-bootstrap-config:/config/bootstrap:ro
+      - ./management/start-core.sh:/config/start-core.sh:ro
+      - type: bind
+        source: /srv/komodo/session-signing
+        target: /run/komodo-session
+        read_only: true
+        bind: {create_host_path: false}
       - "${KOMODO_BACKUPS_PATH:?Set KOMODO_BACKUPS_PATH}:/backups"
 
   host-agent:

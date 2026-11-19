@@ -1,6 +1,6 @@
 # OpenBao on the home server
 
-The existing `home-server` Komodo Server manages two independent, Git-backed Stacks. `openbao` runs OpenBao 2.7.2 with single-node Raft storage. `openbao-backup` runs a native OpenBao Agent and supplies the snapshot command used by the scheduled **Backup OpenBao** Procedure. Management can start independently of OpenBao. Its optional [webhook Agent](komodo-webhook.md) keeps a private startup copy of the signing secret on the Pi.
+The existing `home-server` Komodo Server manages two independent, Git-backed Stacks. `openbao` runs OpenBao 2.7.2 with single-node Raft storage. `openbao-backup` runs a native OpenBao Agent and supplies the snapshot command used by the scheduled **Backup OpenBao** Procedure. Two management Agents each read one KV entry and retain the last delivered file on the Pi so Komodo can start while OpenBao is sealed. [GitHub webhook signing](komodo-webhook.md) · [Komodo session signing](komodo-sessions.md)
 
 | Component | Where it runs or persists |
 | --- | --- |
