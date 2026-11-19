@@ -21,6 +21,13 @@ home-server-*.conf
 *.nmconnection
 portable-network.json
 
+# Private OpenBao signing material, leaf keys and Raft backups.
+ca.key
+server.key
+backup.key
+openbao-identity-*/
+openbao-*.snap
+
 # Keep filled-in router scripts, exports and provider keys local.
 router/*.rsc
 router/*.backup

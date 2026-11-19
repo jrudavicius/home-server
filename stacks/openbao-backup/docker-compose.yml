@@ -1,0 +1,63 @@
+name: openbao-backup
+
+x-client: &client
+  image: openbao/openbao:2.7.2@sha256:5046911075e137e154ce49ab051502f4ec7cf367d484ae4a4dce665d9b90561f
+  user: "${OPENBAO_BACKUP_UID:-10002}:${OPENBAO_BACKUP_GID:-10002}"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  tmpfs: [/tmp]
+  networks: [clients]
+
+services:
+  agent:
+    <<: *client
+    container_name: ${COMPOSE_PROJECT_NAME:-openbao-backup}-agent
+    entrypoint: ["bao"]
+    command: ["agent", "-config=/config/agent.hcl"]
+    restart: unless-stopped
+    environment:
+      BAO_ADDR: https://openbao-server:8200
+      BAO_CACERT: /identity/current/ca.crt
+    volumes:
+      - ./agent.hcl:/config/agent.hcl:ro
+      - type: bind
+        source: ${OPENBAO_STATE_DIR:-/srv/server/openbao}/backup-tls
+        target: /identity
+        read_only: true
+        bind: {create_host_path: false}
+      - session:/session
+
+  snapshot:
+    <<: *client
+    profiles: ["jobs"]
+    entrypoint: ["/bin/sh", "/scripts/snapshot.sh"]
+    environment:
+      BAO_ADDR: https://openbao-server:8200
+      BAO_CACERT: /trust/ca.crt
+      OPENBAO_SNAPSHOT_KEEP: ${OPENBAO_SNAPSHOT_KEEP:-14}
+    volumes:
+      - ./snapshot.sh:/scripts/snapshot.sh:ro
+      - session:/session:ro
+      - type: bind
+        source: ${OPENBAO_STATE_DIR:-/srv/server/openbao}/trust
+        target: /trust
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${OPENBAO_STATE_DIR:-/srv/server/openbao}/snapshots
+        target: /snapshots
+        bind: {create_host_path: false}
+
+networks:
+  clients:
+    name: ${OPENBAO_NETWORK:-openbao-link}
+    external: true
+
+volumes:
+  session:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: "size=1m,mode=0700,uid=${OPENBAO_BACKUP_UID:-10002},gid=${OPENBAO_BACKUP_GID:-10002}"

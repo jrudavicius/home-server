@@ -1,0 +1,47 @@
+name: openbao
+
+services:
+  server:
+    image: openbao/openbao:2.7.2@sha256:5046911075e137e154ce49ab051502f4ec7cf367d484ae4a4dce665d9b90561f
+    container_name: ${COMPOSE_PROJECT_NAME:-openbao}-server
+    user: "${OPENBAO_UID:-10001}:${OPENBAO_GID:-10001}"
+    entrypoint: ["bao"]
+    command: ["server", "-config=/config/server.hcl"]
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs: [/tmp]
+    ports:
+      - "127.0.0.1:${OPENBAO_PORT:-18200}:8200"
+    environment:
+      BAO_ADDR: https://127.0.0.1:8200
+      BAO_CACERT: /tls/current/ca.crt
+    healthcheck:
+      test: ["CMD", "bao", "status"]
+      interval: 30s
+      timeout: 5s
+      retries: 2
+    volumes:
+      - ./server.hcl:/config/server.hcl:ro
+      - type: bind
+        source: ${OPENBAO_STATE_DIR:-/srv/server/openbao}/raft
+        target: /data
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${OPENBAO_STATE_DIR:-/srv/server/openbao}/server-tls
+        target: /tls
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${OPENBAO_STATE_DIR:-/srv/server/openbao}/audit
+        target: /audit
+        bind: {create_host_path: false}
+    networks:
+      clients:
+        aliases: [openbao-server]
+
+networks:
+  clients:
+    name: ${OPENBAO_NETWORK:-openbao-link}
+    external: true

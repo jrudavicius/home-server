@@ -32,12 +32,12 @@ jobs:
     needs: validate
     # MongoDB 8.0 rejects the 6.19+ kernel on the current 24.04 runner.
     # Keep its smoke test on 22.04's 6.8 kernel (SERVER-121912).
-    runs-on: ${{ matrix.suite == 'management' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
+    runs-on: ${{ (matrix.suite == 'management' || matrix.suite == 'openbao') && 'ubuntu-22.04' || 'ubuntu-24.04' }}
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        suite: [management, observability, discord, private-access]
+        suite: [management, observability, discord, private-access, openbao]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -54,3 +54,6 @@ jobs:
       - name: Public webhook boundary
         if: matrix.suite == 'private-access'
         run: python3 tests/smoke_private_access.py
+      - name: OpenBao deployment, credential rotation and snapshot recovery
+        if: matrix.suite == 'openbao'
+        run: python3 tests/smoke_openbao.py

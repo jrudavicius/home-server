@@ -74,6 +74,10 @@ The generated `komodo-bootstrap-config` volume can be recreated from
 Periphery host files need their own backup policy; a Komodo database snapshot
 does not contain them.
 
+The separately scheduled **Backup OpenBao** Procedure writes Raft snapshots to
+`/srv/server/openbao/snapshots`. Preserve the source vault's unseal quorum and
+the separate TLS/recovery material. See the [OpenBao restore procedure](openbao.md#restore-onto-an-isolated-host-or-project).
+
 This repository configures local snapshots. No off-host destination or transfer
 credentials are configured. Local snapshots alone do not cover loss of the Pi's
 storage. Komodo's gzip files are not encrypted, and contain sensitive data.
