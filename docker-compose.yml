@@ -65,6 +65,7 @@ services:
     image: ghcr.io/moghtech/komodo-core:2.3.3@sha256:bca73d0eee143066228fb9b80c38a5a2726e573ad2758f7aa92b5c91a8aef1c7
     init: true
     restart: unless-stopped
+    command: ["perl", "/config/start-core.pl"]
     depends_on:
       database:
         condition: service_healthy
@@ -83,9 +84,11 @@ services:
       traefik.http.services.control-plane.loadbalancer.server.port: "9120"
     ports:
       - "${HOST_BIND_ADDRESS:-0.0.0.0}:${KOMODO_PORT:?Set KOMODO_PORT}:9120"
+    # The OpenBao overlay replaces this input with Core's native file setting.
+    env_file: [./management/komodo-webhook/bootstrap.env.example]
     environment:
       TZ: Europe/Vilnius
-      KOMODO_CONFIG_PATH: /config/bootstrap/core.config.json
+      KOMODO_CONFIG_PATHS: /config/bootstrap/core.config.json
       KOMODO_DATABASE_ADDRESS: database:27017
       KOMODO_DATABASE_DB_NAME: ${KOMODO_DATABASE_DB_NAME:-komodo}
       KOMODO_DATABASE_USERNAME: ${KOMODO_DATABASE_USERNAME:?Set KOMODO_DATABASE_USERNAME}
@@ -102,8 +105,6 @@ services:
       KOMODO_FIRST_SERVER_NAME: ${KOMODO_FIRST_SERVER_NAME:?Set KOMODO_FIRST_SERVER_NAME}
       KOMODO_DISABLE_CONFIRM_DIALOG: false
       KOMODO_DISABLE_INIT_RESOURCES: false
-      KOMODO_WEBHOOK_SECRET: ${KOMODO_WEBHOOK_SECRET:?Set KOMODO_WEBHOOK_SECRET}
-      KOMODO_JWT_SECRET: ${KOMODO_JWT_SECRET:?Set KOMODO_JWT_SECRET}
       KOMODO_JWT_TTL: 1-day
       KOMODO_MONITORING_INTERVAL: 15-sec
       KOMODO_RESOURCE_POLL_INTERVAL: 1-hr
@@ -119,6 +120,12 @@ services:
     volumes:
       - komodo-keys:/config/keys
       - komodo-bootstrap-config:/config/bootstrap:ro
+      - ./management/start-core.pl:/config/start-core.pl:ro
+      - type: bind
+        source: /srv/komodo/session-signing
+        target: /run/komodo-session
+        read_only: true
+        bind: {create_host_path: false}
       - "${KOMODO_BACKUPS_PATH:?Set KOMODO_BACKUPS_PATH}:/backups"
 
   host-agent:

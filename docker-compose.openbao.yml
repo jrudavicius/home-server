@@ -1,0 +1,65 @@
+x-komodo-agent: &komodo-agent
+  image: openbao/openbao:2.7.2@sha256:5046911075e137e154ce49ab051502f4ec7cf367d484ae4a4dce665d9b90561f
+  entrypoint: ["bao"]
+  command: ["agent", "-config=/config/agent.hcl"]
+  restart: unless-stopped
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  tmpfs: [/tmp]
+  networks: [openbao-clients]
+  labels:
+    komodo.skip: "true"
+  environment:
+    BAO_ADDR: https://openbao-server:8200
+    BAO_CACERT: /identity/current/ca.crt
+
+services:
+  session-agent:
+    <<: *komodo-agent
+    container_name: management-session-agent
+    user: "10004:10004"
+    volumes:
+      - ./management/komodo-jwt/agent.hcl:/config/agent.hcl:ro
+      - type: bind
+        source: ${OPENBAO_STATE_DIR:-/srv/server/openbao}/komodo-jwt-tls
+        target: /identity
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: /srv/komodo/session-signing
+        target: /session
+        bind: {create_host_path: false}
+
+  webhook-agent:
+    <<: *komodo-agent
+    container_name: management-webhook-agent
+    user: "${KOMODO_WEBHOOK_UID:-10003}:${KOMODO_WEBHOOK_GID:-10003}"
+    volumes:
+      - ./management/komodo-webhook/agent.hcl:/config/agent.hcl:ro
+      - type: bind
+        source: ${OPENBAO_STATE_DIR:-/srv/server/openbao}/komodo-webhook-tls
+        target: /identity
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${OPENBAO_STATE_DIR:-/srv/server/openbao}/komodo-webhook-cache
+        target: /webhook
+        bind: {create_host_path: false}
+
+  control-plane:
+    # Put site env_file overrides after this overlay to retain their Core settings.
+    env_file: !reset []
+    environment:
+      KOMODO_WEBHOOK_SECRET_FILE: /run/komodo-webhook/signing-secret
+    volumes:
+      - type: bind
+        source: ${OPENBAO_STATE_DIR:-/srv/server/openbao}/komodo-webhook-cache
+        target: /run/komodo-webhook
+        read_only: true
+        bind: {create_host_path: false}
+
+networks:
+  openbao-clients:
+    name: ${OPENBAO_NETWORK:-openbao-link}
+    external: true

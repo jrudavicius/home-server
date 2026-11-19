@@ -15,6 +15,7 @@ import time
 import uuid
 
 from openbao_backup_checks import Vault, backup_and_restore, until
+from komodo_webhook_checks import exercise_webhook
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -82,12 +83,16 @@ def git_origin(folder, env, settings, projects):
     (origin / 'home-server').symlink_to('home-server.git', target_is_directory=True)
 
 
-def management(folder, project, env):
+def management(folder, project, env, *, legacy_signer=None, integrated=False):
     cmd = ['docker', 'compose', '--env-file', str(ROOT / 'bootstrap.env.example'), '-f', str(ROOT / 'docker-compose.yml')]
+    if integrated:
+        cmd.extend(['-f', str(ROOT / 'docker-compose.openbao.yml')])
     config = json.loads(run(cmd + ['config', '--format', 'json'], env).stdout)
     config['name'] = project
     for resource in [*config['networks'].values(), *config['volumes'].values()]:
-        assert not resource.get('external')
+        if resource.get('external'):
+            assert integrated and resource['name'] == env['OPENBAO_NETWORK']
+            continue
         resource.pop('name', None)
     config['networks']['default']['internal'] = True
     config['volumes']['test-backups'] = {}
@@ -98,7 +103,29 @@ def management(folder, project, env):
         service['restart'] = 'no'
 
     core, agent = services['control-plane'], services['host-agent']
-    core['volumes'] = [m for m in core['volumes'] if m['type'] == 'volume'] + ['test-backups:/backups']
+    core['volumes'] = [m for m in core['volumes'] if m['type'] == 'volume' or m['target'] in
+                       ('/run/komodo-webhook', '/run/komodo-session', '/config/start-core.pl')]
+    session = str(folder / 'session-signing')
+    next(m for m in core['volumes'] if m['target'] == '/run/komodo-session')['source'] = session
+    if integrated:
+        delivery = services['session-agent']
+        delivery['user'] = services['webhook-agent']['user']
+        next(m for m in delivery['volumes'] if m['target'] == '/session')['source'] = session
+    else:
+        # A site's legacy file pointer takes precedence over a stale environment value.
+        webhook = folder / 'legacy-webhook'
+        webhook.write_bytes(b' \t' + env['KOMODO_WEBHOOK_SECRET'].encode() + b'\r\n')
+        core['volumes'].append({'type': 'bind', 'source': str(webhook), 'target': '/run/legacy-webhook', 'read_only': True})
+        core['environment'].update(KOMODO_WEBHOOK_SECRET_FILE='/run/legacy-webhook',
+                                   KOMODO_WEBHOOK_SECRET='stale-fixture-value')
+    if legacy_signer is not None:
+        # Model the pre-migration deployment, which already has signed-in users.
+        core.pop('command')
+        core['volumes'] = [m for m in core['volumes'] if m['target'] != '/run/komodo-session']
+        core['environment'].pop('KOMODO_CONFIG_PATHS')
+        core['environment'].update(KOMODO_CONFIG_PATH='/config/bootstrap/core.config.json',
+                                   KOMODO_JWT_SECRET=legacy_signer)
+    core['volumes'].append('test-backups:/backups')
     # The Docker daemon and Periphery must resolve checked-out bind mounts at the same path.
     agent['environment'].update(PERIPHERY_DISABLE_TERMINALS='true', PERIPHERY_DISABLE_CONTAINER_TERMINALS='true')
     # file:// starts a second Git process. On Linux the read-only fixture belongs to the runner.
@@ -114,7 +141,10 @@ def management(folder, project, env):
                           'volumes': [str(ROOT / 'tests/openbao_backup_checks.py') + ':/test/restore.py:ro',
                                       str(folder / 'state/trust') + ':/trust:ro',
                                       str(folder / 'state/snapshots') + ':/snapshots:ro']}
-    target = folder / 'management.json'
+    if integrated:
+        assert 'KOMODO_WEBHOOK_SECRET' not in core['environment']
+    variant = 'legacy' if legacy_signer is not None else 'standalone'
+    target = folder / ('management-openbao.json' if integrated else f'management-{variant}.json')
     target.write_text(json.dumps(config).replace('$', '$$'))
     target.chmod(0o600)
     return ['docker', 'compose', '--env-file', os.devnull, '-p', project, '-f', str(target)]
@@ -167,7 +197,8 @@ def exercise(folder, prefix, env):
     if not os.geteuid():
         os.chown(app / 'local/approle', uid, gid)
     git_origin(folder, env, settings, projects)
-    manager = management(folder, prefix, env)
+    original_jwt = ' \t"literal${TZ}\\ž\n' + secrets.token_hex(24) + ' \r\n\n'
+    manager = management(folder, prefix, env, legacy_signer=original_jwt)
 
     def docker(*args, **kwargs):
         return run(['docker', *args], env, **kwargs)
@@ -230,7 +261,20 @@ def exercise(folder, prefix, env):
         login = until('Komodo login', lambda: api('auth/login/LoginLocalUser', {
             'username': env['KOMODO_INIT_ADMIN_USERNAME'], 'password': env['KOMODO_INIT_ADMIN_PASSWORD']}, ready=False))
         token = login['data']['jwt']
-        until('Periphery', lambda: api('read/GetServerState', {'server': 'home-server'})['status'] == 'Ok')
+
+        def session_works():
+            return (api('read/GetServerState', {'server': 'home-server'}, ready=False) or {}).get('status') == 'Ok'
+
+        until('Periphery', session_works)
+        old_core = run(manager + ['ps', '-q', 'control-plane'], env).stdout.strip()
+        local_import = [sys.executable, str(ROOT / 'scripts/prepare_komodo_identity.py'),
+                        '--import-session-from-core', old_core, '--session-dir', str(folder / 'session-signing'),
+                        '--user', f'{uid}:{gid}']
+        run(local_import, env)
+        run(local_import, env)
+        manager = management(folder, prefix, env)
+        run(manager + ['up', '-d', '--no-deps', 'control-plane'], env)
+        until('Standalone Core to accept the original session before OpenBao exists', session_works)
         api('write/CreateResourceSync', {'name': 'home-server-resources', 'config': {
             'repo': 'jrudavicius/home-server', 'git_provider': 'test-git', 'git_https': False, 'branch': 'main',
             'resource_path': ['komodo'], 'delete': False, 'managed': False, 'webhook_enabled': False}})
@@ -299,11 +343,20 @@ def exercise(folder, prefix, env):
         print('Verifying expiry and revocation with the long-running database client.', flush=True)
         proof = monitor('exec', '-T', 'monitor', 'sh', '/config/verify.sh', timeout=300)
         print(proof.stdout.strip(), flush=True)
+
+        # The webhook recovery check deliberately seals the vault and restarts Core.
+        # Finish the scenarios that use the running scheduler and database leases first.
+        webhook_env = {**env, 'OPENBAO_STATE_DIR': str(state), 'OPENBAO_NETWORK': net,
+                       'KOMODO_WEBHOOK_UID': str(uid), 'KOMODO_WEBHOOK_GID': str(gid)}
+        del webhook_env['KOMODO_WEBHOOK_SECRET']
+        integrated = management(folder, prefix, webhook_env, integrated=True)
+        exercise_webhook(folder, run, integrated, env, configure, source, root_token, key, uid, gid,
+                         original_jwt, session_works)
     finally:
         # Stop the scheduler and any in-flight Periphery deployments before removing their consumers.
         run(manager + ['exec', '-T', 'host-agent', 'chown', '-R', f'{os.geteuid()}:{os.getegid()}',
                        str(folder / 'periphery')], env, check=False)
-        run(manager + ['down', '--volumes'], env)
+        run(manager + ['down', '--volumes', '--remove-orphans'], env)
         if restore_cmd:
             docker(*restore_cmd, 'down', '--volumes')
         monitor('down', '--volumes')
@@ -327,7 +380,7 @@ def main():
         raise SystemExit('Run this test with a local Unix-socket Docker engine.')
     env['DOCKER_SOCKET_PATH'] = '/var/run/docker.sock' if sys.platform == 'darwin' else endpoint[len('unix://'):]
     for key in ('KOMODO_DATABASE_USERNAME', 'KOMODO_DATABASE_PASSWORD', 'KOMODO_INIT_ADMIN_PASSWORD',
-                'KOMODO_WEBHOOK_SECRET', 'KOMODO_JWT_SECRET', 'GRAFANA_ADMIN_PASSWORD'):
+                'KOMODO_WEBHOOK_SECRET', 'GRAFANA_ADMIN_PASSWORD'):
         env[key] = secrets.token_hex(24)
     env.update(KOMODO_INIT_ADMIN_USERNAME='smoke-admin', GRAFANA_ADMIN_USER='smoke-admin',
                TRANSMISSION_USERNAME='smoke-user', KOMODO_HOST='http://control-plane:9120')

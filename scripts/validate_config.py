@@ -54,7 +54,7 @@ def main():
     env.update({name: 'validation-only' for name in (
         'KOMODO_DATABASE_USERNAME', 'KOMODO_DATABASE_PASSWORD',
         'KOMODO_INIT_ADMIN_USERNAME', 'KOMODO_INIT_ADMIN_PASSWORD',
-        'KOMODO_WEBHOOK_SECRET', 'KOMODO_JWT_SECRET',
+        'KOMODO_WEBHOOK_SECRET',
     )})
     env['GRAFANA_DISCORD_WEBHOOK_URL'] = 'https://example.invalid/validation-only'
     # The retained ngrok rollback stack still needs a token to render; the

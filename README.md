@@ -34,6 +34,8 @@ root bootstrap stack.
 | Stack | Service | Container | Implementation / purpose |
 | --- | --- | --- | --- |
 | `management` | `secret-bootstrap` | `management-secret-bootstrap` | Prepares private application secrets before Komodo starts. |
+| `management` (OpenBao option) | `webhook-agent` | `management-webhook-agent` | Delivers the GitHub webhook signing secret to a private file for Core. |
+| `management` (OpenBao option) | `session-agent` | `management-session-agent` | Delivers the existing session signing key to Core's private startup file. |
 | `management` | `database` | `management-database` | MongoDB database used by Komodo. |
 | `management` | `control-plane` | `management-control-plane` | Komodo control plane and web UI. |
 | `management` | `host-agent` | `management-host-agent` | Komodo agent managing Docker and host resources. |
@@ -88,7 +90,7 @@ sudo mkdir -p /srv/komodo
 test -e /srv/komodo/bootstrap.env || sudo install -o "$(id -u)" -g "$(id -g)" -m 600 bootstrap.env.example /srv/komodo/bootstrap.env
 ```
 
-Fill all six of these fields in `/srv/komodo/bootstrap.env`:
+Set the database and administrator credentials in `/srv/komodo/bootstrap.env`. The standalone configuration also uses the webhook field.
 
 | Variable | Value to set |
 | --- | --- |
@@ -97,7 +99,20 @@ Fill all six of these fields in `/srv/komodo/bootstrap.env`:
 | `KOMODO_INIT_ADMIN_USERNAME` | Initial Komodo administrator username. |
 | `KOMODO_INIT_ADMIN_PASSWORD` | Initial Komodo administrator password. |
 | `KOMODO_WEBHOOK_SECRET` | A separate random secret; also enter it in GitHub's webhook Secret field. |
-| `KOMODO_JWT_SECRET` | A separate random secret for signing authentication tokens. |
+
+On an **existing standalone installation**, run the following from the new checkout while the old Core is still running. Substitute its container name (`komodo-core` on older installations). The import creates the private cache locally, accepts a matching cache on reruns and stops if the values differ. It works before OpenBao is installed or unsealed.
+
+```sh
+sudo python3 scripts/prepare_komodo_identity.py --import-session-from-core management-control-plane
+```
+
+When adopting OpenBao, enroll both signing Agents and verify their first deliveries before recreating Core. [Session signing](docs/komodo-sessions.md) · [Agent enrollment and cutover](docs/komodo-webhook.md#migrate-an-existing-pi)
+
+On a **fresh installation**, create the private session file once before the first Core start. Run this only when creating a new Komodo installation.
+
+```sh
+sudo python3 scripts/prepare_komodo_identity.py --init-new-session
+```
 
 For new installations, generate independent passwords and secrets with your
 password manager. Keep a recovery copy there. In environment files, quote
@@ -553,7 +568,14 @@ tunnel will be stopped.
    (`server` by default). The root Compose file explicitly reuses
    `<prefix>_komodo-mongo-data`, `<prefix>_komodo-mongo-config`, and
    `<prefix>_komodo-keys`. Verify those match the recorded volumes and take your
-   usual database backup before proceeding.
+   usual database backup before proceeding. From a **separate checkout of the new revision**,
+   import the signer while the old `komodo-core` is still running. Continue to step 2
+   only after the import succeeds.
+
+   ```sh
+   sudo mkdir -p /srv/komodo
+   sudo python3 scripts/prepare_komodo_identity.py --import-session-from-core komodo-core
+   ```
 2. While the old Compose files are still checked out, run
    `docker compose down --remove-orphans` in each existing stack's working
    directory, using its existing environment and project name. Stop `ngrok`,
@@ -563,7 +585,7 @@ tunnel will be stopped.
 3. Update the checkout. For manual deployments, move the old
    `stacks/ngrok/.env` to `stacks/public-access/.env`. Remove any old
    `COMPOSE_PROJECT_NAME` override or update it to the corresponding stack name.
-   Complete [Credential setup](#credential-setup) and confirm
+   Complete the remaining [credential setup](#credential-setup) using the imported session file and confirm
    `MANAGEMENT_VOLUME_PREFIX` still matches the old root volumes, then run
    `docker compose --env-file /srv/komodo/bootstrap.env up -d` from the
    repository root to start `management`.

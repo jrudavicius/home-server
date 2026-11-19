@@ -55,7 +55,9 @@ Use an encrypted backup destination on another machine or storage service for:
 | Source | Recovery purpose |
 | --- | --- |
 | `/srv/komodo/backups/` (or `KOMODO_BACKUPS_PATH`) | Successful dated snapshots and the top-level `Stats.gz`. |
-| `/srv/komodo/bootstrap.env` | Database credentials, admin bootstrap settings, JWT/webhook secrets, and application secrets. |
+| `/srv/komodo/bootstrap.env` | Database credentials, admin bootstrap settings, application secrets and the webhook secret on standalone installations. |
+| `/srv/komodo/session-signing/` | Private startup copy of the Core session signer. Restore with directory mode 0700, file mode 0400 and owner 10004:10004. The OpenBao Agent can also restore it from the original KV record. |
+| `/srv/server/openbao/komodo-webhook-cache/` | Webhook startup copy for the OpenBao overlay. Restore `signing-secret` with mode 0400 in its 0700 directory, owned by the webhook Agent (default 10003:10003). |
 | The `komodo-keys` volume | Core and Periphery identities; its physical name is normally `server_komodo-keys`. |
 | The deployed Git revision and any local configuration | The exact Compose files and image versions used with the snapshot. |
 
@@ -86,10 +88,11 @@ storage. Komodo's gzip files are not encrypted, and contain sensitive data.
 
 Use a host terminal, since Core will be stopped. Start with the same pinned
 Komodo version that created the snapshot. For a replacement host, restore the
-private bootstrap file, backup directory, and saved keys first, retaining their
-permissions and `MANAGEMENT_VOLUME_PREFIX`. On that replacement host, create
-Core and its dependencies without starting them, then copy the saved keys into
-its volume:
+private bootstrap file, private signing files, backup directory, and saved keys first, retaining their
+permissions and `MANAGEMENT_VOLUME_PREFIX`. Keep the saved Compose file selection so
+Core mounts both private caches on an OpenBao installation. On the replacement
+host, select just Core and its dependencies, then copy the saved keys into its volume.
+These targeted commands work before the OpenBao bridge and Agent identities exist.
 
 ```sh
 docker compose --env-file /srv/komodo/bootstrap.env create control-plane
@@ -159,10 +162,10 @@ database recovery.
    the cause and retry into another empty database.
 
 4. Set `KOMODO_DATABASE_DB_NAME` in `/srv/komodo/bootstrap.env` to the chosen
-   target name, then start management:
+   target name, then start Core and Periphery with their database and bootstrap dependencies.
 
    ```sh
-   docker compose --env-file /srv/komodo/bootstrap.env up -d
+   docker compose --env-file /srv/komodo/bootstrap.env up -d control-plane host-agent
    docker compose --env-file /srv/komodo/bootstrap.env ps
    ```
 
@@ -172,6 +175,14 @@ database recovery.
    backup of the restored database. Keep the previous database until recovery
    is accepted; switching `KOMODO_DATABASE_DB_NAME` back and recreating Core
    provides a rollback on the original host.
+
+5. To resume signing-key delivery on a replacement host, restore the OpenBao
+   bridge and vault, unseal it, and restore `komodo-jwt-tls` and `komodo-webhook-tls`
+   under `OPENBAO_STATE_DIR`. If issuing replacement certificates, use each
+   Agent's documented certificate rotation flag to replace the pinned leaf.
+   Compare both Agent deliveries with the recovered Core
+   before starting the persistent Agents. A full-project `up -d` can then start
+   all management services. [OpenBao recovery](openbao.md#restore-onto-an-isolated-host-or-project) · [Signing Agent enrollment](komodo-webhook.md#migrate-an-existing-pi)
 
 ## Recovery test
 
@@ -188,6 +199,10 @@ counts and a known payload, and verifies login after starting Core against the
 restored database. It also checks startup readiness and network isolation.
 Everything runs in temporary Docker networks and volumes, without production data or a host Docker
 socket mount, and is removed on exit.
+
+The separate `python3 tests/smoke_openbao.py` drill recreates Core and Periphery
+with both signing caches, a missing Agent bridge and absent Agent identities.
+It checks the pre-upgrade session and a signed webhook against the recovered Core.
 
 See [Komodo's backup documentation](https://komo.do/docs/setup/backup) and the
 [pinned 2.3.3 restore implementation](https://github.com/moghtech/komodo/blob/v2.3.3/lib/database/src/utils/restore.rs).

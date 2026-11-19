@@ -108,6 +108,44 @@ class BootstrapSecretsTests(unittest.TestCase):
         self.assertEqual(list(self.output.parent.iterdir()), [self.output])
 
     @unittest.skipUnless(shutil.which("docker"), "Docker Compose CLI is required")
+    def test_webhook_source_selection_in_private_bootstrap_file(self):
+        root = SCRIPT.parents[1]
+        env_file = self.folder / "bootstrap.env"
+        settings = (root / "bootstrap.env.example").read_text()
+        process = {k: v for k, v in os.environ.items() if k in ("PATH", "HOME", "TMPDIR")}
+        self.assertNotIn("KOMODO_JWT_SECRET", settings)
+        for name in ("KOMODO_DATABASE_USERNAME", "KOMODO_DATABASE_PASSWORD",
+                     "KOMODO_INIT_ADMIN_USERNAME", "KOMODO_INIT_ADMIN_PASSWORD", *bootstrap.REQUIRED):
+            process[name] = "fixture"
+        def render(extra):
+            env_file.write_text(settings + "\n" + extra)
+            return subprocess.run(["docker", "compose", "--env-file", str(env_file), "config", "--format", "json"],
+                                  cwd=root, env=process, text=True, capture_output=True)
+
+        self.assertNotEqual(render("").returncode, 0)
+        legacy = render("KOMODO_WEBHOOK_SECRET='special$ # fixture'")
+        self.assertEqual(legacy.returncode, 0, legacy.stderr)
+        direct = json.loads(legacy.stdout)["services"]["control-plane"]["environment"]
+        self.assertFalse(any(key.startswith("KOMODO_JWT_SECRET") for key in direct))
+        self.assertEqual(direct["KOMODO_WEBHOOK_SECRET"].replace("$$", "$"), "special$ # fixture")
+        site_env = self.folder / "site.env"
+        site_env.write_text("SITE_SETTING=preserve-this-value\n")
+        site = self.folder / "site.json"
+        site.write_text(json.dumps({"services": {"control-plane": {"env_file": [str(site_env)]}}}))
+        for leftover in ("", "KOMODO_WEBHOOK_SECRET=must-never-reach-Core\n"):
+            selected = render(leftover + f"COMPOSE_FILE=docker-compose.yml:docker-compose.openbao.yml:{site}")
+            self.assertEqual(selected.returncode, 0, selected.stderr)
+            services = json.loads(selected.stdout)["services"]
+            self.assertIn("webhook-agent", services)
+            self.assertIn("session-agent", services)
+            self.assertNotIn("must-never-reach-Core", selected.stdout)
+            core = services["control-plane"]["environment"]
+            self.assertEqual(core["SITE_SETTING"], "preserve-this-value")
+            self.assertFalse(any(key.startswith("KOMODO_JWT_SECRET") for key in core))
+            self.assertNotIn("KOMODO_WEBHOOK_SECRET", core)
+            self.assertEqual(core["KOMODO_WEBHOOK_SECRET_FILE"], "/run/komodo-webhook/signing-secret")
+
+    @unittest.skipUnless(shutil.which("docker"), "Docker Compose CLI is required")
     def test_special_characters_survive_compose_bootstrap_and_stack_env(self):
         # These are fixtures only. No daemon or containers are needed.
         values = dict(
