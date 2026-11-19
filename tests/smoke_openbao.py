@@ -15,6 +15,7 @@ import time
 import uuid
 
 from openbao_backup_checks import Vault, backup_and_restore, until
+from komodo_webhook_checks import exercise_webhook
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -82,12 +83,16 @@ def git_origin(folder, env, settings, projects):
     (origin / 'home-server').symlink_to('home-server.git', target_is_directory=True)
 
 
-def management(folder, project, env):
+def management(folder, project, env, webhook=False):
     cmd = ['docker', 'compose', '--env-file', str(ROOT / 'bootstrap.env.example'), '-f', str(ROOT / 'docker-compose.yml')]
+    if webhook:
+        cmd.extend(['-f', str(ROOT / 'docker-compose.openbao.yml')])
     config = json.loads(run(cmd + ['config', '--format', 'json'], env).stdout)
     config['name'] = project
     for resource in [*config['networks'].values(), *config['volumes'].values()]:
-        assert not resource.get('external')
+        if resource.get('external'):
+            assert webhook and resource['name'] == env['OPENBAO_NETWORK']
+            continue
         resource.pop('name', None)
     config['networks']['default']['internal'] = True
     config['volumes']['test-backups'] = {}
@@ -98,7 +103,8 @@ def management(folder, project, env):
         service['restart'] = 'no'
 
     core, agent = services['control-plane'], services['host-agent']
-    core['volumes'] = [m for m in core['volumes'] if m['type'] == 'volume'] + ['test-backups:/backups']
+    core['volumes'] = [m for m in core['volumes'] if m['type'] == 'volume' or m['target'] == '/run/komodo-webhook']
+    core['volumes'].append('test-backups:/backups')
     # The Docker daemon and Periphery must resolve checked-out bind mounts at the same path.
     agent['environment'].update(PERIPHERY_DISABLE_TERMINALS='true', PERIPHERY_DISABLE_CONTAINER_TERMINALS='true')
     # file:// starts a second Git process. On Linux the read-only fixture belongs to the runner.
@@ -114,7 +120,9 @@ def management(folder, project, env):
                           'volumes': [str(ROOT / 'tests/openbao_backup_checks.py') + ':/test/restore.py:ro',
                                       str(folder / 'state/trust') + ':/trust:ro',
                                       str(folder / 'state/snapshots') + ':/snapshots:ro']}
-    target = folder / 'management.json'
+    if webhook:
+        assert 'KOMODO_WEBHOOK_SECRET' not in core['environment']
+    target = folder / ('management-openbao.json' if webhook else 'management.json')
     target.write_text(json.dumps(config).replace('$', '$$'))
     target.chmod(0o600)
     return ['docker', 'compose', '--env-file', os.devnull, '-p', project, '-f', str(target)]
@@ -299,11 +307,19 @@ def exercise(folder, prefix, env):
         print('Verifying expiry and revocation with the long-running database client.', flush=True)
         proof = monitor('exec', '-T', 'monitor', 'sh', '/config/verify.sh', timeout=300)
         print(proof.stdout.strip(), flush=True)
+
+        # The webhook recovery check deliberately seals the vault and restarts Core.
+        # Finish the scenarios that use the running scheduler and database leases first.
+        webhook_env = {**env, 'OPENBAO_STATE_DIR': str(state), 'OPENBAO_NETWORK': net,
+                       'KOMODO_WEBHOOK_UID': str(uid), 'KOMODO_WEBHOOK_GID': str(gid)}
+        del webhook_env['KOMODO_WEBHOOK_SECRET']
+        integrated = management(folder, prefix, webhook_env, webhook=True)
+        exercise_webhook(folder, run, integrated, env, configure, source, root_token, key, uid, gid)
     finally:
         # Stop the scheduler and any in-flight Periphery deployments before removing their consumers.
         run(manager + ['exec', '-T', 'host-agent', 'chown', '-R', f'{os.geteuid()}:{os.getegid()}',
                        str(folder / 'periphery')], env, check=False)
-        run(manager + ['down', '--volumes'], env)
+        run(manager + ['down', '--volumes', '--remove-orphans'], env)
         if restore_cmd:
             docker(*restore_cmd, 'down', '--volumes')
         monitor('down', '--volumes')

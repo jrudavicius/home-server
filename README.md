@@ -34,6 +34,7 @@ root bootstrap stack.
 | Stack | Service | Container | Implementation / purpose |
 | --- | --- | --- | --- |
 | `management` | `secret-bootstrap` | `management-secret-bootstrap` | Prepares private application secrets before Komodo starts. |
+| `management` (OpenBao option) | `webhook-agent` | `management-webhook-agent` | Delivers the GitHub webhook signing secret to a private file for Core. |
 | `management` | `database` | `management-database` | MongoDB database used by Komodo. |
 | `management` | `control-plane` | `management-control-plane` | Komodo control plane and web UI. |
 | `management` | `host-agent` | `management-host-agent` | Komodo agent managing Docker and host resources. |
@@ -98,6 +99,9 @@ Fill all six of these fields in `/srv/komodo/bootstrap.env`:
 | `KOMODO_INIT_ADMIN_PASSWORD` | Initial Komodo administrator password. |
 | `KOMODO_WEBHOOK_SECRET` | A separate random secret; also enter it in GitHub's webhook Secret field. |
 | `KOMODO_JWT_SECRET` | A separate random secret for signing authentication tokens. |
+
+On an existing Pi, you can [migrate the GitHub webhook signing secret to OpenBao](docs/komodo-webhook.md).
+Core then reads the last delivered value from a private file and can start while OpenBao is sealed.
 
 For new installations, generate independent passwords and secrets with your
 password manager. Keep a recovery copy there. In environment files, quote
