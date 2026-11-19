@@ -6,36 +6,18 @@ import getpass
 import json
 from pathlib import Path
 import ssl
-import subprocess
 import sys
 import urllib.error
 import urllib.parse
 import urllib.request
 
+from komodo_signing import read_core_signer
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def seed_signing_secret(request, container, workload):
-    # Only the fixed legacy environment variable or the current private Core fragment
-    # is read. The signing value stays on a pipe and in process memory.
-    if workload == 'jwt':
-        command = 'test -n "$KOMODO_JWT_SECRET" || exit 3; printf %s "$KOMODO_JWT_SECRET"'
-    else:
-        command = 'test -n "$KOMODO_WEBHOOK_SECRET" && printf %s "$KOMODO_WEBHOOK_SECRET"'
-    result = subprocess.run(['docker', 'exec', container, 'sh', '-ec', command], capture_output=True)
-    if workload == 'jwt' and result.returncode == 3:
-        result = subprocess.run(['docker', 'exec', container, 'cat', '/run/komodo-session/core.config.json'],
-                                capture_output=True)
-        value = json.loads(result.stdout).get('jwt_secret') if result.returncode == 0 else None
-    else:
-        value = result.stdout.decode('utf-8')
-    if result.returncode:
-        raise SystemExit(f'Could not read the active {workload} signing value from Core.')
-    if not isinstance(value, str) or not value:
-        raise SystemExit(f'The {workload} signing value must be a nonempty string.')
-    if workload == 'webhook' and (value != value.strip() or any(ord(c) < 32 or ord(c) == 127 for c in value)):
-        raise SystemExit('The active signing secret has control characters or surrounding whitespace. '
-                         'Coordinate a replacement with GitHub before switching to file input.')
+    value = read_core_signer(container, workload)
     path = 'kv/data/komodo/' + workload
     existing = request(path, missing_ok=True).get('data')
     if existing is not None:

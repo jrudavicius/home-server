@@ -4,42 +4,37 @@ Komodo Core 2.3.3 reads `KOMODO_WEBHOOK_SECRET_FILE` at startup. An OpenBao Agen
 
 ## Migrate an existing Pi
 
-Run these commands on the Pi from the management Compose checkout containing this integration. Start with the current Core running and OpenBao unsealed. Keep the existing signing value in your password manager for rollback. With a customized installation, use the actual Core container name, `--state-dir`, and loopback `--port`. Set matching `OPENBAO_STATE_DIR` and `OPENBAO_NETWORK` in the private bootstrap file if they differ from the repository defaults.
+Run these commands from the management checkout with the existing Core running and OpenBao unsealed. Keep a signed-in browser tab open on **Servers**. Pause signing-key changes during enrollment. For legacy native file inputs, confirm the files still contain the values in effect at Core's last start. Keep the matching recovery copies in your password manager. If the Agents already run, stop them during verification so the first render has a single writer per cache.
 
-1. Create the client key and certificate locally, then enroll the public certificate and import the signing value from the running Core. The second command prompts privately for an authorized OpenBao operator token. The client key stays on the Pi. Repeating the import accepts an identical existing value and refuses to overwrite a different value.
+1. Prepare **both** clients, including on standalone installations with a private session cache. Enroll the pinned certificates and seed each KV record from the running Core. The importer reads a configured native secret file with Core's whitespace trimming, then falls back to the literal environment value only when the pointer is absent. It also recognizes the private session cache. Each KV write is create-only. A mismatch stops enrollment.
 
    ```sh
+   sudo python3 scripts/prepare_komodo_identity.py --jwt
    sudo python3 scripts/prepare_komodo_webhook.py
-   sudo python3 scripts/configure_openbao.py --komodo-webhook --seed-from-core management-control-plane
-   ```
-
-   On the home Pi, the `manager` administrator signs in through the `home-admins` username/password mount. Use this enrollment command and enter the OpenBao password at the hidden prompt. The script uses the login token in memory and revokes that session when it finishes. For another installation, substitute its username and mount. [OpenBao username/password login](https://openbao.org/docs/auth/userpass/)
-
-   ```sh
+   sudo python3 scripts/configure_openbao.py --komodo-jwt --seed-from-core management-control-plane \
+     --userpass manager --userpass-mount home-admins
    sudo python3 scripts/configure_openbao.py --komodo-webhook --seed-from-core management-control-plane \
      --userpass manager --userpass-mount home-admins
    ```
 
-2. Start just the Agent. Wait until its delivered bytes match the active signing value. The comparison prints no credential. A successful comparison exits zero.
+   These commands use the home Pi's administrator and prompt privately for its OpenBao password. Omit the two userpass options to use an operator token. Substitute your Core container, state directory and loopback port where needed. Set matching `OPENBAO_STATE_DIR` and `OPENBAO_NETWORK` in the private bootstrap file. [OpenBao username/password login](https://openbao.org/docs/auth/userpass/)
+
+2. In `/srv/komodo/bootstrap.env`, set `COMPOSE_FILE=docker-compose.yml:docker-compose.openbao.yml`. Append every site override **after** the OpenBao overlay, preserving the order among site files. For example, `docker-compose.yml:docker-compose.openbao.yml:site.yml` keeps Core's `env_file` entries from `site.yml`. The overlay clears the standalone webhook input and selects the mounted webhook file. Remove legacy signer overrides from the site's Core environment and env files so they cannot supply a stale JWT or webhook setting. Future configuration edits take effect when Core is recreated.
+
+3. Verify the first delivery while the old Core is still serving. The verifier captures both current signers in memory, then runs each Agent once to authenticate and render into an empty private directory. It compares both delivered values before installing either startup file. A failed comparison preserves both existing caches. Continue only after the verifier succeeds.
 
    ```sh
-   docker compose --env-file /srv/komodo/bootstrap.env -f docker-compose.yml -f docker-compose.openbao.yml up -d --no-deps webhook-agent
-   sudo test -s /srv/server/openbao/komodo-webhook-cache/signing-secret &&
-     docker exec management-control-plane sh -ec 'test -n "$KOMODO_WEBHOOK_SECRET" && printf %s "$KOMODO_WEBHOOK_SECRET"' |
-     sudo cmp -s - /srv/server/openbao/komodo-webhook-cache/signing-secret
+   sudo python3 scripts/komodo_signing.py --core management-control-plane --env-file /srv/komodo/bootstrap.env
    ```
 
-3. Core also requires its private session signing file. If the running Core still takes the session signer from its environment, enroll the session Agent and verify its first delivery before recreating Core. Both migrations can share one Core restart. [Session signing migration](komodo-sessions.md#move-an-existing-signer)
-
-   After both files are ready, set `COMPOSE_FILE=docker-compose.yml:docker-compose.openbao.yml` in the private `/srv/komodo/bootstrap.env` so future root Compose commands include the Agents. Preserve any other active overrides and include the management OpenBao overlay last. Run these commands from the management checkout while its deployment Procedure is idle. Recreating Core briefly interrupts the UI and webhook listener.
+4. When deployment procedures are idle, start both persistent Agents and recreate Core. This briefly interrupts the UI and webhook listener.
 
    ```sh
-   docker compose --env-file /srv/komodo/bootstrap.env config --services
+   docker compose --env-file /srv/komodo/bootstrap.env up -d --no-deps session-agent webhook-agent
    docker compose --env-file /srv/komodo/bootstrap.env up -d --no-deps control-plane
-   docker exec management-control-plane sh -ec 'test -z "${KOMODO_WEBHOOK_SECRET+x}" && test -s "$KOMODO_WEBHOOK_SECRET_FILE"'
    ```
 
-   Verify `webhook-agent` is listed, Core is reachable, and Periphery reconnects. In GitHub’s webhook delivery history, redeliver a push whose `ref` names a branch other than `main`. HTTP 200 verifies the signature through the gateway, and Komodo’s branch filter keeps the deployment Procedure idle. The next normal push to `main` exercises the Procedure. After verifying the signing value and its recovery copy, remove the old `KOMODO_WEBHOOK_SECRET` assignment from the private bootstrap file.
+   Reload **Servers** in the original browser session and confirm Periphery reconnects. In GitHub's webhook history, redeliver a push for a branch other than `main`. HTTP 200 verifies the signature while the branch filter keeps deployment idle. After both checks, remove obsolete signer assignments and pointers from private environment files, templates and plaintext recovery copies.
 
 ## Operation and recovery
 

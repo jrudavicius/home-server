@@ -83,8 +83,7 @@ def git_origin(folder, env, settings, projects):
     (origin / 'home-server').symlink_to('home-server.git', target_is_directory=True)
 
 
-def management(folder, project, env, *, legacy_signer=None):
-    integrated = legacy_signer is None
+def management(folder, project, env, *, legacy_signer=None, integrated=False):
     cmd = ['docker', 'compose', '--env-file', str(ROOT / 'bootstrap.env.example'), '-f', str(ROOT / 'docker-compose.yml')]
     if integrated:
         cmd.extend(['-f', str(ROOT / 'docker-compose.openbao.yml')])
@@ -105,14 +104,21 @@ def management(folder, project, env, *, legacy_signer=None):
 
     core, agent = services['control-plane'], services['host-agent']
     core['volumes'] = [m for m in core['volumes'] if m['type'] == 'volume' or m['target'] in
-                       ('/run/komodo-webhook', '/run/komodo-session', '/config/start-core.sh')]
+                       ('/run/komodo-webhook', '/run/komodo-session', '/config/start-core.pl')]
+    session = str(folder / 'session-signing')
+    next(m for m in core['volumes'] if m['target'] == '/run/komodo-session')['source'] = session
     if integrated:
-        session = str(folder / 'session-signing')
-        next(m for m in core['volumes'] if m['target'] == '/run/komodo-session')['source'] = session
         delivery = services['session-agent']
         delivery['user'] = services['webhook-agent']['user']
         next(m for m in delivery['volumes'] if m['target'] == '/session')['source'] = session
     else:
+        # A site's legacy file pointer takes precedence over a stale environment value.
+        webhook = folder / 'legacy-webhook'
+        webhook.write_bytes(b' \t' + env['KOMODO_WEBHOOK_SECRET'].encode() + b'\r\n')
+        core['volumes'].append({'type': 'bind', 'source': str(webhook), 'target': '/run/legacy-webhook', 'read_only': True})
+        core['environment'].update(KOMODO_WEBHOOK_SECRET_FILE='/run/legacy-webhook',
+                                   KOMODO_WEBHOOK_SECRET='stale-fixture-value')
+    if legacy_signer is not None:
         # Model the pre-migration deployment, which already has signed-in users.
         core.pop('command')
         core['volumes'] = [m for m in core['volumes'] if m['target'] != '/run/komodo-session']
@@ -137,7 +143,8 @@ def management(folder, project, env, *, legacy_signer=None):
                                       str(folder / 'state/snapshots') + ':/snapshots:ro']}
     if integrated:
         assert 'KOMODO_WEBHOOK_SECRET' not in core['environment']
-    target = folder / ('management-openbao.json' if integrated else 'management.json')
+    variant = 'legacy' if legacy_signer is not None else 'standalone'
+    target = folder / ('management-openbao.json' if integrated else f'management-{variant}.json')
     target.write_text(json.dumps(config).replace('$', '$$'))
     target.chmod(0o600)
     return ['docker', 'compose', '--env-file', os.devnull, '-p', project, '-f', str(target)]
@@ -190,7 +197,7 @@ def exercise(folder, prefix, env):
     if not os.geteuid():
         os.chown(app / 'local/approle', uid, gid)
     git_origin(folder, env, settings, projects)
-    original_jwt = ' "special$\\ž\n' + secrets.token_hex(24) + ' '
+    original_jwt = ' \t"literal${TZ}\\ž\n' + secrets.token_hex(24) + ' \r\n\n'
     manager = management(folder, prefix, env, legacy_signer=original_jwt)
 
     def docker(*args, **kwargs):
@@ -254,7 +261,20 @@ def exercise(folder, prefix, env):
         login = until('Komodo login', lambda: api('auth/login/LoginLocalUser', {
             'username': env['KOMODO_INIT_ADMIN_USERNAME'], 'password': env['KOMODO_INIT_ADMIN_PASSWORD']}, ready=False))
         token = login['data']['jwt']
-        until('Periphery', lambda: api('read/GetServerState', {'server': 'home-server'})['status'] == 'Ok')
+
+        def session_works():
+            return (api('read/GetServerState', {'server': 'home-server'}, ready=False) or {}).get('status') == 'Ok'
+
+        until('Periphery', session_works)
+        old_core = run(manager + ['ps', '-q', 'control-plane'], env).stdout.strip()
+        local_import = [sys.executable, str(ROOT / 'scripts/prepare_komodo_identity.py'),
+                        '--import-session-from-core', old_core, '--session-dir', str(folder / 'session-signing'),
+                        '--user', f'{uid}:{gid}']
+        run(local_import, env)
+        run(local_import, env)
+        manager = management(folder, prefix, env)
+        run(manager + ['up', '-d', '--no-deps', 'control-plane'], env)
+        until('Standalone Core to accept the original session before OpenBao exists', session_works)
         api('write/CreateResourceSync', {'name': 'home-server-resources', 'config': {
             'repo': 'jrudavicius/home-server', 'git_provider': 'test-git', 'git_https': False, 'branch': 'main',
             'resource_path': ['komodo'], 'delete': False, 'managed': False, 'webhook_enabled': False}})
@@ -329,9 +349,7 @@ def exercise(folder, prefix, env):
         webhook_env = {**env, 'OPENBAO_STATE_DIR': str(state), 'OPENBAO_NETWORK': net,
                        'KOMODO_WEBHOOK_UID': str(uid), 'KOMODO_WEBHOOK_GID': str(gid)}
         del webhook_env['KOMODO_WEBHOOK_SECRET']
-        integrated = management(folder, prefix, webhook_env)
-        def session_works():
-            return (api('read/GetServerState', {'server': 'home-server'}, ready=False) or {}).get('status') == 'Ok'
+        integrated = management(folder, prefix, webhook_env, integrated=True)
         exercise_webhook(folder, run, integrated, env, configure, source, root_token, key, uid, gid,
                          original_jwt, session_works)
     finally:

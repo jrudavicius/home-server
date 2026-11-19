@@ -19,8 +19,9 @@ template {
   contents = <<EOT
 {{- with secret "kv/data/komodo/jwt" -}}
   {{- $value := .Data.data.secret -}}
-  {{- if or (not (sprig_kindIs "string" $value)) (not $value) -}}
-    {{- sprig_fail "Session signing key must be a nonempty string" -}}
+  {{- if not (sprig_kindIs "string" $value) -}}{{ sprig_fail "Invalid session signing key type" }}{{- end -}}
+  {{- if or (not $value) (sprig_contains "\x00" $value) -}}
+    {{- sprig_fail "Session signing key must be a nonempty string without NUL" -}}
   {{- end -}}
   {"jwt_secret":{{ $value | toJSON }}}
 {{- end -}}

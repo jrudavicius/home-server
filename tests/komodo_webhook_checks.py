@@ -3,6 +3,7 @@
 import hashlib
 import hmac
 import json
+import os
 from pathlib import Path
 import secrets
 import sys
@@ -53,14 +54,12 @@ def exercise_webhook(folder, run, manager, env, configure, vault, operator, unse
     reader = session_client.request('auth/komodo-jwt/login', {'name': 'komodo-jwt'})['auth']['client_token']
     session_client.expect_denied('kv/data/komodo/webhook', token=reader)
     session_client.expect_denied(jwt_path, {'data': {'secret': 'must-be-denied'}}, token=reader)
-    empty = compose('run', '--rm', '--no-deps', 'control-plane', check=False)
+    empty_session = folder / 'empty-session'
+    empty_session.mkdir()
+    empty = compose('run', '--rm', '--no-deps', '-v', str(empty_session) + ':/run/komodo-session:ro',
+                    'control-plane', check=False)
     assert empty.returncode and 'session signing file is missing or invalid' in empty.stderr
-    compose('up', '-d', '--no-deps', 'session-agent')
     cache_jwt = session_dir / 'core.config.json'
-    until('Agent to deliver the original session signer', lambda:
-          cache_jwt.is_file() and json.loads(cache_jwt.read_bytes()) == {'jwt_secret': original_jwt})
-    modes = compose('exec', '-T', 'session-agent', 'stat', '-c', '%a', '/session/core.config.json', '/session').stdout.split()
-    assert modes == ['400', '700'], modes
     enroll = configure + ['--komodo-webhook', '--seed-from-core', core]
     run(enroll, env, data=operator + '\n')
     vault.request('sys/auth/home-admins', {'type': 'userpass'}, operator)
@@ -90,7 +89,14 @@ def exercise_webhook(folder, run, manager, env, configure, vault, operator, unse
 
     empty = compose('run', '--rm', '--no-deps', 'control-plane', check=False)
     assert empty.returncode and 'secret file is missing or empty' in empty.stderr
-    compose('up', '-d', '--no-deps', 'webhook-agent')
+    # Exercise the operator's first-render check with an existing standalone JWT
+    # cache and both a webhook file pointer and a different environment value.
+    run([sys.executable, str(ROOT / 'scripts/komodo_signing.py'), '--core', core, '--env-file', os.devnull],
+        {**env, 'COMPOSE_FILE': manager[-1]})
+    compose('up', '-d', '--no-deps', 'session-agent', 'webhook-agent')
+    assert json.loads(cache_jwt.read_bytes()) == {'jwt_secret': original_jwt}
+    modes = compose('exec', '-T', 'session-agent', 'stat', '-c', '%a', '/session/core.config.json', '/session').stdout.split()
+    assert modes == ['400', '700'], modes
     cache = state / 'komodo-webhook-cache/signing-secret'
     until('Agent to deliver the signing secret', lambda: cache.is_file() and cache.read_bytes() == original.encode())
     # Docker Desktop can translate guest permissions on a bind mount. Check
@@ -136,6 +142,24 @@ def exercise_webhook(folder, run, manager, env, configure, vault, operator, unse
         assert cache.read_bytes() == replacement.encode()
         until('Sealed startup to preserve the existing Komodo session', session_works)
         assert json.loads(cache_jwt.read_bytes()) == {'jwt_secret': original_jwt}
+
+        # A replacement host has restored caches but no Agent identities or bridge.
+        compose('rm', '--stop', '--force', 'session-agent', 'webhook-agent', 'host-agent', 'control-plane')
+        missing = str(folder / 'missing-identity')
+        override = folder / 'replacement-host.json'
+        override.write_text(json.dumps({
+            'networks': {'openbao-clients': {'external': True, 'name': folder.name + '-missing'}},
+            'services': {s: {'volumes': [{'type': 'bind', 'source': missing, 'target': '/identity',
+                                          'bind': {'create_host_path': False}}]}
+                         for s in ('session-agent', 'webhook-agent')},
+        }))
+        recovery = manager + ['-f', str(override)]
+        run(recovery + ['create', 'control-plane'], env)
+        run(recovery + ['up', '-d', 'control-plane', 'host-agent'], env)
+        until('Core-first restore to accept the existing session', session_works)
+        assert status(replacement) == '200'
+        assert not Path(missing).exists()
+        print('PASS: recovered management from both caches without the Agent identities or bridge.', flush=True)
     finally:
         assert not vault.request('sys/unseal', {'key': unseal_key})['sealed']
     print('PASS: Komodo verified signed webhooks with the OpenBao value before and after a sealed restart.', flush=True)

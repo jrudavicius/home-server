@@ -48,7 +48,7 @@ def main():
     ], env=env, text=True))
     project = 'management-smoke-' + uuid.uuid4().hex[:8]
     with tempfile.TemporaryDirectory(prefix=project + '-') as temporary:
-        folder = Path(temporary)
+        folder = Path(temporary).resolve()
         folder.chmod(0o755)
         gate = folder / 'gate.sh'
         gate.write_text('echo "READINESS_TEST_INITIALIZING"\n'

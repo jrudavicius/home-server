@@ -65,7 +65,7 @@ services:
     image: ghcr.io/moghtech/komodo-core:2.3.3@sha256:bca73d0eee143066228fb9b80c38a5a2726e573ad2758f7aa92b5c91a8aef1c7
     init: true
     restart: unless-stopped
-    command: ["sh", "/config/start-core.sh"]
+    command: ["perl", "/config/start-core.pl"]
     depends_on:
       database:
         condition: service_healthy
@@ -88,7 +88,7 @@ services:
     env_file: [./management/komodo-webhook/bootstrap.env.example]
     environment:
       TZ: Europe/Vilnius
-      KOMODO_CONFIG_PATHS: /config/bootstrap/core.config.json,/run/komodo-session/core.config.json
+      KOMODO_CONFIG_PATHS: /config/bootstrap/core.config.json
       KOMODO_DATABASE_ADDRESS: database:27017
       KOMODO_DATABASE_DB_NAME: ${KOMODO_DATABASE_DB_NAME:-komodo}
       KOMODO_DATABASE_USERNAME: ${KOMODO_DATABASE_USERNAME:?Set KOMODO_DATABASE_USERNAME}
@@ -120,7 +120,7 @@ services:
     volumes:
       - komodo-keys:/config/keys
       - komodo-bootstrap-config:/config/bootstrap:ro
-      - ./management/start-core.sh:/config/start-core.sh:ro
+      - ./management/start-core.pl:/config/start-core.pl:ro
       - type: bind
         source: /srv/komodo/session-signing
         target: /run/komodo-session
