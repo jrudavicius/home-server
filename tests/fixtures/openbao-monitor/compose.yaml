@@ -1,0 +1,76 @@
+name: openbao-monitor
+services:
+  monitor-db:
+    image: postgres:17.12-alpine@sha256:a77aa70e641402a21411b92b721c58d10f23b50ae5fdd2333efd22d166e1e5f7
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/config/start-db.sh"]
+    environment:
+      POSTGRES_DB: telemetry
+      POSTGRES_PASSWORD_FILE: /bootstrap/postgres-password
+      POSTGRES_INITDB_ARGS: "--auth-local=peer --auth-host=scram-sha-256"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./local/postgres-password:/bootstrap/postgres-password:ro
+      - ./local/db-tls:/bootstrap/tls:ro
+      - ./start-db.sh:/config/start-db.sh:ro
+      - ./pg_hba.conf:/config/pg_hba.conf:ro
+    tmpfs: [/run/db-tls]
+    networks:
+      app:
+        aliases: [db]
+      secrets: {}
+
+  agent:
+    image: openbao/openbao:2.7.2@sha256:5046911075e137e154ce49ab051502f4ec7cf367d484ae4a4dce665d9b90561f
+    user: "${RUN_UID:?load the prepared .env}:${RUN_GID:?load the prepared .env}"
+    entrypoint: ["bao"]
+    command: ["agent", "-config=/config/agent.hcl"]
+    restart: unless-stopped
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      BAO_ADDR: https://openbao-server:8200
+      BAO_CACERT: /trust/ca.crt
+    volumes:
+      - ./agent.hcl:/config/agent.hcl:ro
+      - ./service.ctmpl:/config/service.ctmpl:ro
+      - ./local/approle:/identity:ro
+      - ./local/ca.crt:/trust/ca.crt:ro
+      - issued:/run/issued
+    networks: [secrets]
+
+  monitor:
+    image: postgres:17.12-alpine@sha256:a77aa70e641402a21411b92b721c58d10f23b50ae5fdd2333efd22d166e1e5f7
+    user: "${RUN_UID:?load the prepared .env}:${RUN_GID:?load the prepared .env}"
+    entrypoint: ["/bin/sh", "/config/monitor.sh"]
+    restart: unless-stopped
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      PGSERVICEFILE: /run/issued/service.conf
+      PGCONNECT_TIMEOUT: "3"
+      LC_ALL: C
+    volumes:
+      - issued:/run/issued:ro
+      - ./local/ca.crt:/trust/ca.crt:ro
+      - ./monitor.sh:/config/monitor.sh:ro
+      - ./verify.sh:/config/verify.sh:ro
+    tmpfs: [/tmp]
+    networks: [app]
+
+networks:
+  app:
+    internal: true
+  secrets:
+    name: "${OPENBAO_LINK:-openbao-link}"
+    external: true
+volumes:
+  db-data:
+    name: "${MONITOR_DB_VOLUME:?load the prepared .env}"
+    external: true
+  issued:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: "size=1m,mode=0700,uid=${RUN_UID:?load the prepared .env},gid=${RUN_GID:?load the prepared .env}"

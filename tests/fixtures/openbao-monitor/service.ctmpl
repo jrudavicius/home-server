@@ -1,0 +1,10 @@
+{{- with secret "database/creds/monitor" -}}
+[monitor]
+host=db
+port=5432
+dbname=telemetry
+sslmode=verify-full
+sslrootcert=/trust/ca.crt
+user={{ .Data.username }}
+password={{ .Data.password }}
+{{ end -}}

@@ -1,0 +1,15 @@
+/srv/server/openbao/audit/audit.json {
+    daily
+    maxsize 32M
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    nocreate
+    postrotate
+        if [ "$(/usr/bin/docker inspect -f '{{.State.Running}}' openbao-server 2>/dev/null)" = true ]; then
+            /usr/bin/docker kill --signal=HUP openbao-server >/dev/null
+        fi
+    endscript
+}

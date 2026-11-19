@@ -34,6 +34,18 @@ executions = [
   { execution.type = "DeployStackIfChanged", execution.params.stack = "media" },
 ]
 
+[[procedure.config.stage]]
+name = "Deploy OpenBao"
+executions = [
+  { execution.type = "DeployStackIfChanged", execution.params.stack = "openbao" },
+]
+
+[[procedure.config.stage]]
+name = "Deploy OpenBao backup agent"
+executions = [
+  { execution.type = "DeployStackIfChanged", execution.params.stack = "openbao-backup" },
+]
+
 # HTTPS webhook ingress runs on the gateway. The retained public-access Stack
 # is an ngrok rollback option and must not start during routine deployments.
 

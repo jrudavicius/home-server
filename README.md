@@ -9,6 +9,7 @@ The root `docker-compose.yml` bootstraps Komodo. Application stacks live under
 The Raspberry Pi is used as a lightweight home/server entry point for:
 
 - Managing the stack with Komodo.
+- Storing secrets in OpenBao and taking daily Raft snapshots with a dedicated backup identity.
 - Running a local Komodo periphery agent.
 - Routing local web traffic with Traefik through the `entrypoint` stack.
 - Opening a local home server landing page through the `entrypoint` stack.
@@ -43,6 +44,8 @@ root bootstrap stack.
 | `observability` | `log-collector` | `observability-log-collector` | Alloy Docker log collector. |
 | `media` | `streaming-server` | `media-streaming-server` | Plex Media Server. |
 | `media` | `torrent-client` | `media-torrent-client` | Transmission torrent client. |
+| `openbao` | `server` | `openbao-server` | Private HTTPS secrets service with persistent Raft storage. |
+| `openbao-backup` | `agent`, `snapshot` | `openbao-backup-agent` and a one-off job | Certificate-authenticated OpenBao Agent and scheduled Raft backups. |
 | `public-access` | `tunnel` | `public-access-tunnel` | Stopped ngrok rollback option; excluded from routine deployments. |
 
 Use service names for Compose commands, dependencies, and addresses within a
@@ -406,12 +409,12 @@ and isolated Docker smoke tests on pull requests and pushes to `main`.
 
 ## Image versions and updates
 
-All twelve service images use an exact release tag plus a registry digest in
+Service images use an exact release tag plus a registry digest in
 their Compose files (`image: repository:version@sha256:...`). The digest fixes
 the image contents even if the publisher moves a tag. The pins use manifest
 lists/image indexes with Linux ARM64 support, so Docker selects the Raspberry
 Pi image while retaining support for other published architectures. Registry
-references and ARM64 availability were verified on 2026-10-18.
+references for the original stacks were verified on 2026-10-18. The OpenBao server and backup Agent share the tested 2.7.2 image pin.
 
 Komodo Core and Periphery are both pinned to **2.3.3**. Update their two image
 references together in the root `docker-compose.yml`. Other management images
@@ -504,6 +507,18 @@ alert delivery to a local receiver, then exercises the backup Procedure,
 retention, and recovery into a fresh database. It uses fixture credentials, temporary
 networks and volumes, no host Docker socket or production data, and removes its
 containers, networks, and volumes on exit.
+
+## OpenBao
+
+Prepare the host certificates and storage before the first coordinated deployment.
+The existing Resource Sync registers `openbao` and `openbao-backup`. The backup
+Procedure runs daily at 02:15 Europe/Vilnius and keeps 14 local Raft snapshots.
+The vault requires a manual unseal after a server process restart. The
+[OpenBao setup and recovery guide](docs/openbao.md) covers initialization,
+certificate renewal, off-host copies, and recovery when Komodo is unavailable.
+
+Run `python3 tests/smoke_openbao.py` to exercise Git-based deployment, backup
+permissions, retention, restoration and live database credential rotation.
 
 ## Komodo backups
 
@@ -622,12 +637,14 @@ Traefik's internal port 9121. That listener accepts only POST requests to
 the webhook signature.
 
 For Komodo, sync the full `komodo/` directory, including `repos.toml`,
-`stacks.toml`, `procedures.toml`, `servers.toml`, and `alerters.toml`.
+`stacks.toml`, `openbao.toml`, `openbao-backup.toml`, `procedures.toml`,
+`servers.toml`, and `alerters.toml`.
 First run root `up -d` from the updated Pi checkout so the new optional Core
 secrets exist, even when empty. The sync creates the `home-server` Repo, Stacks
-named `entrypoint`, `observability`, `media`, and `public-access` on the
+named `entrypoint`, `observability`, `media`, `public-access`, `openbao`, and
+`openbao-backup` on the
 `home-server` server, the `home-server-deploy` Procedure, and the scheduled
-`Backup Core Database` Procedure. It also reconciles health settings on the
+`Backup Core Database` and `Backup OpenBao` Procedures. It also reconciles health settings on the
 existing `home-server` Server and creates the disabled `home-server-discord` Alerter.
 Every Stack uses `linked_repo = "home-server"` to source its Compose files
 through that Repo:
@@ -640,13 +657,15 @@ Entrypoint run directory: stacks/entrypoint
 Observability run directory: stacks/observability
 Media run directory: stacks/media
 Public access run directory: stacks/public-access
+OpenBao run directory: stacks/openbao
+OpenBao backup run directory: stacks/openbao-backup
 Compose file: docker-compose.yml
 ```
 
 Resource Sync updates definitions only (`deploy = false` on every Stack).
 The `home-server-deploy` Procedure owns deployment ordering: it syncs the
-definitions, then checks and deploys `entrypoint`, `observability` and `media`,
-one at a time. This creates the `transmission_ui` network before media needs it.
+definitions, then checks and deploys `entrypoint`, `observability`, `media`,
+`openbao` and `openbao-backup` in sequence. This creates the `transmission_ui` network before media needs it.
 Gateway HTTPS runs separately; the retained `public-access` Stack stays stopped.
 
 The Repo resource in `komodo/repos.toml` is required for Stack deployments.
@@ -661,10 +680,9 @@ account in Komodo and select it on the `home-server` Repo and the
 deploying its linked Stacks. Commit and push these files before syncing so
 Komodo can read the updated configuration from `main`.
 
-For existing installations, sync `komodo/repos.toml` together with
-`komodo/stacks.toml` to switch all four Stacks to the linked Repo, then verify
-their source shows `home-server`. If importing the Stack definitions separately,
-create or sync the Repo first.
+For existing installations, sync the full `komodo/` directory and verify that
+each Stack shows `home-server` as its linked Repo. If importing individual
+Stack definitions, create or sync the Repo first.
 
 The Resource Sync in `komodo/syncs.toml` reads the `komodo/` directory directly
 from `github.com/jrudavicius/home-server` on `main` and reconciles the declared
@@ -681,14 +699,15 @@ later Stacks from being deployed. Each Stack stage uses `DeployStackIfChanged`,
 which refreshes the tracked files before checking for changes. A new Stack is
 deployed on its first run.
 
-The tracked files include each Stack's Compose and service configuration files,
+The entrypoint, observability, media and public-access Stacks track their Compose and service files,
 plus `komodo/stacks.toml`, `komodo/variables.toml`, and `komodo/repos.toml`.
 Those shared TOML files require a redeploy because Komodo's file comparison
 does not detect changes to Stack environment settings or global variables by
 themselves. Consequently, editing any of those shared files deploys the three
 active application Stacks in order; an ordinary service-file edit affects only
 its Stack, and a README-only edit does not deploy anything. Existing service restart requirements
-still apply to tracked service configuration files.
+still apply to tracked service configuration files. Each OpenBao Stack tracks its own resource file
+and service configuration so unrelated application configuration edits do not restart the secrets server.
 
 For first setup or migration from the individual webhooks:
 
@@ -700,10 +719,10 @@ For first setup or migration from the individual webhooks:
    resource, including the Sync that is currently running.
 3. Refresh and manually run `home-server-resources` for the full `komodo/`
    directory. Confirm that `home-server-deploy` exists and that the Repo and all
-   four Stacks have webhooks disabled. This sync does not deploy the Stacks.
-4. Run `home-server-deploy` once from Komodo and verify all four stages succeed.
-   Complete credential setup and create the required media directories/networks
-   before this run. Set up the [gateway receiver](host/netcup-webhook/README.md)
+   six Stacks have webhooks disabled. This sync does not deploy the Stacks.
+4. Run `home-server-deploy` once from Komodo and verify the sync and five Stack stages succeed.
+   Complete credential setup, create the media directories/networks, and
+   [prepare the OpenBao host](docs/openbao.md#prepare-the-pi) before this run. Set up the [gateway receiver](host/netcup-webhook/README.md)
    separately; this Procedure does not start ngrok.
 5. Set `KOMODO_WEBHOOK_BASE_URL` to the public HTTPS endpoint, then configure
    exactly one GitHub webhook for **Push events** with this payload URL:

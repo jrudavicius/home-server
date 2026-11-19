@@ -1,0 +1,5 @@
+.env
+.komodo.env
+.prepare.*
+local/
+__pycache__/

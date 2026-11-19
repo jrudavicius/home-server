@@ -1,0 +1,40 @@
+[[stack]]
+name = "openbao-backup"
+description = "Native OpenBao Agent and on-demand Raft snapshot job."
+tags = ["secrets", "home"]
+deploy = false
+
+[stack.config]
+server = "home-server"
+linked_repo = "home-server"
+files_on_host = false
+run_directory = "stacks/openbao-backup"
+file_paths = ["docker-compose.yml"]
+config_files = [
+  { path = "agent.hcl", services = ["agent"], requires = "Restart" },
+  { path = "snapshot.sh", services = ["snapshot"], requires = "None" },
+  { path = "../../komodo/openbao-backup.toml", requires = "Redeploy" },
+]
+project_name = "openbao-backup"
+send_alerts = true
+auto_pull = true
+webhook_enabled = false
+
+[[procedure]]
+name = "Backup OpenBao"
+description = "Save an encrypted OpenBao Raft snapshot on the Pi."
+tags = ["secrets", "home"]
+
+[procedure.config]
+schedule = "Every day at 02:15"
+schedule_timezone = "Europe/Vilnius"
+schedule_enabled = true
+schedule_alert = false
+failure_alert = true
+webhook_enabled = false
+
+[[procedure.config.stage]]
+name = "Save Raft snapshot"
+executions = [
+  { execution.type = "RunStackService", execution.params.stack = "openbao-backup", execution.params.service = "snapshot", execution.params.no_tty = true, execution.params.no_deps = true },
+]

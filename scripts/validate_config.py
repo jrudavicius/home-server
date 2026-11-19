@@ -64,7 +64,7 @@ def main():
     files = [ROOT / 'docker-compose.yml', *sorted((ROOT / 'stacks').glob('*/docker-compose.yml'))]
     for path in files:
         example = ROOT / 'bootstrap.env.example' if path.parent == ROOT else path.parent / '.env.example'
-        command = ['docker', 'compose', '--env-file', str(repository_file(example)), '-f', str(path)]
+        command = ['docker', 'compose', '--profile', '*', '--env-file', str(repository_file(example)), '-f', str(path)]
         result = subprocess.run(command + ['config', '--format', 'json'],
                                 env=env, capture_output=True, text=True, check=True)
         config = json.loads(result.stdout)

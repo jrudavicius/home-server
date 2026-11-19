@@ -1,0 +1,20 @@
+[[stack]]
+name = "openbao"
+description = "Private OpenBao server with persistent Raft storage."
+tags = ["secrets", "home"]
+deploy = false
+
+[stack.config]
+server = "home-server"
+linked_repo = "home-server"
+files_on_host = false
+run_directory = "stacks/openbao"
+file_paths = ["docker-compose.yml"]
+config_files = [
+  { path = "server.hcl", services = ["server"], requires = "Restart" },
+  { path = "../../komodo/openbao.toml", requires = "Redeploy" },
+]
+project_name = "openbao"
+send_alerts = true
+auto_pull = true
+webhook_enabled = false
