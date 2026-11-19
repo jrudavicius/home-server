@@ -101,11 +101,14 @@ def management(folder, project, env):
     core['volumes'] = [m for m in core['volumes'] if m['type'] == 'volume'] + ['test-backups:/backups']
     # The Docker daemon and Periphery must resolve checked-out bind mounts at the same path.
     agent['environment'].update(PERIPHERY_DISABLE_TERMINALS='true', PERIPHERY_DISABLE_CONTAINER_TERMINALS='true')
+    # file:// starts a second Git process. On Linux the read-only fixture belongs to the runner.
+    git_config = folder / 'test.gitconfig'
+    git_config.write_text('[url "file:///test-origin/"]\n\tinsteadOf = http://test-git/\n'
+                          '[safe]\n\tdirectory = /test-origin/jrudavicius/home-server\n'
+                          '\tdirectory = /test-origin/jrudavicius/home-server.git\n')
     for service in (core, agent):
-        service['volumes'].append(str(folder / 'origin') + ':/test-origin:ro')
-        service['environment'].update(GIT_CONFIG_COUNT='2', GIT_CONFIG_KEY_0='url.file:///test-origin/.insteadOf',
-                                      GIT_CONFIG_VALUE_0='http://test-git/', GIT_CONFIG_KEY_1='safe.directory',
-                                      GIT_CONFIG_VALUE_1='*')
+        service['volumes'].extend([str(folder / 'origin') + ':/test-origin:ro',
+                                   str(git_config) + ':/etc/gitconfig:ro'])
     services['client'] = {'image': services['secret-bootstrap']['image'], 'networks': ['default'],
                           'command': ['python', '-c', 'import time; time.sleep(3600)'],
                           'volumes': [str(ROOT / 'tests/openbao_backup_checks.py') + ':/test/restore.py:ro',
