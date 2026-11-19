@@ -13,10 +13,10 @@ Core signs user sessions with the `jwt_secret` field in its native configuration
      --userpass manager --userpass-mount home-admins
    ```
 
-3. With the management OpenBao overlay selected, start the session Agent on its own. Compare its first delivery to the running legacy Core using this local check. It prints only the result.
+3. Start the session Agent on its own. The explicit Compose files also work during first enrollment, before the overlay becomes the default. Compare its first delivery to the running legacy Core using this local check. It prints only the result.
 
    ```sh
-   docker compose --env-file /srv/komodo/bootstrap.env up -d --no-deps session-agent
+   docker compose --env-file /srv/komodo/bootstrap.env -f docker-compose.yml -f docker-compose.openbao.yml up -d --no-deps session-agent
    sudo python3 - <<'PY'
    import json, subprocess
    from pathlib import Path
@@ -29,7 +29,7 @@ Core signs user sessions with the `jwt_secret` field in its native configuration
    PY
    ```
 
-4. Once the values match and deployments are idle, run `docker compose --env-file /srv/komodo/bootstrap.env up -d --no-deps control-plane`. Reload **Servers** in the same browser session and confirm it can still fetch Pi status without signing in again. Remove the previous signer assignments and file pointers from the private bootstrap file, other environment files, templates, and plaintext recovery copies.
+4. Once both signing files are ready, select the management overlay in the private bootstrap file if needed, as described in the webhook guide. Wait for deployments to finish, then run `docker compose --env-file /srv/komodo/bootstrap.env up -d --no-deps control-plane`. Reload **Servers** in the same browser session and confirm it can still fetch Pi status without signing in again. Remove the previous session signer assignments and file pointers from the private bootstrap file, other environment files, templates, and plaintext recovery copies.
 
 ## Reboot and recovery
 
