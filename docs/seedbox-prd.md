@@ -48,6 +48,7 @@ This is a planning workload to validate against the selected hardware and repres
 | PRIV-01 | Downloading and seeding must use a VPN so torrent peers do not see the home's internet IP. |
 | PRIV-02 | Transfers must stop when protection is unavailable, with no fallback to an unprotected connection. This applies before protection is established and if protection is lost during operation. |
 | PRIV-03 | All torrent-related internet traffic must remain protected, including peer connections, tracker communication, and name lookups, during startup, normal operation, and reconnection. |
+| PEER-01 | Allow external torrent peers to initiate connections to the seedbox through the VPN. Incoming peer connectivity must work after startup and be restored after VPN reconnection, including changes to the VPN address or assigned peer port, without exposing the home's internet IP. |
 | USER-01 | The first release supports one administrator: the owner. |
 | TRACK-01 | Support the owner's private trackers and public torrents, keeping tracker-specific policies separate. Compatibility with the owner's selected trackers must be validated before release. |
 | ADD-01 | Accept manually submitted `.torrent` files and magnet links through a web interface usable on a computer and phone. |
@@ -73,6 +74,7 @@ The first release succeeds when the owner can complete the main journeys at the 
 | Scenario | Expected outcome |
 | --- | --- |
 | Normal protected operation | Downloading and seeding work through the VPN; peers see its address rather than the home's internet IP. Torrent-related tracker communication and name lookups are protected as well. |
+| Incoming peer connectivity | An external peer can initiate a connection and exchange torrent data through the VPN after startup and after reconnection. Repeat with a changed VPN address or assigned peer port; incoming connectivity is restored and the home's internet IP remains unexposed. |
 | Protection unavailable at startup or lost during activity | No torrent-related internet traffic falls back to the unprotected connection. The same condition holds during reconnection. |
 | Manual use from computer and phone | The owner can submit a `.torrent` file or magnet link, inspect status, and pause, resume, or remove the torrent. Representative private and public torrents can progress from downloading to seeding. |
 | Saving and retrieving torrent files | The owner can save a submitted `.torrent` file, retrieve a usable copy later, and re-import it. The saved copy remains available after removal of the associated torrent or downloaded content, and is removed only through an explicit choice to delete the saved copy. Access remains private and authenticated. |
@@ -105,7 +107,8 @@ Resource and storage parameters, representative competing workloads, and measura
 
 These decisions must satisfy the PRD and are intentionally left to the next phase:
 
-- Select torrent software, VPN provider, private-access mechanism, deployment architecture, and notification-service integration.
+- Select torrent software, a VPN provider supporting incoming peer connectivity, private-access mechanism, deployment architecture, and notification-service integration.
+- Choose how to maintain and verify incoming peer connectivity when the VPN address or assigned peer port changes.
 - Validate compatibility with the selected private trackers and choose operational values for their configurable policies.
 - Size storage, set the free-space reserve and resource budgets, and define representative coexistence benchmarks.
 - Choose how to verify VPN protection, preserve and restore saved state, and handle missing or replaced storage.
