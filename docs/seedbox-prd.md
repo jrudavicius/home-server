@@ -63,10 +63,11 @@ This is a planning workload to validate against the selected hardware and repres
 | RESOURCE-01 | Under resource contention, reduce torrent workload to keep other Home Server services responsive. Torrent throughput yields to those services. |
 | SCALE-01 | Support the planning workload of 100 retained torrents and up to two simultaneous downloads while meeting privacy, management, recovery, and coexistence requirements. |
 | STORAGE-01 | Pause downloads before they consume a configured free-space reserve. Preserve existing files, disable automatic deletion by default, and continue seeding where possible. Tell the owner when space needs to be freed. |
-| RECOVERY-01 | After a VPN outage, restart, or power interruption, resume previously running, eligible torrents within five minutes after VPN protection and required storage are available again. Keep deliberately paused or policy-stopped torrents stopped. Alert the owner if automatic recovery fails. |
+| STORAGE-02 | When the intended storage is absent at startup or becomes unavailable during activity, prevent affected transfers from starting or continuing and prevent fallback writes to other storage. Preserve recoverable torrent state and notify the owner. When the same storage returns, resume eligible activity under RECOVERY-01. Replacement storage requires an explicit recovery process and must not be treated automatically as the returned original storage. |
+| RECOVERY-01 | After a VPN or storage outage, restart, or power interruption, resume previously running, eligible torrents within five minutes after VPN protection and required storage are available again. Keep deliberately paused or policy-stopped torrents stopped. Alert the owner if automatic recovery fails. |
 | RECOVERY-02 | Make the torrent list, settings, saved `.torrent` files, and saved seeding state recoverable after reinstallation, so activity can resume from surviving content. Downloaded content lost through storage-device failure may be downloaded again; preservation of all downloaded content is outside the first release. |
 | STATS-01 | Show each torrent's uploaded and downloaded amounts, torrent ratio, seeding time, and tracker, with grouping or filtering by tracker. The owner checks account-wide ratios on tracker websites in the first release. |
-| ALERT-01 | Deliver actionable alerts outside the dashboard when attention is needed, including persistent VPN failure, low storage, tracker problems, and failed automatic recovery. One external delivery channel is sufficient for the first release; its service is selected during technical design. |
+| ALERT-01 | Deliver actionable alerts outside the dashboard when attention is needed, including persistent VPN failure, low or unavailable storage, tracker problems, and failed automatic recovery. One external delivery channel is sufficient for the first release; its service is selected during technical design. |
 
 ## Success and acceptance criteria
 
@@ -85,6 +86,9 @@ The first release succeeds when the owner can complete the main journeys at the 
 | Use of completed files | Retrieving a file or making it available to another Home Server service preserves its availability for seeding. |
 | Removal and deletion | Removing a torrent without explicitly choosing deletion leaves its files intact. Deletion is a separate choice whose effect on seeding and other consumers is explained before it is applied. |
 | Storage pressure | Before downloads consume the free-space reserve, they pause and the owner is notified. Existing files remain intact; seeding continues where storage and other prerequisites permit. |
+| Intended storage absent at startup | With the intended storage missing, affected transfers do not start, even if the usual storage location is writable on another device. No fallback writes occur, recoverable torrent state is preserved, and the owner receives an actionable alert. |
+| Intended storage lost during activity | Disconnect the intended storage while torrents are running. Affected transfers stop safely without fallback writes, recoverable torrent state is preserved, and the owner is notified. Restoring the same storage resumes only previously running, eligible activity under the routine recovery criteria. |
+| Replacement storage | Substitute a different storage device at the usual location. Transfers remain stopped until the owner explicitly recovers or reestablishes the required content and state; the replacement is not silently accepted as the original device. |
 | Routine interruption and recovery | With a mix of running, deliberately paused, and policy-stopped torrents, recovery resumes only previously running, still-eligible torrents within five minutes after protection and required storage return. Failed automatic recovery generates an actionable alert. |
 | Reinstallation | The owner can recover the torrent list, settings, saved `.torrent` files, and saved seeding state and resume using surviving content. Recovery of the saved `.torrent` files is required even though recovery of all downloaded content after storage-device failure is outside scope. |
 | Intended scale and shared resources | At 100 retained torrents and up to two simultaneous downloads, privacy, management, and recovery checks pass. Under representative competing workloads, torrent workload reduces and other services meet the agreed responsiveness criteria. |
@@ -113,7 +117,7 @@ These decisions must satisfy the PRD and are intentionally left to the next phas
 - Choose how to maintain and verify incoming peer connectivity when the VPN address or assigned peer port changes.
 - Validate compatibility with the selected private trackers and choose operational values for their configurable policies.
 - Size storage, set the free-space reserve and resource budgets, and define representative coexistence benchmarks.
-- Choose how to verify VPN protection, preserve and restore saved state, and handle missing or replaced storage.
+- Choose how to verify VPN protection, preserve and restore saved state, identify the intended storage, prevent fallback writes, and recover onto replacement storage.
 - Configure notification delivery, persistence thresholds, and repeat behavior.
 
 The current Home Server implementation may inform a later feasibility assessment; it does not define these requirements.
