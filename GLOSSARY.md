@@ -21,7 +21,7 @@ _Avoid_: Downloaded content.
 
 **Downloaded content**:
 The files transferred by a torrent for the owner to use or seed.
-_Avoid_: Torrent file, when referring to the `.torrent` metadata.
+_Avoid_: Torrent file, when referring to downloaded content.
 
 **Owner**:
 The person who administers the seedbox, including its torrents and settings. The first version has one owner.
