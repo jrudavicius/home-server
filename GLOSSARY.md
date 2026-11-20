@@ -23,6 +23,10 @@ _Avoid_: Downloaded content.
 The files transferred by a torrent for the owner to use or seed.
 _Avoid_: Torrent file, when referring to downloaded content.
 
+**Selected-file completion**:
+The state in which all files the owner chose to download from a torrent are complete. Other files in that torrent may remain incomplete.
+_Avoid_: Whole-torrent completion, when only the selected files are complete.
+
 **Owner**:
 The person who administers the seedbox, including its torrents and settings. The first version has one owner.
 
