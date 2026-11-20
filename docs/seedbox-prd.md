@@ -28,7 +28,7 @@ The Raspberry Pi host, mandatory VPN protection, and computer/phone web access a
 
 ## Intended scale
 
-The first release targets **100 retained torrents and up to two simultaneous downloads**. Retained torrents include those downloading, seeding, or paused under seedbox management.
+The first release targets **100 retained torrents and up to two simultaneous downloads**. Retained torrents include those queued, downloading, seeding, or paused under seedbox management.
 
 This is a planning workload to validate against the selected hardware and representative files. It is not a measurement of the current Pi's capacity. Privacy, recovery, and coexistence requirements must hold at this scale.
 
@@ -56,6 +56,7 @@ This is a planning workload to validate against the selected hardware and repres
 | ADD-02 | Allow the owner to select which files in a multi-file torrent to download once its file list is available, before content downloading starts. Show selected-file completion separately from completion of the whole torrent. Selected-file completion must preserve default seeding behavior and configured tracker policies. |
 | META-01 | Allow the owner to save submitted `.torrent` metadata files and retrieve them later through private, authenticated access for reuse or re-import. Preserve a saved copy until the owner explicitly deletes it, independently of removal of the associated torrent or downloaded content. |
 | CONTROL-01 | Show torrent status and provide pause, resume, and removal controls. Deliberate pauses must survive interruptions and restarts. |
+| QUEUE-01 | Allow the owner to manually order downloads waiting to start. When capacity becomes available, start the next eligible torrent in that order, with no more than two downloads active at once. Reordering does not interrupt active downloads or resume deliberately paused or policy-stopped torrents. Preserve queue order across restarts and apply the same concurrency limit during recovery. |
 | SEED-01 | Completed torrents continue seeding by default until deliberately stopped or an explicitly configured stopping rule applies. The same default applies to available content after selected-file completion, even when the whole torrent remains incomplete. Automatic stopping is disabled by default. |
 | SEED-02 | Allow optional ratio and seeding-time targets for each tracker. Automatic stopping requires all enabled targets to be met. Explicit per-torrent overrides take precedence over tracker defaults. |
 | ACCESS-01 | Allow the owner to manage torrents and retrieve completed files both at home and remotely through private, authenticated access. |
@@ -66,7 +67,7 @@ This is a planning workload to validate against the selected hardware and repres
 | STORAGE-01 | Pause downloads before they consume a configured free-space reserve. Preserve existing files, disable automatic deletion by default, and continue seeding where possible. Tell the owner when space needs to be freed. |
 | STORAGE-02 | When the intended storage is absent at startup or becomes unavailable during activity, prevent affected transfers from starting or continuing and prevent fallback writes to other storage. Preserve recoverable torrent state and notify the owner. When the same storage returns, resume eligible activity under RECOVERY-01. Replacement storage requires an explicit recovery process and must not be treated automatically as the returned original storage. |
 | RECOVERY-01 | After a VPN or storage outage, restart, or power interruption, resume previously running, eligible torrents within five minutes after VPN protection and required storage are available again. Keep deliberately paused or policy-stopped torrents stopped. Alert the owner if automatic recovery fails. |
-| RECOVERY-02 | Make the torrent list, settings, saved `.torrent` files, and saved seeding state recoverable after reinstallation, so activity can resume from surviving content. Downloaded content lost through storage-device failure may be downloaded again; preservation of all downloaded content is outside the first release. |
+| RECOVERY-02 | Make the torrent list, queue order, settings, saved `.torrent` files, and saved seeding state recoverable after reinstallation, so activity can resume from surviving content. Downloaded content lost through storage-device failure may be downloaded again; preservation of all downloaded content is outside the first release. |
 | STATS-01 | Show each torrent's uploaded and downloaded amounts, torrent ratio, seeding time, and tracker, with grouping or filtering by tracker. The owner checks account-wide ratios on tracker websites in the first release. |
 | ALERT-01 | Deliver actionable alerts outside the dashboard when attention is needed, including persistent VPN failure, low or unavailable storage, tracker problems, and failed automatic recovery. One external delivery channel is sufficient for the first release; its service is selected during technical design. |
 
@@ -81,6 +82,7 @@ The first release succeeds when the owner can complete the main journeys at the 
 | Protection unavailable at startup or lost during activity | No torrent-related internet traffic falls back to the unprotected connection. The same condition holds during reconnection. |
 | Manual use from computer and phone | The owner can submit a `.torrent` file or magnet link, inspect status, and pause, resume, or remove the torrent. Representative private and public torrents can progress from downloading to seeding. |
 | Selective downloads | From a computer and phone, the owner selects a subset of a multi-file torrent after its file list becomes available and before content downloading starts. The selected files complete and become available for use without requiring unselected files to finish. The interface distinguishes selected-file completion from whole-torrent completion; available content remains available for seeding under the existing defaults and tracker policies. |
+| Manual download queue | With two downloads active and several waiting, the owner changes the waiting order from a computer and phone. Active downloads continue; when a slot opens, the next eligible torrent starts in the chosen order. Deliberately paused and policy-stopped torrents remain stopped. Queue order survives restart, and normal operation and recovery never exceed two simultaneous downloads. |
 | Private-torrent discovery isolation | With private and public torrents active together, verify that private torrents announce and discover peers only through their authorized trackers and do not use DHT, peer exchange, or local discovery. The same isolation holds after restart and VPN reconnection; public torrents can continue using their permitted discovery mechanisms. |
 | Saving and retrieving torrent files | The owner can save a submitted `.torrent` file, retrieve a usable copy later, and re-import it. The saved copy remains available after removal of the associated torrent or downloaded content, and is removed only through an explicit choice to delete the saved copy. Access remains private and authenticated. |
 | Default seeding and configured policies | Without a stopping rule, completion or reaching a ratio does not automatically stop seeding. When ratio and time targets are both enabled, meeting only one does not trigger stopping. Per-torrent overrides take precedence, and unrelated tracker policies remain unaffected. |
@@ -92,7 +94,7 @@ The first release succeeds when the owner can complete the main journeys at the 
 | Intended storage lost during activity | Disconnect the intended storage while torrents are running. Affected transfers stop safely without fallback writes, recoverable torrent state is preserved, and the owner is notified. Restoring the same storage resumes only previously running, eligible activity under the routine recovery criteria. |
 | Replacement storage | Substitute a different storage device at the usual location. Transfers remain stopped until the owner explicitly recovers or reestablishes the required content and state; the replacement is not silently accepted as the original device. |
 | Routine interruption and recovery | With a mix of running, deliberately paused, and policy-stopped torrents, recovery resumes only previously running, still-eligible torrents within five minutes after protection and required storage return. Failed automatic recovery generates an actionable alert. |
-| Reinstallation | The owner can recover the torrent list, settings, saved `.torrent` files, and saved seeding state and resume using surviving content. Recovery of the saved `.torrent` files is required even though recovery of all downloaded content after storage-device failure is outside scope. |
+| Reinstallation | The owner can recover the torrent list, queue order, settings, saved `.torrent` files, and saved seeding state and resume using surviving content. Recovery of the saved `.torrent` files is required even though recovery of all downloaded content after storage-device failure is outside scope. |
 | Intended scale and shared resources | At 100 retained torrents and up to two simultaneous downloads, privacy, management, and recovery checks pass. Under representative competing workloads, torrent workload reduces and other services meet the agreed responsiveness criteria. |
 | Statistics and notifications | Torrent statistics are available and can be grouped or filtered by tracker. Problems requiring attention reach the owner outside the dashboard with the affected function and the action needed. |
 
@@ -101,6 +103,7 @@ Resource and storage parameters, representative competing workloads, and measura
 ## Outside the first release
 
 - Automatic torrent discovery and submission.
+- Advanced download scheduling and automatic queue-priority rules; basic manual queue ordering is included.
 - Integrated tracker-account statistics.
 - Multiple seedbox administrators or independent per-user collections.
 - Guaranteed recovery of all downloaded content following storage-device failure. Saved `.torrent` files are part of the recoverable seedbox state.

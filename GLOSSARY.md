@@ -13,7 +13,7 @@ The Home Server capability for downloading and seeding files using the BitTorren
 _Avoid_: Home Server, when referring only to this capability.
 
 **Retained torrent**:
-A torrent kept under seedbox management, whether downloading, seeding, or paused. Keeping its downloaded content or a saved torrent file after removal does not make it a retained torrent.
+A torrent kept under seedbox management, whether queued, downloading, seeding, or paused. Keeping its downloaded content or a saved torrent file after removal does not make it a retained torrent.
 
 **Torrent file**:
 A `.torrent` metadata file used to add or re-import a torrent.
