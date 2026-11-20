@@ -9,7 +9,7 @@ The Raspberry Pi device that hosts the seedbox and other services.
 _Avoid_: Seedbox, when referring to the entire device.
 
 **Seedbox**:
-The Home Server capability for downloading and seeding files through BitTorrent.
+The Home Server capability for downloading and seeding files using the BitTorrent peer-to-peer protocol.
 _Avoid_: Home Server, when referring only to this capability.
 
 **Retained torrent**:
