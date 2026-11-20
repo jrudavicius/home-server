@@ -63,6 +63,7 @@ This is a planning workload to validate against the selected hardware and repres
 | FILE-01 | Allow completed files to be retrieved by personal devices and used by other Home Server services while preserving the files needed for seeding. |
 | FILE-02 | Removing a torrent keeps its downloaded files by default. Deleting its files is a separate, explicit choice that explains the loss of seeding availability and possible effects on other services using those files. |
 | RESOURCE-01 | Under resource contention, reduce torrent workload to keep other Home Server services responsive. Torrent throughput yields to those services. |
+| BANDWIDTH-01 | Allow the owner to set separate global upload and download limits for torrent data transfers through the web interface. Apply each limit to the aggregate activity of all torrents and preserve the settings across restarts. These are ceilings, not reserved bandwidth; workload must still reduce further when needed to satisfy RESOURCE-01. |
 | SCALE-01 | Support the planning workload of 100 retained torrents and up to two simultaneous downloads while meeting privacy, management, recovery, and coexistence requirements. |
 | STORAGE-01 | Pause downloads before they consume a configured free-space reserve. Preserve existing files, disable automatic deletion by default, and continue seeding where possible. Tell the owner when space needs to be freed. |
 | STORAGE-02 | When the intended storage is absent at startup or becomes unavailable during activity, prevent affected transfers from starting or continuing and prevent fallback writes to other storage. Preserve recoverable torrent state and notify the owner. When the same storage returns, resume eligible activity under RECOVERY-01. Replacement storage requires an explicit recovery process and must not be treated automatically as the returned original storage. |
@@ -96,6 +97,7 @@ The first release succeeds when the owner can complete the main journeys at the 
 | Routine interruption and recovery | With a mix of running, deliberately paused, and policy-stopped torrents, recovery resumes only previously running, still-eligible torrents within five minutes after protection and required storage return. Failed automatic recovery generates an actionable alert. |
 | Reinstallation | The owner can recover the torrent list, queue order, settings, saved `.torrent` files, and saved seeding state and resume using surviving content. Recovery of the saved `.torrent` files is required even though recovery of all downloaded content after storage-device failure is outside scope. |
 | Intended scale and shared resources | At 100 retained torrents and up to two simultaneous downloads, privacy, management, and recovery checks pass. Under representative competing workloads, torrent workload reduces and other services meet the agreed responsiveness criteria. |
+| Global bandwidth controls | From a computer and phone, the owner can change global upload and download limits independently. With enough active demand, aggregate torrent transfer rates respect each limit over the measurement window established during technical design. Limits survive restart, and competing service workloads can reduce torrent activity further under the shared-resource criteria. |
 | Statistics and notifications | Torrent statistics are available and can be grouped or filtered by tracker. Problems requiring attention reach the owner outside the dashboard with the affected function and the action needed. |
 
 Resource and storage parameters, representative competing workloads, and measurable responsiveness thresholds must be established during technical design before release validation. The agreed priority for other services remains fixed.
@@ -104,6 +106,7 @@ Resource and storage parameters, representative competing workloads, and measura
 
 - Automatic torrent discovery and submission.
 - Advanced download scheduling and automatic queue-priority rules; basic manual queue ordering is included.
+- Scheduled, per-torrent, and per-tracker bandwidth limits; global upload and download limits are included.
 - Integrated tracker-account statistics.
 - Multiple seedbox administrators or independent per-user collections.
 - Guaranteed recovery of all downloaded content following storage-device failure. Saved `.torrent` files are part of the recoverable seedbox state.
@@ -122,6 +125,7 @@ These decisions must satisfy the PRD and are intentionally left to the next phas
 - Choose how to maintain and verify incoming peer connectivity when the VPN address or assigned peer port changes.
 - Validate compatibility with the selected private trackers and choose operational values for their configurable policies.
 - Size storage, set the free-space reserve and resource budgets, and define representative coexistence benchmarks.
+- Define default global bandwidth limits and the measurement window for validating aggregate transfer rates.
 - Choose how to verify VPN protection, preserve and restore saved state, identify the intended storage, prevent fallback writes, and recover onto replacement storage.
 - Configure notification delivery, persistence thresholds, and repeat behavior.
 
