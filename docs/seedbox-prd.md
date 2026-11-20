@@ -36,7 +36,7 @@ This is a planning workload to validate against the selected hardware and repres
 
 1. **Submit and manage:** the owner chooses a torrent, uploads its `.torrent` file or pastes a magnet link, selects which files to download once the file list is available, follows its status, and can pause, resume, or remove it from a computer or phone.
 2. **Download and seed securely:** downloading proceeds only with VPN protection. Completed torrents continue seeding by default. Optional tracker policies and explicit per-torrent overrides determine when automatic stopping is allowed.
-3. **Use completed files:** the owner retrieves files from home or away, or another Home Server service consumes them, while preserving their availability for seeding.
+3. **Use completed files:** the owner retrieves files from home or away and can resume an interrupted retrieval, or another Home Server service consumes them, while preserving their availability for seeding.
 4. **Respond to a problem:** when protection or storage becomes unavailable, transfers stop safely. The owner receives actionable alerts when attention is needed. Previously running, eligible torrents resume automatically after the prerequisites return.
 5. **Save torrent files:** the owner saves a submitted `.torrent` file and can download it again for later reuse or re-import. Removing the associated torrent or its downloaded content does not delete the saved `.torrent` copy.
 6. **Remove or recover:** removing a torrent keeps its downloaded content by default. Deleting content or a saved `.torrent` copy is an explicit choice. After a reinstall, the owner can recover the torrent list, settings, saved `.torrent` files, and saved seeding state and resume from surviving content.
@@ -64,6 +64,7 @@ This is a planning workload to validate against the selected hardware and repres
 | FILE-01 | Allow completed files to be retrieved by personal devices and used by other Home Server services while preserving the files needed for seeding. |
 | FILE-02 | Removing a torrent keeps its downloaded files by default. Deleting its files is a separate, explicit choice that explains the loss of seeding availability and possible effects on other services using those files. |
 | FILE-03 | Allow the owner to associate a torrent with existing complete or partial content and request an integrity recheck. Reuse verified content without downloading it again, and download only missing or invalid data needed for the selected files when the torrent is eligible to run. Rechecking must preserve deliberate pauses, configured stopping policies, and queue eligibility. |
+| FILE-04 | Allow interrupted retrieval of a completed file to resume without transferring the entire file again, through a supported workflow on a computer and phone, both at home and remotely. Resumed retrieval must remain private and authenticated and preserve the source file's availability for seeding. |
 | RESOURCE-01 | Under resource contention, reduce torrent workload to keep other Home Server services responsive. Torrent throughput yields to those services. |
 | BANDWIDTH-01 | Allow the owner to set separate global upload and download limits for torrent data transfers through the web interface. Apply each limit to the aggregate activity of all torrents and preserve the settings across restarts. These are ceilings, not reserved bandwidth; workload must still reduce further when needed to satisfy RESOURCE-01. |
 | SCALE-01 | Support the planning workload of 100 retained torrents and up to two simultaneous downloads while meeting privacy, management, recovery, and coexistence requirements. |
@@ -91,6 +92,7 @@ The first release succeeds when the owner can complete the main journeys at the 
 | Default seeding and configured policies | Without a stopping rule, completion or reaching a ratio does not automatically stop seeding. When ratio and time targets are both enabled, meeting only one does not trigger stopping. Per-torrent overrides take precedence, and unrelated tracker policies remain unaffected. |
 | Home and remote access | The authenticated owner can manage torrents and retrieve files from both locations; unauthenticated access is denied. |
 | Use of completed files | Retrieving a file or making it available to another Home Server service preserves its availability for seeding. |
+| Resumable file retrieval | Interrupt retrieval of a large completed file, then resume using the supported computer and phone workflows, both at home and remotely. Retrieval continues from previously received data without retransferring the whole file, and the completed copy matches the source. Unauthenticated attempts to start or resume retrieval are denied, and the source remains available for seeding. |
 | Removal and deletion | Removing a torrent without explicitly choosing deletion leaves its files intact. Deletion is a separate choice whose effect on seeding and other consumers is explained before it is applied. |
 | Rechecking and reusing existing content | From a computer and phone, the owner can associate existing content with a torrent and request a recheck. Complete, valid content can seed without being downloaded again. With partial or damaged content, verified data is retained and only missing or invalid data needed for selected files is downloaded when eligible. Rechecking a deliberately paused or policy-stopped torrent does not resume it; queue limits still apply. |
 | Storage pressure | Before downloads consume the free-space reserve, they pause and the owner is notified. Existing files remain intact; seeding continues where storage and other prerequisites permit. |
@@ -126,6 +128,7 @@ These decisions must satisfy the PRD and are intentionally left to the next phas
 
 - Select torrent software, a VPN provider supporting incoming peer connectivity, private-access mechanism, deployment architecture, and notification-service integration.
 - Choose how to maintain and verify incoming peer connectivity when the VPN address or assigned peer port changes.
+- Choose the private, authenticated file-retrieval mechanism and document supported computer and phone workflows for resuming interrupted retrieval.
 - Validate compatibility with the selected private trackers and choose operational values for their configurable policies.
 - Size storage, set the free-space reserve and resource budgets, and define representative coexistence benchmarks.
 - Define default global bandwidth limits and the measurement window for validating aggregate transfer rates.
