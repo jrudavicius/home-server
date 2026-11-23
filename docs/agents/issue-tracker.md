@@ -27,9 +27,15 @@ Use GitHub's native sub-issue relationships and issue dependencies when availabl
 
 - Link a child with `gh issue edit PARENT --repo jrudavicius/home-server --add-sub-issue CHILD`.
 - Add a blocker with `gh issue edit CHILD --repo jrudavicius/home-server --add-blocked-by BLOCKER`.
-- The REST equivalents use numeric issue database IDs, not issue numbers or node IDs.
 - If the relationship is unavailable, use `Part of #PARENT` in the child and a task list in the parent. For blockers, put `Blocked by: #NUMBER, #NUMBER` at the top of the child.
 - Work blockers first. A ticket is startable when all its blockers are closed; inspect their states rather than just counting listed relationships.
+
+For the equivalent REST requests, get the child or blocker's numeric database ID with `gh api repos/jrudavicius/home-server/issues/NUMBER --jq .id`.
+
+| Relationship | POST path (issue number in the URL) | JSON body field |
+| --- | --- | --- |
+| Add a child | `/repos/{owner}/{repo}/issues/{parent_number}/sub_issues` | `sub_issue_id` = child's database ID |
+| Add a blocker | `/repos/{owner}/{repo}/issues/{blocked_issue_number}/dependencies/blocked_by` | `issue_id` = blocker's database ID |
 
 ## Pull requests as a triage surface
 
