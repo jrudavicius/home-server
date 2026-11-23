@@ -5,8 +5,9 @@ Implementation specs and tasks live in GitHub Issues in `jrudavicius/home-server
 ## Repository and issue operations
 
 - Run `gh repo view --json nameWithOwner` from this checkout to verify the repository. Use `--repo jrudavicius/home-server` for writes so an upstream repository cannot be selected accidentally.
-- Read an issue with `gh issue view NUMBER --repo jrudavicius/home-server --json number,title,body,labels,comments`.
-- List issues with `gh issue list --repo jrudavicius/home-server --state open --json number,title,body,labels`, adding label filters for the workflow.
+- Read an issue with `gh issue view NUMBER --repo jrudavicius/home-server --json number,title,body,labels,author,createdAt,comments`.
+- List issues with `gh issue list --repo jrudavicius/home-server --state open --json number,title,body,labels,author,createdAt`, adding label filters for the workflow.
+- For each `needs-info` candidate, read its comments with `gh issue view`. If it returns 100 comments, fetch the full history with `gh api --paginate repos/jrudavicius/home-server/issues/NUMBER/comments` (REST uses `user.login` and `created_at`). Flag a reporter reply when a comment's `author.login` matches the issue's `author.login` and its `createdAt` is later than the latest `## Triage Notes` comment.
 - Create an issue with `gh issue create --repo jrudavicius/home-server --title TITLE --body-file FILE`. Use a body file for multiline Markdown so shell quoting preserves the exact text.
 - Add or remove labels with `gh issue edit NUMBER --repo jrudavicius/home-server --add-label LABEL` or `--remove-label LABEL`. Use the mapping in [triage-labels.md](triage-labels.md).
 - Add a comment with `gh issue comment NUMBER --repo jrudavicius/home-server --body-file FILE` when the requested workflow calls for it.
