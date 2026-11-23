@@ -43,4 +43,4 @@ If this is changed to `yes`, external PRs follow the same triage roles as issues
 - Create these additional labels only when using the wayfinding workflow.
 - Choose an open, unassigned child whose blockers are all closed, in map order.
 - Claim it by assigning it to the driving developer.
-- To resolve it, record the answer, close the child, and add a short decision summary with a link to the map.
+- To resolve a decision ticket, post the full answer in a comment on the child, then close it. Append a one-line summary under **Decisions so far** on the map and link the closed ticket by title.
