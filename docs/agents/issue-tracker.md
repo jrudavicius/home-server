@@ -18,7 +18,7 @@ When a skill says "publish to the issue tracker", create a GitHub issue. When it
 
 Product requirements may remain as repository documents under `docs/`. A later implementation spec should link to its source product document. A product PRD does not need to be moved into the issue tracker merely to complete this setup.
 
-Specs and tickets produced by the engineering flow use `ready-for-agent` when fully specified. Raw incoming requests go through the triage workflow.
+Reserve `ready-for-agent` for fully specified implementation specs and tickets that an agent can execute. Wayfinder maps and their decision tickets use only `wayfinder:*` labels. Raw incoming requests go through the triage workflow.
 
 ## Parent issues and blockers
 
