@@ -164,9 +164,16 @@ python3 stacks/observability/tests/smoke.py --discord
 python3 tests/smoke_private_access.py
 ```
 
-CI does not delay the existing Komodo push webhook. To prevent invalid changes
-from reaching `main`, use pull requests and configure repository rules to
-require the configuration and all five smoke checks before merging.
+The Komodo push webhook can deploy as soon as `main` advances. The
+[main branch ruleset](../.github/rulesets/main.json) requires a pull request,
+resolved review threads, and all six validation and smoke checks against current
+`main` before merging. The scheduled availability check runs separately.
+
+An administrator can activate the versioned ruleset in [repository settings](https://github.com/jrudavicius/home-server/settings/rules).
+Choose **New ruleset → Import a ruleset**, select `.github/rulesets/main.json`,
+set enforcement to **Active**, and choose **Create**. Verify the active rules with
+`gh ruleset check main --repo jrudavicius/home-server`. Update the active ruleset
+when changing a required check name.
 
 The management and OpenBao smoke jobs currently use Ubuntu 22.04's Linux 6.8 kernel because
 the pinned MongoDB version rejects newer kernels on the Ubuntu 24.04 runner.
